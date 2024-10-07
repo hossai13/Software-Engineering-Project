@@ -15,6 +15,7 @@ body {
     font-family:'Roboto';
     margin: 0;
     padding: 0;
+    padding-bottom: 50px;
 }
 
 a {
@@ -24,16 +25,21 @@ a {
 
 a:hover {
     cursor: pointer;
-    color: #9b0a36;
+    color: #ff437b;
     transition: all 0.5s ease;
 }
 
 nav {
+    top: 0;
+    width: 100%;
+    z-index: 1;
+    position: fixed;
     display: flex;
     justify-content: space-between;
     padding: .75rem;
     background: linear-gradient(180deg, #9b0a36, #420417);
     font-family:'Disco';
+    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
 }
 
 nav h1 {
@@ -59,6 +65,7 @@ nav img {
     border-radius: 50%;
     margin-left: 1rem;
     image-rendering: optimizeQuality;
+    box-shadow: 0 0 10px #ffffff;
 }
 
 #FP-Logo {
@@ -75,35 +82,45 @@ ul {
     font-family:'Atop';
     font-weight: 200;
     font-size: 1.25rem;
-    margin-right: 1rem;
+    margin-right: 2.5rem;
+    text-shadow: 0 0 5px #f33670;
 }
 
-ul li {
+ul li{
     margin-left: 2.6rem;
     display: flex;
     align-items: center;
 }
 
-.slideshow-container {
-    max-width: 100%;
+.video-container {
+    margin-top: 10rem;
+    margin-bottom: 5.5rem;
+    padding: 0;
+    width: 100vw;
     height: 70vh;
     position: relative;
-    padding-top: 1.25rem;
-    margin: auto;
     overflow: hidden;
+    background: rgba( 182, 182, 182, 0.05 );
+    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+    backdrop-filter: blur( 4px );
+    -webkit-backdrop-filter: blur( 4px );
 }
 
-.slides h2 {
-    font-size: 4rem;
+.video h2 {
+    font-size: 5rem;
     color: white;
     font-family: 'Quartzo';
     text-align: center;
     text-shadow: 2px 2px 4px #f5f5f540;
     z-index: 1;
     position: absolute;
-    top: 35%;
+    top: 25%;
     left: 50%;
     transform: translate(-50%, -50%);
+}
+
+.video h2:hover {
+    cursor: default;
 }
 
 .pulsate {
@@ -124,17 +141,17 @@ ul li {
 
 .order-button {
     background-color: #cf4d4d;
-    width: 11rem;
-    height: 2rem;
+    width: 16rem;
+    height: 3rem;
     color: black;
     font-family: 'Roboto';
-    font-size: 1rem;
+    font-size: 1.35rem;
     font-weight: 725;
     border-color: #993939;
     border-radius: 10px;
     z-index: 1;
     position: absolute;
-    top: 57%;
+    top: 47%;
     left: 50%;
     transform: translate(-50%, -50%);
 }
@@ -143,4 +160,159 @@ ul li {
     cursor: pointer;
 }
  
+.about-us-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+    height: 100vh;
+    justify-content: center;
+    margin-top: 2rem;
+    font-size: 3.75rem;
+    font-family: 'Quartzo';
+    background: rgba( 182, 182, 182, 0.25 );
+    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+    backdrop-filter: blur( 1.5px );
+    -webkit-backdrop-filter: blur( 1.5px );
+    border-radius: 10px;
+    border: 1px solid rgba( 255, 255, 255, 0.18 );
 
+}
+
+.title.animate {
+    animation-duration: 2s, 2.5s;
+    animation-name: fadeInOut, moveDown;
+    animation-iteration-count: 1, 1;
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes moveDown {
+    0% {
+        transform: translateY(-50%);
+    }
+    100% {
+        transform: translateY(0%);
+    }
+}
+
+.title {
+    margin-top: -4rem;
+    margin-bottom: -2.5rem;
+    line-height: 2.5;
+    display: inline-block;
+    position: relative;
+}
+
+.title::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    transform: scaleX(0); 
+    height: 4px;
+    bottom: 150px;
+    left: 0;
+    background-color: #f33670;
+    transform-origin: bottom left;
+    transition: transform 0.35s ease-out;
+}
+
+.title:hover {
+    cursor: default;
+}
+
+.title:hover::after {
+    transform: scaleX(1);
+}
+
+.slideshow-container {
+    max-width: 80%;
+    margin: 2rem auto;
+    position: relative;
+    border-radius: var(--border-radius);
+    padding: 4px;
+}
+
+.slides {
+    display: block;
+    border-radius: 4px;
+}
+
+.slides img {
+    width: 100%;
+    max-width: 55rem;
+    height: 35rem;
+    object-fit: cover;
+    border-radius: 5px;
+
+}
+
+.slides.fade {
+    animation-name: fade;
+    animation-duration: 3.75s;
+}
+
+@keyframes fade {
+    from {
+        opacity: .65;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.slideshow-container::before, .slideshow-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0.85rem;
+    background: linear-gradient(45deg,#f33670, #3485e8, #da3163, #644feb);
+    background-size: 400%;
+    z-index: -1;
+    animation: glow 20s infinite;
+    width: 100%;
+    border-radius: 10px;
+}
+
+.slideshow-container::after {
+    filter: blur(10px);
+    transform: translate3d(0, 0, 0);
+}
+
+@keyframes glow {
+    0% {
+      background-position: 0 0;
+    }
+  
+    50% {
+      background-position: 100% 0;
+    }
+  
+    100% {
+      background-position: 0 0;
+    }
+  }
+
+.slideshow-container.animate {
+    animation-duration: 1s, 1.25s;
+    animation-name: fadeInOut, moveUp;
+    animation-iteration-count: 1, 1;
+}
+
+@keyframes moveUp {
+    0% {
+        transform: translateY(50%);
+    }
+    100% {
+        transform: translateY(0%);
+    }
+}
