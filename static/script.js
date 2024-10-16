@@ -3,7 +3,7 @@ var animation = lottie.loadAnimation({
     renderer: 'svg',
     loop: true,
     autoplay: true,
-    path: '/Homepage/Cart.json'
+    path: '/static/Cart.json'
   });
 
 document.addEventListener('DOMContentLoaded', function() {
