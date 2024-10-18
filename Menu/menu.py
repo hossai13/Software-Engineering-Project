@@ -7,8 +7,8 @@ app = Flask(__name__)
 
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'naliah'
-app.config['MYSQL_DB'] = 'menu'
+app.config['MYSQL_PASSWORD'] = 'root'
+app.config['MYSQL_DB'] = 'test'
 
 mysql = MySQL(app)
 
@@ -16,7 +16,7 @@ mysql = MySQL(app)
 def index():
     
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM menu_t")
+    cursor.execute("SELECT * FROM ACCOUT")
     result = cursor.fetchone()
 
     return render_template('menu.html',result=result)
