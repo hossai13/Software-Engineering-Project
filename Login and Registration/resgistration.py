@@ -14,46 +14,16 @@ app.config['MYSQL_DB'] = 'PizzaInfo'
 
 mysql = MySQL(app)
 
-
-# http://localhost:5000/pythonlogin/
-@app.route('/', methods=['GET', 'POST'])
-def login():
-    msg = ''
-    if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
-        username = request.form['username']
-        password = request.form['password']
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM UserInfo WHERE username = %s AND password = %s', (username, password))
-        account = cursor.fetchone()
-
-        if account:
-            session['loggedin'] = True
-            session['id'] = account['LoginID']
-            session['email'] = account['Email']
-            return 'logged in successfully!'
-        else:
-            msg = 'Incorrect username/password!'
-    return render_template('Index.html', msg=msg)
-
-
-@app.route('/Logout')
-def logout():
-    session.pop('loggedin', None)
-    session.pop('id', None)
-    session.pop('email', None)
-    return redirect(url_for('login'))
-
-
-# http://localhost:5000/Falsk/register
 @app.route('/form', methods=['GET', 'POST'])
 def register():
     msg = ''
-    if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'email' in request.form:
-        username = request.form['username']
+    if request.method == 'POST' and 'name' in request.form and 'password' in request.form and 'email' in request.form and 'confirm-password' in request.form:
+        username = request.form['name']
         email = request.form['email']
         password = request.form['password']
+        confirm_password = request.form['confirm-password']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM UserInfo WHERE Email = %s', (email,))
+        cursor.execute('SELECT * FROM UserInfo WHERE Email = %s', (email))
         account = cursor.fetchone()
         if account:
             msg = 'Account already exists!'
@@ -63,13 +33,15 @@ def register():
             msg = 'Please fill out the form!'
         elif not re.match(r'[A-Za-z0-9]+', username):
             msg = 'Username must contain only characters and numbers!'
+        elif password != confirm_password:
+            msg = 'Passwords do not match!'
         else:
             cursor.execute('INSERT INTO UserInfo (Username, Password, Email) VALUES (%s, %s, %s)', (username, password, email))
             mysql.connection.commit()
             msg = 'You have successfully registered!'
     elif request.method == 'POST':
         msg = 'Please fill out the form!'
-    return render_template('Fill.html', msg=msg)
+    return render_template('registration_form.html', msg=msg)
 
 
 def validate_email(email):
