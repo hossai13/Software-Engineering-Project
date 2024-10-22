@@ -28,15 +28,29 @@
         </ul>
     </nav>
 <div class="form-container">
+    <p>Your account details are below:</p>
+    <table>
+        <tr>
+            <td>Username:</td>
+            <td>{{ account['Username'] }}</td>
+        </tr>
+        <tr>
+            <td>Password:</td>
+            <td>******</td>
+        </tr>
+        <tr>
+            <td>Email:</td>
+            <td>{{ account['Email'] }}</td>
+        </tr>
+    </table>
+    <hr>
     <form action="{{ url_for('profile') }}" method = post>
         <label for="name">Change Your Name:</label>
         <input type="text" id="name" name="UsernameChange">
         
         <button type="submit">Change UserName</button>
     </form>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-</div>
-<div class="form-container">
+    <hr>
     <form action="{{ url_for('profile') }}" method = post>
         <label for="name">Change Your Password:</label>
         <input type="text" id="name" name="PasswordChange">
