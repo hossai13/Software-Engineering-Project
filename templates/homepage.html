@@ -21,7 +21,7 @@
             <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;&nbsp;PIZZA</h1>
         </a>
         <ul>
-            <li><a href="#">ORDER NOW</a></li>
+            <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
             <li><a href="{{ url_for('register') }}">REGISTER</a></li>
             <li><a href="{{ url_for('login') }}">LOGIN</a></li>
             <li id="cart-icon">
