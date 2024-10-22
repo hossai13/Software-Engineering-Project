@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration</title>
+    <title>Login</title>
     
     <!-- Correct CSS file references -->
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/registration.css') }}">
@@ -30,13 +30,13 @@
     
     <div class="form-container">
         <div class="textContainer">
-            <span>R</span><span>E</span><span>G</span><span>I</span>
-            <span>S</span><span>T</span><span>E</span><span>R</span><span>&nbsp;</span>
+            <span>L</span><span>O</span><span>G</span><span>I</span>
+            <span>N</span><span>&nbsp;</span>
             <span>N</span><span>O</span><span>W</span><span>!</span>
         </div>
 
         <!-- Correct form submission endpoint -->
-        <form action="{{ url_for('register') }}" method="POST">
+        <form action="{{ url_for('login') }}" method="POST">
             <label for="name">Name:</label>
             <input type="text" id="name" name="Username" required>
             
@@ -46,10 +46,8 @@
             <label for="password">Password:</label>
             <input type="password" id="password" name="Password" required>
             
-            <label for="confirm-password">Confirm Password:</label>
-            <input type="password" id="confirm-password" name="ConfirmPassword" required>
             
-            <button type="submit">Register</button>
+            <button type="submit">Log In</button>
         </form>
     </div>
 
