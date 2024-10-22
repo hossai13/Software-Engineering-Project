@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration</title>
+    
+    <!-- Correct CSS file references -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/registration.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/styles.css') }}">
+
+    <!-- Google Fonts -->
+    <style>@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');</style>
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('homepage') }}" id="FP-Logo">
+            <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;&nbsp;PIZZA</h1>
+        </a>
+        <ul>
+            <li><a href="#">ORDER NOW</a></li>
+            <li><a href="{{ url_for('register') }}">REGISTER</a></li>
+            <li><a href="#">LOGIN</a></li>
+            <li id="cart-icon">
+                <a href="#"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
+            </li>
+        </ul>
+    </nav>
+    
+    <div class="form-container">
+        <div class="textContainer">
+            <span>R</span><span>E</span><span>G</span><span>I</span>
+            <span>S</span><span>T</span><span>E</span><span>R</span><span>&nbsp;</span>
+            <span>N</span><span>O</span><span>W</span><span>!</span>
+        </div>
+
+        <!-- Correct form submission endpoint -->
+        <form action="{{ url_for('register') }}" method="POST">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="Username" required>
+            
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="Email" required>
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="Password" required>
+            
+            <label for="confirm-password">Confirm Password:</label>
+            <input type="password" id="confirm-password" name="ConfirmPassword" required>
+            
+            <button type="submit">Register</button>
+        </form>
+    </div>
+
+    <!-- Correct JS file reference -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
