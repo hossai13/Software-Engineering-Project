@@ -3,17 +3,25 @@
     src: url("{{ url_for('static', filename='Fonts/QuartzoBold-W9lv.ttf') }}") format("truetype");
 }
 
+@font-face {
+    font-family: 'Mori';
+    src: url('/static/Fonts/PPMori-Regular.otf') format("opentype");
+}
 
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 
 body {
     background-color: #f8f6f8;
-    font-family:'Roboto';
+    background-image: 
+        radial-gradient(at 20% 33%, #ed1d4e 0, transparent 59%), 
+        radial-gradient(at 82% 65%, #901343 0, transparent 55%);
+    font-family:'Mori';
     margin: 0;
     padding: 0;
     padding-bottom: 3.125rem;
     display: grid;
     place-items: center;
+    height: 90vh;
 }
 
 .form-container { 
@@ -21,51 +29,91 @@ body {
     flex-direction: column;
     align-items: center;
     overflow: hidden; 
-    width: 50vw;
+    width: 40vw;
     height: 75vh;
-    margin: 6vh auto;
     margin-top: 9.5rem;
-    background: rgba( 182, 182, 182, 0.25 );
-    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
-    backdrop-filter: blur( 1.5px );
-    -webkit-backdrop-filter: blur( 1.5px );
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    background-color: rgba(17, 25, 40, 0.70);
     border-radius: 20px;
-    border: 1px solid rgba( 255, 255, 255, 0.18 );
+    border: 1px solid rgba(255, 255, 255, 0.125);
 }
 
-.textContainer {
-    position: relative;
-    width: 300px; /* Adjust size to fit your container */
-    height: 300px; /* Adjust size to fit your container */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 50%; /* Make it circular */
+h1 {
+    display: flex;                
+    align-items: center;          
+    justify-content: center;     
+    gap: 1rem;                    
+    color: #fff;
+    --color-one: #cf4d4d;
+    --color-two: #d64d76;
+    --stretch-multiplier: 5;
+    font-size: clamp(2rem, 14vmin, 4rem);
+    font-family: 'Quartzo';
+    line-height: 1;
+    --stretch: 1;
+    cursor: url('/static/Images_Videos/icon.png'), auto;
 }
 
-.textContainer span {
+.sr-only {
     position: absolute;
-    font-size: 24px; /* Adjust font size */
-    font-family: 'Quartzo', sans-serif;
-    color: #000; /* Change to desired color */
-    transform-origin: 150px; /* Half of the container width/height */
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
     white-space: nowrap;
+    border-width: 0;  
 }
 
-.textContainer span:nth-child(1) { transform: rotate(0deg) translateX(120px); }
-.textContainer span:nth-child(2) { transform: rotate(20deg) translateX(120px); }
-.textContainer span:nth-child(3) { transform: rotate(40deg) translateX(120px); }
-.textContainer span:nth-child(4) { transform: rotate(60deg) translateX(120px); }
-.textContainer span:nth-child(5) { transform: rotate(80deg) translateX(120px); }
-.textContainer span:nth-child(6) { transform: rotate(100deg) translateX(120px); }
-.textContainer span:nth-child(7) { transform: rotate(120deg) translateX(120px); }
-.textContainer span:nth-child(8) { transform: rotate(140deg) translateX(120px); }
-.textContainer span:nth-child(9) { transform: rotate(160deg) translateX(120px); }
-.textContainer span:nth-child(10) { transform: rotate(180deg) translateX(120px); }
-.textContainer span:nth-child(11) { transform: rotate(200deg) translateX(120px); }
-.textContainer span:nth-child(12) { transform: rotate(220deg) translateX(120px); }
-.textContainer span:nth-child(13) { transform: rotate(240deg) translateX(120px); }
+[aria-hidden] {
+    display: flex;
+    gap: 0.025ch;
+    align-items: center;
+    color: white;
+}
 
+.stretch-o {
+    height: 1.45rem; 
+    width: calc(var(--stretch) * 1.5rem);
+    translate: 0 -0.01ch;
+    border: 0.25ch solid white;
+    border-radius: 50%;
+    transition: width 0.2s;
+    position: relative;
+}
+
+
+h1:hover {
+    --stretch: var(--stretch-multiplier);
+    cursor: url('/static/Images_Videos/icon.png'), auto;
+}
+
+.stretch-o:after,
+.stretch-o:before {
+    content: "";
+    border: 0.25ch solid var(--color);
+    position: absolute;
+    inset: -0.25ch;
+    border-radius: 50%;
+    opacity: calc(-1 + var(--stretch));
+    transition: opacity 0.2s;
+}
+
+.stretch-o:before {
+    --color: var(--color-one);
+}
+
+.stretch-o:after {
+    --color: var(--color-two);
+    mask:
+        radial-gradient(
+            circle at top left,
+            #fff,
+            transparent
+        );
+}
 
 form {
     display: flex;
@@ -75,6 +123,8 @@ form {
 
 label {
     font-size: 1.75rem;
+    color: #fff;
+    margin-bottom: 0.75rem;
 }
 
 input {
@@ -82,52 +132,46 @@ input {
     height: 2.5vh;
     margin-bottom: 1.25rem;
     padding: 0.5rem; 
-    font-size: 1rem;
-    border-radius: 0.75rem;
-    border: 1px solid #ccc;
+    font-size: 1.25rem;
+    border-radius: 1.5rem;
+    font-family: 'Mori';
+    border: 3px solid #fff;
+    background-color: rgba(248, 248, 248, 0.1);
+    transition: border-color 0.3s ease;
+    margin-bottom: 3.5rem;
 }
 
-.inside-container {
-    max-width: 88vw;
-    margin: 2vh auto;
-    position: relative;
-    border-radius: 0.25rem;
-    padding: 0.25rem;
+input::placeholder {
+    color: #fff;
+    font-family: 'Mori';
 }
 
-
-.inside-container::before, .inside-container::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0.85rem;
-    background: linear-gradient(45deg, #f33670, #3485e8, #da3163, #644feb);
-    background-size: 400%;
-    z-index: -1;
-    animation: glow 20s infinite;
-    width: 100%;
-    border-radius: 0.625rem;
+input:focus {
+    outline: none;
+    border: 5px solid #ff437b;
 }
 
-.inside-container::after {
-    filter: blur(0.625rem);
-    transform: translate3d(0, 0, 0);
+button {
+    margin: 0 auto;
+    width: 45%;
+    padding: 1rem;
+    font-size: 1.25rem;
+    cursor: pointer;
+    color: #fff;
+    backdrop-filter: blur(7px) saturate(172%);
+    -webkit-backdrop-filter: blur(7px) saturate(172%);
+    background: linear-gradient(90deg, #af2238bd, #f19659);
+    border-radius: 1.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.125);
+    font-family: 'Atop';
 }
 
-@keyframes glow {
-    0% {
-      background-position: 0 0;
-    }
-  
-    50% {
-      background-position: 100% 0;
-    }
-  
-    100% {
-      background-position: 0 0;
-    }
-  }
+button:hover {
+    background: linear-gradient(90deg, #8d1b2dbd, #d4783a);
+}
 
-  
+p {
+    color: #fff;    
+    font-size: 1.55rem;
+    margin-top: 1.75rem;
+}

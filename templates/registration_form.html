@@ -8,10 +8,11 @@
     <!-- Correct CSS file references -->
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/registration.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/navbar.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/styles.css') }}">
+    <!--link rel="stylesheet" href="{{ url_for('static', filename='CSS/style.css') }}"-->
 
     <!-- Google Fonts -->
     <style>@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');</style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.5/lottie.min.js"></script>
 </head>
 <body>
     <nav>
@@ -22,6 +23,7 @@
             <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
             <li><a href="{{ url_for('register') }}">REGISTER</a></li>
             <li><a href="{{ url_for('login') }}">LOGIN</a></li>
+            <li>
             <li id="cart-icon">
                 <a href="#"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
             </li>
@@ -30,27 +32,34 @@
     
     <div class="form-container">
         <div class="textContainer">
-            <span>R</span><span>E</span><span>G</span><span>I</span>
-            <span>S</span><span>T</span><span>E</span><span>R</span><span>&nbsp;</span>
-            <span>N</span><span>O</span><span>W</span><span>!</span>
+            <h1>
+                <span>REGISTER</span>
+                <span class="sr-only"> NOW</span>
+                <span aria-hidden="true" class="now-section">
+                    <span>N</span>
+                    <span class="stretch-o"></span>
+                    <span>W!</span>
+                </span>
+            </h1>
         </div>
-
-        <!-- Correct form submission endpoint -->
+    
+        <!-- Registration form -->
         <form action="{{ url_for('register') }}" method="POST">
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="Username" required>
+            <label for="name"></label>
+            <input type="text" id="name" name="Username" placeholder="Username" required>
             
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="Email" required>
+            <label for="email"></label>
+            <input type="email" id="email" name="Email" placeholder="Email" required>
             
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="Password" required>
+            <label for="password"></label>
+            <input type="password" id="password" name="Password" placeholder="Password" required>
             
-            <label for="confirm-password">Confirm Password:</label>
-            <input type="password" id="confirm-password" name="ConfirmPassword" required>
+            <label for="confirm-password"></label>
+            <input type="password" id="confirm-password" name="ConfirmPassword" placeholder="Confirm Password" required>
             
             <button type="submit">Register</button>
         </form>
+        <p>Have an account? <a href="{{ url_for('login') }}">Login!</a></p>
     </div>
 
     <!-- Correct JS file reference -->

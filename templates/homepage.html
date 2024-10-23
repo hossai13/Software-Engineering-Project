@@ -7,7 +7,7 @@
     
     <!-- Reference to CSS in static/CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/navbar.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/homepage.css') }}">
     
     <!-- Google fonts (external link) -->
     <style>@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');</style>
@@ -24,6 +24,7 @@
             <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
             <li><a href="{{ url_for('register') }}">REGISTER</a></li>
             <li><a href="{{ url_for('login') }}">LOGIN</a></li>
+            <li><a href="{{ url_for('profile') }}">PROFILE</a></li>
             <li id="cart-icon">
                 <a href="#"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
             </li>
@@ -35,7 +36,7 @@
             <div class="video">
                 <h2 class="pulsate">ORDER NOW</h2>
                 <video id="bg-video" autoplay loop muted>
-                    <source src="{{ url_for('static', filename='Images_Videos/4131833-hd_1920_1080_24fps.mp4') }}" type="video/mp4">
+                   <source src="{{ url_for('static', filename='Images_Videos/4131833-hd_1920_1080_24fps.mp4') }}" type="video/mp4">
                 </video>
             </div>
             <div>
@@ -45,20 +46,42 @@
             </div>
         </div>
         
-        <div class="about-us-container">
-            <h3 class="title">WHO WE ARE</h3>
-            <div class="slideshow-container"> 
-                <div class="slides fade">
-                    <img src="{{ url_for('static', filename='Images_Videos/map.png') }}" alt="map">
+        <div class="whole-container">
+            <div class="about-us-container">
+                <h3 class="title">🎉 FIESTA EXPERIENCE 🍕</h3>
+                <div class="slideshow-container"> 
+                    <div class="slides fade">
+                        <img src="{{ url_for('static', filename='Images_Videos/mural.jpeg') }}" alt="mural">
+                    </div>
+                    <div class="slides fade">
+                        <img src="{{ url_for('static', filename='Images_Videos/map.png') }}" alt="map" class="move-down">
+                    </div>
+                    <div class="slides fade">
+                        <img src="{{ url_for('static', filename='Images_Videos/inside.jpeg') }}" alt="restaurant" class="move-down">
+                    </div>
+                    <div class="slides fade">
+                        <img src="{{ url_for('static', filename='Images_Videos/pizza.jpeg') }}" alt="pizza" class="move-down">
+                    </div>
                 </div>
-                <div class="slides fade">
-                    <img src="{{ url_for('static', filename='Images_Videos/mural.jpeg') }}" alt="mural">
-                </div>
-                <div class="slides fade">
-                    <img src="{{ url_for('static', filename='Images_Videos/inside.jpeg') }}" alt="restaurant">
-                </div>
-                <div class="slides fade">
-                    <img src="{{ url_for('static', filename='Images_Videos/pizza.jpeg') }}" alt="pizza">
+            </div>
+        
+            <div class="contact-container">
+                <h3 class="title">CONTACT US</h3>
+                <div class="contact-info">
+                    <div class="contact">
+                        <h4>ADDRESS:</h4>
+                        <p>4518 Baltimore Ave</p>
+                        <p>Philadelphia, PA 19143</p>
+                    </div>
+                    <div class="contact">
+                        <h4>PHONE:</h4>
+                        <p>(215) 386-5455</p>
+                    </div>
+                    <div class="contact">
+                        <h4>HOURS:</h4>
+                        <p>9 AM - 9:30 PM (EVERY DAY EXCEPT SAT)</p>
+                        <p>9 AM - 10:30 PM (SAT)</p>
+                    </div>
                 </div>
             </div>
         </div>

@@ -8,10 +8,11 @@
     <!-- Correct CSS file references -->
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/registration.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/navbar.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/styles.css') }}">
+    <!-- link rel="stylesheet" href="{{ url_for('static', filename='CSS/styles.css') }}"-->
 
     <!-- Google Fonts -->
     <style>@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');</style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.5/lottie.min.js"></script>
 </head>
 <body>
     <nav>
@@ -30,25 +31,34 @@
     
     <div class="form-container">
         <div class="textContainer">
-            <span>L</span><span>O</span><span>G</span><span>I</span>
-            <span>N</span><span>&nbsp;</span>
-            <span>N</span><span>O</span><span>W</span><span>!</span>
+            <h1>
+                <span class="sr-only">LOGIN</span>
+                <span aria-hidden="true" class="now-section">
+                    <span>L</span>
+                    <span class="stretch-o"></span>
+                    <span>G</span>
+                    <span>I</span>
+                    <span>N</span>
+                </span>
+                <span>NOW!</span>
+            </h1>
         </div>
 
         <!-- Correct form submission endpoint -->
         <form action="{{ url_for('login') }}" method="POST">
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="Username" required>
+            <label for="name"></label>
+            <input type="text" id="name" name="Username" placeholder="Username" required>
             
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="Email" required>
+            <label for="email"></label>
+            <input type="email" id="email" name="Email" placeholder="Email" required>
             
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="Password" required>
+            <label for="password"></label>
+            <input type="password" id="password" name="Password" placeholder="Password" required>
             
             
             <button type="submit">Log In</button>
         </form>
+        <p>Don't have an account? <a href="{{ url_for('register') }}">Register!</a></p>
     </div>
 
     <!-- Correct JS file reference -->

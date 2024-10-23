@@ -37,4 +37,3 @@ function slideShow() {
   setTimeout(slideShow, 6000);
 
 }
-f
