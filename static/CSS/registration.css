@@ -139,6 +139,7 @@ input {
     background-color: rgba(248, 248, 248, 0.1);
     transition: border-color 0.3s ease;
     margin-bottom: 3.5rem;
+    color: #fff;
 }
 
 input::placeholder {
@@ -163,7 +164,7 @@ button {
     background: linear-gradient(90deg, #af2238bd, #f19659);
     border-radius: 1.75rem;
     border: 1px solid rgba(255, 255, 255, 0.125);
-    font-family: 'Atop';
+    font-family: 'Mori';
 }
 
 button:hover {
