@@ -1,0 +1,227 @@
+@font-face {
+    font-family: 'Quartzo';
+    src: url('/static/Fonts/QuartzoBold-W9lv.ttf') format("truetype");
+}
+
+@font-face {
+    font-family: 'Mori';
+    src: url('/static/Fonts/PPMori-Regular.otf') format("opentype");
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+body {
+    background-color: #f8f6f8;
+    font-family: 'Mori';
+    margin: 0;
+    padding-bottom: 5rem;
+}
+
+#lottie-cart {
+    width: 50px;
+    height: 50px;
+}
+
+.video-container {
+    width: 100%;
+    height: 55vh;
+    top: 12vh;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background: rgba(182, 182, 182, 0.05);
+    box-shadow: 0 0.25rem 1rem rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(0.25rem);
+    overflow: hidden;
+}
+
+.video-container video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+.video h2 {
+    font-size: 4vw;
+    color: white;
+    font-family: 'Quartzo';
+    text-align: center;
+    text-shadow: 0.125rem 0.125rem 0.25rem #f5f5f540;
+    position: absolute;
+    top: 25%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.pulsate {
+    animation: pulsate 3s ease-out infinite;
+    opacity: 0.5;
+}
+
+@keyframes pulsate {
+    0% { opacity: 0.6; }
+    50% { opacity: 1.0; }
+    100% { opacity: 0.6; }
+}
+
+.order-button {
+    background-color: #cf4d4d;
+    padding: 0.75rem 2rem;
+    color: #fff;
+    font-family: 'Mori';
+    font-size: 1rem;
+    font-weight: 800;
+    border: none;
+    border-radius: 1rem;
+    position: absolute;
+    top: 53%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+}
+
+.about-us-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: auto 0;
+    width: 55vw;
+    background: rgba(217, 212, 212, 0.25);
+    border-radius: 0.625rem;
+    padding: 2rem;
+    margin-left: 5vw;
+}
+
+.title {
+    font-family: 'Quartzo';
+    font-size: 4rem;
+    position: relative;
+    margin-bottom: 1.5rem;
+    margin-top: -0.025rem;
+}
+
+.title::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 4px;
+    background-color: #f33670;
+    bottom: 5rem;
+    left: 0;
+    transform: scaleX(0);
+    transform-origin: bottom left;
+    transition: transform 0.35s ease-out;
+}
+
+.title:hover::after {
+    transform: scaleX(1);
+}
+
+.slideshow-container {
+    max-width: 50vw;
+    aspect-ratio: 16/9;
+    position: relative;
+    border-radius: 0.25rem;
+    padding: 0.25rem;
+    overflow: hidden;
+}
+
+.slides {
+    display: block;
+    border-radius: 4px;
+    width: 100%;
+    height: 100%;
+}
+
+.slides img {
+    width: 100%;
+    height: auto;
+    border-radius: 0.3125rem;
+    object-fit: contain;
+}
+
+.slides img.move-down {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: translateY(-1px) scale(1);
+}
+
+
+.slides.fade {
+    animation: fade 4s;
+}
+
+@keyframes fade {
+    from { opacity: 0.75; }
+    to { opacity: 1; }
+}
+
+.slideshow-container::before, .slideshow-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0.05rem;
+    background: linear-gradient(45deg, #f33670, #3485e8, #da3163, #644feb);
+    background-size: 400%;
+    z-index: -1;
+    animation: glow 20s infinite;
+    width: 100%;
+    border-radius: 0.625rem;
+}
+
+.slideshow-container::after {
+    transform: translate3d(0, 0, 0);
+}
+
+@keyframes glow {
+    0% { background-position: 0 0; }
+    50% { background-position: 100% 0; }
+    100% { background-position: 0 0; }
+}
+
+.whole-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: 20vh;
+    gap: 2rem;
+}
+
+.contact-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: auto 0;
+    margin-right: 10vw;
+    width: 20vw;
+    height: 50vh;
+    background: rgba(217, 212, 212, 0.25);
+    border-radius: 0.625rem;
+}
+
+.contact-container h3 {
+    font-family: 'Quartzo';
+    font-size: clamp(2.5rem, 5vw, 3.25rem); 
+    margin-top: 1.8rem;
+    margin-bottom: -0.5rem;
+}
+
+.contact h4 {
+    font-family: 'Quartzo';
+    font-size: clamp(1.5rem, 3.5vw, 1.85rem); 
+    text-decoration: underline;
+}
+
+.contact-container p {
+    font-size: clamp(0.9rem, 2.5vw, 1.20rem); 
+    margin-top: -1rem;
+}
