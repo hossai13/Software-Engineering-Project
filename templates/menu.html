@@ -30,9 +30,21 @@
         </nav>
         <div>
             <img src = "/static/Images_Videos/pizza.jpeg" height="100">
-            <tr>
-                <td>{{ result }}</td>
-            </tr>
+            <h1>Menu List</h1>
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                </tr>
+                {% for row in menu_items %}
+                <tr>
+                    <td>{{ row.itemID }}</td>
+                    <td>{{ row.itemName }}</td>
+                    <td>{{ row.itemPrice }}</td>
+                </tr>
+                {% endfor %}
+            </table>
         </div>
     </body> 
 </html>

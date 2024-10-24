@@ -26,7 +26,7 @@ def homepage():
 @app.route('/menu')
 def menu():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM UserInfo")  # Assuming you have a Menu table
+    cursor.execute("SELECT itemID, itemName, itemPrice FROM Menu")  # Assuming you have a Menu table
     menu_items = cursor.fetchall()
     return render_template('menu.html', menu_items=menu_items)
 
