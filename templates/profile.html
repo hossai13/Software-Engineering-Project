@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROFILE</title>
+    
+    <!-- Correct CSS file references -->
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/profile.css') }}">
+
+    <!-- Google Fonts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.5/lottie.min.js"></script>
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('homepage') }}" id="FP-Logo">
+            <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;&nbsp;PIZZA</h1>
+        </a>
+        <ul>
+            <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
+            <li><a href="{{ url_for('register') }}">REGISTER</a></li>
+            <li><a href="{{ url_for('login') }}">LOGIN</a></li>
+            <li><a href="{{ url_for('profile') }}">PROFILE</a></li>
+            <li id="cart-icon">
+                <a href="#"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
+            </li>
+        </ul>
+    </nav>
+    <div class="form-container">
+        <h2>Your account details are below:</h2>
+        <table>
+            <tr>
+                <td class="header">Username:</td>
+                <td>{{ account['Username'] }}</td>
+            </tr>
+            <tr>
+                <td class="header">Password:</td>
+                <td>******</td>
+            </tr>
+            <tr>
+                <td class="header">Email:</td>
+                <td>{{ account['Email'] }}</td>
+            </tr>
+        </table>
+        <div class="change-container">
+            <form action="{{ url_for('profile') }}" method="POST">
+                <label for="name">Change Your Username:</label>
+                <input type="text" id="name" name="UsernameChange">
+                <button type="submit">Change Username</button>
+            </form>
+            <form action="{{ url_for('profile') }}" method="POST">
+                <label for="password">Change Your Password:</label>
+                <input type="password" id="password" name="PasswordChange">
+                <button type="submit">Change Password</button>
+            </form>
+        </div>
+        <button><a href="{{ url_for('logout') }}">LOGOUT</a></button>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>

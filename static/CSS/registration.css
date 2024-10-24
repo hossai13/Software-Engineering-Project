@@ -1,0 +1,178 @@
+@font-face {
+    font-family: 'Quartzo';
+    src: url("{{ url_for('static', filename='Fonts/QuartzoBold-W9lv.ttf') }}") format("truetype");
+}
+
+@font-face {
+    font-family: 'Mori';
+    src: url('/static/Fonts/PPMori-Regular.otf') format("opentype");
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+body {
+    background-color: #f8f6f8;
+    background-image: 
+        radial-gradient(at 20% 33%, #ed1d4e 0, transparent 59%), 
+        radial-gradient(at 82% 65%, #901343 0, transparent 55%);
+    font-family:'Mori';
+    margin: 0;
+    padding: 0;
+    padding-bottom: 3.125rem;
+    display: grid;
+    place-items: center;
+    height: 90vh;
+}
+
+.form-container { 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden; 
+    width: 40vw;
+    height: 75vh;
+    margin-top: 9.5rem;
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    background-color: rgba(17, 25, 40, 0.70);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.125);
+}
+
+h1 {
+    display: flex;                
+    align-items: center;          
+    justify-content: center;     
+    gap: 1rem;                    
+    color: #fff;
+    --color-one: #cf4d4d;
+    --color-two: #d64d76;
+    --stretch-multiplier: 5;
+    font-size: clamp(2rem, 14vmin, 4rem);
+    font-family: 'Quartzo';
+    line-height: 1;
+    --stretch: 1;
+    cursor: url('/static/Images_Videos/icon.png'), auto;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;  
+}
+
+[aria-hidden] {
+    display: flex;
+    gap: 0.025ch;
+    align-items: center;
+    color: white;
+}
+
+.stretch-o {
+    height: 1.45rem; 
+    width: calc(var(--stretch) * 1.5rem);
+    translate: 0 -0.01ch;
+    border: 0.25ch solid white;
+    border-radius: 50%;
+    transition: width 0.2s;
+    position: relative;
+}
+
+
+h1:hover {
+    --stretch: var(--stretch-multiplier);
+    cursor: url('/static/Images_Videos/icon.png'), auto;
+}
+
+.stretch-o:after,
+.stretch-o:before {
+    content: "";
+    border: 0.25ch solid var(--color);
+    position: absolute;
+    inset: -0.25ch;
+    border-radius: 50%;
+    opacity: calc(-1 + var(--stretch));
+    transition: opacity 0.2s;
+}
+
+.stretch-o:before {
+    --color: var(--color-one);
+}
+
+.stretch-o:after {
+    --color: var(--color-two);
+    mask:
+        radial-gradient(
+            circle at top left,
+            #fff,
+            transparent
+        );
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+}
+
+label {
+    font-size: 1.75rem;
+    color: #fff;
+    margin-bottom: 0.75rem;
+}
+
+input {
+    width: 100%;
+    height: 2.5vh;
+    margin-bottom: 1.25rem;
+    padding: 0.5rem; 
+    font-size: 1.25rem;
+    border-radius: 1.5rem;
+    font-family: 'Mori';
+    border: 3px solid #fff;
+    background-color: rgba(248, 248, 248, 0.1);
+    transition: border-color 0.3s ease;
+    margin-bottom: 3.5rem;
+    color: #fff;
+}
+
+input::placeholder {
+    color: #fff;
+    font-family: 'Mori';
+}
+
+input:focus {
+    outline: none;
+    border: 5px solid #ff437b;
+}
+
+button {
+    margin: 0 auto;
+    width: 45%;
+    padding: 1rem;
+    font-size: 1.25rem;
+    cursor: pointer;
+    color: #fff;
+    backdrop-filter: blur(7px) saturate(172%);
+    -webkit-backdrop-filter: blur(7px) saturate(172%);
+    background: linear-gradient(90deg, #af2238bd, #f19659);
+    border-radius: 1.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.125);
+    font-family: 'Mori';
+}
+
+button:hover {
+    background: linear-gradient(90deg, #8d1b2dbd, #d4783a);
+}
+
+p {
+    color: #fff;    
+    font-size: 1.55rem;
+    margin-top: 1.75rem;
+}
