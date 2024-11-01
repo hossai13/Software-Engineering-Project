@@ -11,7 +11,7 @@ app.secret_key = 'your secret key'
 # MySQL database configuration
 app.config['MYSQL_HOST'] = 'localhost'  
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'root1234'
 app.config['MYSQL_DB'] = 'PizzaInfo'
 
 # Initialize MySQL
@@ -22,6 +22,15 @@ mysql = MySQL(app)
 def homepage():
     return render_template('homepage.html')
 
+#Route for the user homepage
+@app.route('/userhomepage')
+def userhomepage():
+    if 'loggedin' in session:
+        return render_template('userhomepage.html', username=session['username'])
+    else:
+        msg = 'Please log in to access your homepage.'
+        return redirect(url_for('login'))
+    
 # Route for the menu page
 @app.route('/menu')
 def menu():
@@ -98,7 +107,7 @@ def login():
                 session['id'] = account['LoginID']
                 session['username'] = account['Username']
                 msg = 'Logged in successfully!'
-                return redirect(url_for('profile'))
+                return redirect(url_for('userhomepage'))
             else:
                 msg = 'Incorrect username/password!'
         else:
