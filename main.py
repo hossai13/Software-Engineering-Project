@@ -22,8 +22,6 @@ mysql = MySQL(app)
 def homepage():
     return render_template('homepage.html')
 
-<<<<<<< Updated upstream
-=======
 #Route for the user homepage
 @app.route('/userhomepage')
 def userhomepage():
@@ -36,7 +34,6 @@ def userhomepage():
         return redirect(url_for('login'))
     
 
->>>>>>> Stashed changes
 # Route for the menu page
 @app.route('/menu')
 def menu():
