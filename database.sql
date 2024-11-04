@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS UserInfo (
     Password VARCHAR(255) NOT NULL,
     Email VARCHAR(255) NOT NULL, 
     LoginID INT AUTO_INCREMENT,
+    Points INT(10),
+    Admin varchar(6) not null,
     PRIMARY KEY (LoginID)
 );
 
