@@ -15,6 +15,16 @@ CREATE TABLE IF NOT EXISTS UserInfo (
 
 -- TRUNCATE TABLE Login;
 
+
+-- Create the reviews table
+CREATE TABLE IF NOT EXISTS Reviews (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    LoginID INT NOT NULL,
+    rating INTEGER NOT NULL,
+    review_text TEXT NOT NULL,
+    date_made TEXT NOT NULL,
+    FOREIGN KEY (LoginID) REFERENCES UserInfo(LoginID) ON DELETE CASCADE
+);
 Select * from UserInfo;
 
 -- Create the menu table
