@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_mysqldb import MySQL
+from datetime import datetime
+import mysql.connector
 import MySQLdb.cursors
 import re
 
@@ -26,10 +28,45 @@ def homepage():
 @app.route('/userhomepage')
 def userhomepage():
     if 'loggedin' in session:
-        return render_template('userhomepage.html', username=session['username'])
+        current_date = datetime.now().strftime('%Y-%m-%d')
+        cursor = mysql.connection.cursor()
+        cursor.execute('SELECT username, rating, review_text, date_made FROM reviews ORDER BY date_made DESC')
+        reviews = cursor.fetchall()
+        cursor.close()
+        return render_template('userhomepage.html', username=session['username'], user_id=session['id'], current_date=current_date, reviews=reviews)
     else:
         msg = 'Please log in to access your homepage.'
         return redirect(url_for('login'))
+
+# Route for the review submission/database connection
+@app.route('/submit_review', methods=['POST'])
+def submit_review():
+    if request.method == 'POST':
+        username = request.form['name']
+        rating = request.form['rating']
+        review_text = request.form['review']
+        date_made = request.form['DateMade']
+        cursor = mysql.connection.cursor()
+
+        cursor.execute('''
+            INSERT INTO reviews (username, rating, review_text, date_made)
+            VALUES (%s, %s, %s, %s)
+        ''', (username, rating, review_text, date_made))
+
+        mysql.connection.commit()
+        cursor.close()
+
+        return redirect(url_for('userhomepage'))
+    
+# Route for the reviews display
+@app.route('/reviews')
+def reviews():
+    cursor = mysql.connection.cursor()
+    cursor.execute('SELECT username, rating, review_text, date_made FROM reviews ORDER BY date_made DESC')
+    reviews = cursor.fetchall()
+    cursor.close()
+    return render_template('reviews.html', reviews=reviews)
+
     
 # Route for the menu page
 @app.route('/menu')
