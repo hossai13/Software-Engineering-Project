@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Homepage</title>
+    
+    <!-- Reference to CSS in static/CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/homepage.css') }}">
+    
+    <!-- Google fonts (external link) -->
+    <style>@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');</style>
+
+    <!-- Bodymovin (Lottie animation library) from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.5/lottie.min.js"></script>
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('userhomepage') }}" id="FP-Logo">
+            <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;&nbsp;PIZZA</h1>
+        </a>
+        <ul>
+            <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
+            <li><a href="{{ url_for('register') }}">REGISTER</a></li>
+            <li><a href="{{ url_for('login') }}">LOGIN</a></li>
+            <li><a href="{{ url_for('profile') }}">PROFILE</a></li>
+            <li id="cart-icon">
+                <a href="#"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
+            </li>
+        </ul>
+    </nav>
+    
+    <div class="home-page">
+        <div class="video-container">
+            <div class="video">
+                <h2 class="pulsate">ORDER NOW</h2>
+                <video id="bg-video" autoplay loop muted>
+                   <source src="{{ url_for('static', filename='Images_Videos/4131833-hd_1920_1080_24fps.mp4') }}" type="video/mp4">
+                </video>
+            </div>
+            <div>
+                <button class="order-button">
+                    <a href="{{ url_for('menu') }}">CLICK HERE!</a>
+                </button>
+            </div>
+        </div>
+        
+        <div class="whole-container">
+            <div class="about-us-container">
+                <h3 class="title">🎉 FIESTA EXPERIENCE 🍕</h3>
+                <div class="slideshow-container"> 
+                    <div class="slides fade"
+                        <img src="{{ url_for('static', filename='Images_Videos/mural.jpeg') }}" alt="mural">
+                    </div>
+                    <div class="slides fade">
+                        <img src="{{ url_for('static', filename='Images_Videos/map.png') }}" alt="map" class="move-down">
+                    </div>
+                    <div class="slides fade">
+                        <img src="{{ url_for('static', filename='Images_Videos/inside.jpeg') }}" alt="restaurant" class="move-down">
+                    </div>
+                    <div class="slides fade">
+                        <img src="{{ url_for('static', filename='Images_Videos/pizza.jpeg') }}" alt="pizza" class="move-down">
+                    </div>
+                </div>
+            </div>
+        
+            <div class="contact-container">
+                <h3 class="title">CONTACT US</h3>
+                <div class="contact-info">
+                    <div class="contact">
+                        <h4>ADDRESS:</h4>
+                        <p>4518 Baltimore Ave</p>
+                        <p>Philadelphia, PA 19143</p>
+                    </div>
+                    <div class="contact">
+                        <h4>PHONE:</h4>
+                        <p>(215) 386-5455</p>
+                    </div>
+                    <div class="contact">
+                        <h4>HOURS:</h4>
+                        <p>9 AM - 9:30 PM (EVERY DAY EXCEPT SAT)</p>
+                        <p>9 AM - 10:30 PM (SAT)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="restaurant-review-container">
+        <div class="restaurant-review-header"> 
+            <h2 class="title"> RESTAURANT REVIEWS</h2>
+            <h4> Please give us your feedback and we will improve upon it!!! </h4>
+        </div>
+        <div class="review-submission-container">
+            <form id="reviewForm">
+                <div>
+                <td>Username:</td>
+                <input type="text" id="name" name="name" value="{{ username }}" readonly>
+                </div>
+
+                <div class="date-field-review">
+                <label>Date Created:</label>
+                <input type="text" id="dateCreated" name="dateCreated" value="" readonly>
+                </div>
+
+                <div class="star-rating-container">
+                <label>Rating:</label>
+                <label for="1-star">1 Star</label>
+                <input type="radio" id="star1" name="rating" value="1" required>
+                <label for="2-star">2 Stars</label>
+                <input type="radio" id="star2" name="rating" value="2">
+                <label for="3-star">3 Stars</label>
+                <input type="radio" id="star3" name="rating" value="3">
+                <label for="4-star">4 Stars</label>
+                <input type="radio" id="star4" name="rating" value="4">
+                <label for="5-star">5 Stars</label>
+                <input type="radio" id="star5" name="rating" value="5">
+                </div>
+
+                <div class="review-description">
+                <label for="review">Review:</label>
+                <textarea id="review" name="review" rows="6" cols="50" required></textarea>
+                </div>
+
+                <div class="review-submit-button">
+                <input type="submit" value="Submit Review">
+                </div>
+
+            </form>
+        </div>
+        
+            <h2>Your Reviews:</h2>
+            <div id="reviews-list"></div>
+        
+            
+            <script>
+            const reviewForm = document.getElementById('reviewForm');
+            const reviewsList = document.getElementById('reviews-list');
+            const dateCreatedInput = document.getElementById('dateCreated');
+            const currentDate = new Date().toLocaleDateString();
+
+            dateCreatedInput.value = currentDate;
+            reviewForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+            
+                const name = document.getElementById('name').value;
+                const rating = document.querySelector('input[name="rating"]:checked').value;
+                const dateCreated = dateCreatedInput.value;
+                const reviewText = document.getElementById('review').value; 
+
+                const reviewElement = document.createElement('div');
+                reviewElement.innerHTML = `<strong>${name}</strong> - ${dateCreated} - Rating: ${rating} Stars<br>${reviewText}<hr>`;
+                reviewsList.appendChild(reviewElement);
+                reviewForm.reset();
+                dateCreatedInput.value = currentDate;
+        });
+    </script>
+
+
+
+        </div>
+        <!-- Include JS file -->
+        <script src="{{ url_for('static', filename='script.js') }}"></script>
+    </body>
+</html>
