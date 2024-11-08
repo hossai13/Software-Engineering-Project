@@ -1,3 +1,4 @@
+import datetime
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
@@ -28,7 +29,32 @@ def userhomepage():
     if isAdmin():
         return redirect(url_for('admhomepage'))
     if 'loggedin' in session:
-        return render_template('userhomepage.html', username=session['username'])
+        current_date = datetime.now().strftime('%Y-%m-%d')
+        if request.method == 'POST':
+            username = request.form['name']
+            rating = request.form['rating']
+            review_text = request.form['review']
+            date_made = request.form['DateMade']
+
+            try:
+                cursor = mysql.connection.cursor()
+                cursor.execute('''INSERT INTO reviews (username, rating, review_text, date_made)
+                                  VALUES (%s, %s, %s, %s)''',
+                               (username, rating, review_text, date_made))
+                mysql.connection.commit()
+                cursor.close()
+                return redirect(url_for('userhomepage'))
+
+            except Exception as error:
+                print(f"Error: {error}")
+                return "There was an error submitting your review."
+            
+        cursor = mysql.connection.cursor()
+        cursor.execute('SELECT username, rating, review_text, date_made FROM reviews ORDER BY date_made DESC')
+        reviews = cursor.fetchall()
+        cursor.close()
+
+        return render_template('userhomepage.html', username=session['username'], user_id=session['id'], current_date=current_date, reviews=reviews)
     else:
         msg = 'Please log in to access your homepage.'
         return redirect(url_for('login'))
@@ -83,8 +109,6 @@ def register():
                 print("Insert executed")  # Check if the insert was executed
                 msg = 'You have successfully registered!'
                 return redirect(url_for('login'))
-        else:
-            msg = 'Please fill out the form!'
     return render_template('registration_form.html', msg=msg)
 
 # Email validation function
@@ -155,99 +179,7 @@ def profile():
     else:
         return redirect(url_for('login'))
     return render_template('profile.html', account=account, msg=msg)
-
-# Route for admin profile page
-@app.route('/admprofile', methods=['GET', 'POST']) 
-def admprofile():
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT Username, Email FROM UserInfo")
-    accounts = cursor.fetchall()
-    return render_template('admprofile.html', accounts=accounts)
     
-# Route for deleting the profile
-@app.route('/delete/<int:id>', methods=['GET', 'POST'])
-def delete(id):
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute('DELETE FROM UserInfo WHERE LoginID = %s', (id,))
-    mysql.connection.commit()
-    return redirect(url_for('admprofile'))
-
-
-# Route for the admin menu page
-@app.route('/admMenu', methods=['GET', 'POST'])
-def admmenu():
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM Menu")
-    menu_items = cursor.fetchall()
-    return render_template('admmenu.html', menu_items=menu_items)
-
-# Route for adding the menu item
-@app.route('/addMenuItem', methods=['GET', 'POST'])
-def addMenuItem():
-    msg = ''
-    if request.method == 'POST':
-        if 'itemName' in request.form and 'itemPrice' in request.form:
-            itemName = request.form['itemName']
-            itemPrice = request.form['itemPrice']
-            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute('INSERT INTO Menu (itemName, itemPrice) VALUES (%s, %s)', (itemName, itemPrice))
-            mysql.connection.commit()
-            msg = 'Item added successfully!'
-        else:
-            msg = 'Please fill out the form!'
-    return render_template('addMenuItem.html', msg=msg)
-
-# Route for deleting the menu item
-@app.route('/deleteMenuItem/<int:id>', methods=['GET', 'POST'])
-def deleteMenuItem(id):
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute('DELETE FROM Menu WHERE itemID = %s', (id,))
-    mysql.connection.commit()
-    return redirect(url_for('admmenu'))
-
-# Route for updating the menu item
-@app.route('/updateMenuItem/<int:id>', methods=['GET', 'POST'])
-def updateMenuItem(id):
-    msg = ''
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute('SELECT * FROM Menu WHERE itemID = %s', (id,))
-    item = cursor.fetchone()
-    if request.method == 'POST':
-        if 'itemName' in request.form and 'itemPrice' in request.form:
-            itemName = request.form['itemName']
-            itemPrice = request.form['itemPrice']
-            cursor.execute('UPDATE Menu SET itemName = %s, itemPrice = %s WHERE itemID = %s', (itemName, itemPrice, id))
-            mysql.connection.commit()
-            msg = 'Item updated successfully!'
-        else:
-            msg = 'Please fill out the form!'
-    return render_template('updateMenuItem.html', item=item, msg=msg)
-
-
-# Route for the admin homepage
-@app.route('/admhomepage')
-def admhomepage():
-    return render_template('admhomepage.html')
-
-#route for deleting reviews
-@app.route('/deleteReview/<int:id>', methods=['GET', 'POST'])
-def deleteReview(id):
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute('DELETE FROM Reviews WHERE reviewID = %s', (id,))
-    mysql.connection.commit()
-    return redirect(url_for('admreviews'))
-
-# this is to check if the user is an admin
-def isAdmin():
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute('SELECT isAdmin FROM UserInfo WHERE LoginID = %s', (session['id'],))
-    admin = cursor.fetchone()
-    if admin and admin['isAdmin'] == "True":
-        return True
-    else:
-        return False    
-    
-
 # Running the Flask app
 if __name__ == '__main__':
     app.run(debug=True)
