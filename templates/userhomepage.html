@@ -91,7 +91,7 @@
             <h4> Please give us your feedback and we will improve upon it!!! </h4>
         </div>
         <div class="review-submission-container">
-            <form id="Review-form" method="POST" action="{{ url_for('submit_review') }}">
+            <form id="Review-form" method="POST" action="{{ url_for('userhomepage') }}">
                 <div>
                     <td>Username:</td>
                     <input type= "text" id="name" name="name" value="{{ username }}" readonly>
@@ -124,51 +124,9 @@
                 <div class="review-submit-button">
                     <input type="submit" value="Submit Review">
                 </div>
-
-                <div class="reviews-list">
-                    <h3>Your Reviews:</h3>
-                    {% for review in reviews %}
-                        <div>
-                            <strong>{{ review.username }}</strong> - {{ review.date_made }} - Rating: {{ review.rating }} Stars
-                            <br>{{ review.review_text }}
-                            <hr>
-                        </div>
-                    {% endfor %}
-                </div>
             </form>
         </div>
         
-        <div class="reviews-list-container">
-            <h2>Your Reviews:</h2>
-            <div class="listofreviews" id="Review-list"></div>
-        </div>
-            
-            <script>    
-
-                const reviewForm = document.getElementById('Review-form');
-                const reviewsList = document.getElementById('Review-list');
-                const DateMadeInput = document.getElementById('DateMade');
-                const currentDate = new Date().toLocaleDateString();
-
-                DateMadeInput.value = currentDate;
-                reviewForm.addEventListener('submit', function(event) {
-                    event.preventDefault();
-            
-                    const name = document.getElementById('name').value;
-                    const rating = document.querySelector('input[name="rating"]:checked').value;
-                    const DateMade = DateMadeInput.value;
-                    const reviewText = document.getElementById('review').value; 
-
-                    const reviewElement = document.createElement('div');
-                    reviewElement.innerHTML = `<strong>${name}</strong> - ${DateMade} - Rating: ${rating} Stars<br>${reviewText}<hr>`;
-                    reviewsList.appendChild(reviewElement);
-                    reviewForm.reset();
-                    DateMadeInput.value = currentDate;
-                });
-                  
-            </script>
-
-        </div>
         <!-- Include JS file -->
         <script src="{{ url_for('static', filename='script.js') }}"></script>
     </body>

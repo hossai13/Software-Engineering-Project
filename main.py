@@ -19,54 +19,45 @@ app.config['MYSQL_DB'] = 'PizzaInfo'
 # Initialize MySQL
 mysql = MySQL(app)
 
+
 # Route for the homepage
 @app.route('/')
 def homepage():
     return render_template('homepage.html')
 
-#Route for the user homepage
-@app.route('/userhomepage')
+#Route for the user homepage/restaurant reviews
+@app.route('/userhomepage', methods=['GET', 'POST'])
 def userhomepage():
     if 'loggedin' in session:
         current_date = datetime.now().strftime('%Y-%m-%d')
+        if request.method == 'POST':
+            username = request.form['name']
+            rating = request.form['rating']
+            review_text = request.form['review']
+            date_made = request.form['DateMade']
+
+            try:
+                cursor = mysql.connection.cursor()
+                cursor.execute('''INSERT INTO reviews (username, rating, review_text, date_made)
+                                  VALUES (%s, %s, %s, %s)''',
+                               (username, rating, review_text, date_made))
+                mysql.connection.commit()
+                cursor.close()
+                return redirect(url_for('userhomepage'))
+
+            except Exception as error:
+                print(f"Error: {error}")
+                return "There was an error submitting your review."
+            
         cursor = mysql.connection.cursor()
         cursor.execute('SELECT username, rating, review_text, date_made FROM reviews ORDER BY date_made DESC')
         reviews = cursor.fetchall()
         cursor.close()
+
         return render_template('userhomepage.html', username=session['username'], user_id=session['id'], current_date=current_date, reviews=reviews)
     else:
         msg = 'Please log in to access your homepage.'
         return redirect(url_for('login'))
-
-# Route for the review submission/database connection
-@app.route('/submit_review', methods=['POST'])
-def submit_review():
-    if request.method == 'POST':
-        username = request.form['name']
-        rating = request.form['rating']
-        review_text = request.form['review']
-        date_made = request.form['DateMade']
-        cursor = mysql.connection.cursor()
-
-        cursor.execute('''
-            INSERT INTO reviews (username, rating, review_text, date_made)
-            VALUES (%s, %s, %s, %s)
-        ''', (username, rating, review_text, date_made))
-
-        mysql.connection.commit()
-        cursor.close()
-
-        return redirect(url_for('userhomepage'))
-    
-# Route for the reviews display
-@app.route('/reviews')
-def reviews():
-    cursor = mysql.connection.cursor()
-    cursor.execute('SELECT username, rating, review_text, date_made FROM reviews ORDER BY date_made DESC')
-    reviews = cursor.fetchall()
-    cursor.close()
-    return render_template('reviews.html', reviews=reviews)
-
     
 # Route for the menu page
 @app.route('/menu')

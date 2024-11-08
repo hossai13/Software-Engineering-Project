@@ -230,6 +230,7 @@ body {
 
 .restaurant-review-container {
     display: flex;
+    font-family: 'Mori';
     flex-direction: column;
     align-items: center;
     margin-top: 10vh;
@@ -239,3 +240,4 @@ body {
     padding: 2rem;
     margin-left: 5vw;
 }
+
