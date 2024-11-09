@@ -21,6 +21,10 @@ mysql = MySQL(app)
 # Route for the homepage
 @app.route('/')
 def homepage():
+    if isAdmin():
+        return redirect(url_for('adminhomepage'))
+    if 'loggedin' in session:
+        return redirect(url_for('userhomepage'))
     return render_template('homepage.html')
 
 #Route for the user homepage
@@ -146,7 +150,7 @@ def login():
                 session['id'] = account['LoginID']
                 session['username'] = account['Username']
                 msg = 'Logged in successfully!'
-                return redirect(url_for('profile'))
+                return redirect(url_for('userhomepage'))
             else:
                 msg = 'Incorrect username/password/email!'
         else:
