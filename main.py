@@ -27,7 +27,7 @@ def homepage():
 @app.route('/userhomepage')
 def userhomepage():
     if isAdmin():
-        return redirect(url_for('admProfiles'))
+        return redirect(url_for('admProfile'))
     if 'loggedin' in session:
         current_date = datetime.now().strftime('%Y-%m-%d')
         if request.method == 'POST':
@@ -63,7 +63,7 @@ def userhomepage():
 @app.route('/adminhomepage')
 def adminhomepage():
     if isAdmin():
-        return render_template('adminhomepage.html')
+        return render_template('admhomepage.html')
     else:
         return redirect(url_for('homepage'))
 
@@ -167,7 +167,7 @@ def logout():
 def profile():
     msg = ''
     if isAdmin():
-        return redirect(url_for('admProfiles'))
+        return redirect(url_for('admProfile'))
     if 'loggedin' in session:
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT * FROM UserInfo WHERE LoginID = %s', (session['id'],))
@@ -189,7 +189,7 @@ def profile():
 
 # Route for admin profile page
 @app.route('/admProfile', methods=['GET', 'POST']) 
-def admProfiles():
+def admProfile():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT Username, Email FROM UserInfo")
     accounts = cursor.fetchall()
@@ -199,7 +199,7 @@ def admProfiles():
         email = request.form['emailDelete']
         cursor.execute('DELETE FROM UserInfo WHERE Username = %s AND Email = %s', (username, email))
         mysql.connection.commit()
-        return redirect(url_for('admProfiles'))
+        return redirect(url_for('admProfile'))
     return render_template('admProfile.html', accounts=accounts)
 
     
