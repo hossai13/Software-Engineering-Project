@@ -27,7 +27,7 @@ def homepage():
 @app.route('/userhomepage')
 def userhomepage():
     if isAdmin():
-        return redirect(url_for('admhomepage'))
+        return redirect(url_for('admProfiles'))
     if 'loggedin' in session:
         current_date = datetime.now().strftime('%Y-%m-%d')
         if request.method == 'POST':
@@ -59,12 +59,19 @@ def userhomepage():
         msg = 'Please log in to access your homepage.'
         return redirect(url_for('login'))
     
+# route for the admin homepage
+@app.route('/adminhomepage')
+def adminhomepage():
+    if isAdmin():
+        return render_template('adminhomepage.html')
+    else:
+        return redirect(url_for('homepage'))
 
 # Route for the menu page
 @app.route('/menu')
 def menu():
     if isAdmin():
-        return redirect(url_for('admmenu'))
+        return redirect(url_for('admMenu'))
     
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT itemID, itemName, itemPrice FROM Menu")  # Assuming you have a Menu table
@@ -139,7 +146,7 @@ def login():
                 session['id'] = account['LoginID']
                 session['username'] = account['Username']
                 msg = 'Logged in successfully!'
-                return redirect(url_for('userhomepage'))
+                return redirect(url_for('profile'))
             else:
                 msg = 'Incorrect username/password/email!'
         else:
@@ -160,7 +167,7 @@ def logout():
 def profile():
     msg = ''
     if isAdmin():
-        return redirect(url_for('admprofile'))
+        return redirect(url_for('admProfiles'))
     if 'loggedin' in session:
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT * FROM UserInfo WHERE LoginID = %s', (session['id'],))
@@ -179,7 +186,67 @@ def profile():
     else:
         return redirect(url_for('login'))
     return render_template('profile.html', account=account, msg=msg)
+
+# Route for admin profile page
+@app.route('/admProfile', methods=['GET', 'POST']) 
+def admProfiles():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT Username, Email FROM UserInfo")
+    accounts = cursor.fetchall()
+    ## this is for the admin to delete a user
+    if 'usernameDelete' in request.form and 'emailDelete' in request.form:
+        username = request.form['usernameDelete']
+        email = request.form['emailDelete']
+        cursor.execute('DELETE FROM UserInfo WHERE Username = %s AND Email = %s', (username, email))
+        mysql.connection.commit()
+        return redirect(url_for('admProfiles'))
+    return render_template('admProfile.html', accounts=accounts)
+
     
+
+
+
+# Route for the admin menu page
+@app.route('/admMenu', methods=['GET', 'POST'])
+def admMenu():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT * FROM Menu")
+    menu_items = cursor.fetchall()
+    ## this is for the admin to delete a menu item
+    if 'itemName' in request.form:    
+        itemName = request.form['itemName']
+        cursor.execute('DELETE FROM Menu WHERE itemID = %s', (itemName,))
+        mysql.connection.commit()
+        return redirect(url_for('admMenu'))
+    ## this is for the admin to add a menu item
+    if 'itemName' in request.form and 'itemPrice' in request.form:
+        itemName = request.form['itemName']
+        itemPrice = request.form['itemPrice']
+        cursor.execute('INSERT INTO Menu (itemName, itemPrice) VALUES (%s, %s)', (itemName, itemPrice))
+        mysql.connection.commit()
+        return redirect(url_for('admMenu'))
+    ## this is for the admin to update a menu item  
+    if 'itemName' in request.form and 'itemPrice' in request.form:
+        itemName = request.form['itemName']
+        itemPrice = request.form['itemPrice']
+        cursor.execute('UPDATE Menu SET itemName = %s, itemPrice = %s WHERE itemID = %s', (itemName, itemPrice, id))
+        mysql.connection.commit()
+        return redirect(url_for('admMenu'))
+    
+    return render_template('admMenu.html', menu_items=menu_items)
+
+
+# this is to check if the user is an admin
+def isAdmin():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('SELECT isAdmin FROM UserInfo WHERE LoginID = %s', (session['id'],))
+    admin = cursor.fetchone()
+    if admin and admin['isAdmin'] == "True":
+        return True
+    else:
+        return False    
+    
+
 # Running the Flask app
 if __name__ == '__main__':
     app.run(debug=True)
