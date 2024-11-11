@@ -91,73 +91,66 @@
             <h4> Please give us your feedback and we will improve upon it!!! </h4>
         </div>
         <div class="review-submission-container">
-            <form id="reviewForm">
+            <form id="Review-form" method="POST" action="{{ url_for('userhomepage') }}">
                 <div>
-                <td>Username:</td>
-                <input type="text" id="name" name="name" value="{{ username }}" readonly>
+                    <td>Username:</td>
+                    <input type= "text" id="name" name="name" value="{{ username }}" readonly>
                 </div>
 
                 <div class="date-field-review">
-                <label>Date Created:</label>
-                <input type="text" id="dateCreated" name="dateCreated" value="" readonly>
+                    <label>Date:</label>
+                    <input type= "text" id="DateMade" name="DateMade" value="{{ current_date }}" readonly>
                 </div>
 
                 <div class="star-rating-container">
-                <label>Rating:</label>
-                <label for="1-star">1 Star</label>
-                <input type="radio" id="star1" name="rating" value="1" required>
-                <label for="2-star">2 Stars</label>
-                <input type="radio" id="star2" name="rating" value="2">
-                <label for="3-star">3 Stars</label>
-                <input type="radio" id="star3" name="rating" value="3">
-                <label for="4-star">4 Stars</label>
-                <input type="radio" id="star4" name="rating" value="4">
-                <label for="5-star">5 Stars</label>
-                <input type="radio" id="star5" name="rating" value="5">
+                    <label for="star1">
+                        <img src="static/Images_Videos/icons8-star-50-2.png" alt="1 Star" id="star1" class="star" data-value="1">
+                    </label>
+                    <label for="star2">
+                        <img src="static/Images_Videos/icons8-star-50-2.png" alt="2 Stars" id="star2" class="star" data-value="2">
+                    </label>
+                    <label for="star3">
+                        <img src="static/Images_Videos/icons8-star-50-2.png" alt="3 Stars" id="star3" class="star" data-value="3">
+                    </label>
+                    <label for="star4">
+                        <img src="static/Images_Videos/icons8-star-50-2.png" alt="4 Stars" id="star4" class="star" data-value="4">
+                    </label>
+                    <label for="star5">
+                        <img src="static/Images_Videos/icons8-star-50-2.png" alt="5 Stars" id="star5" class="star" data-value="5">
+                    </label>
+                </div>
+                <input type="hidden" id="rating" name="rating">
                 </div>
 
                 <div class="review-description">
-                <label for="review">Review:</label>
-                <textarea id="review" name="review" rows="6" cols="50" required></textarea>
+                    <label for="review">Leave A Review:</label>
+                    <textarea id="review" name="review" rows="6" cols="50" required></textarea>
                 </div>
 
                 <div class="review-submit-button">
-                <input type="submit" value="Submit Review">
+                    <input type="submit" value="Submit Review">
                 </div>
-
             </form>
         </div>
+
+        <script>
+            const stars = document.querySelectorAll('.star-rating-container .star');
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    document.getElementById('rating').value = value;
+                    stars.forEach(star => {
+                        if (star.getAttribute('data-value') <= value) {
+                            star.src = 'static/Images_Videos/icons8-star-50-3.png';
+                        } 
+                        else {
+                            star.src = 'static/Images_Videos/icons8-star-50-2.png';
+                        }
+                    });
+                });
+            });
+        </script>
         
-            <h2>Your Reviews:</h2>
-            <div id="reviews-list"></div>
-        
-            
-            <script>
-            const reviewForm = document.getElementById('reviewForm');
-            const reviewsList = document.getElementById('reviews-list');
-            const dateCreatedInput = document.getElementById('dateCreated');
-            const currentDate = new Date().toLocaleDateString();
-
-            dateCreatedInput.value = currentDate;
-            reviewForm.addEventListener('submit', function(event) {
-                event.preventDefault();
-            
-                const name = document.getElementById('name').value;
-                const rating = document.querySelector('input[name="rating"]:checked').value;
-                const dateCreated = dateCreatedInput.value;
-                const reviewText = document.getElementById('review').value; 
-
-                const reviewElement = document.createElement('div');
-                reviewElement.innerHTML = `<strong>${name}</strong> - ${dateCreated} - Rating: ${rating} Stars<br>${reviewText}<hr>`;
-                reviewsList.appendChild(reviewElement);
-                reviewForm.reset();
-                dateCreatedInput.value = currentDate;
-        });
-    </script>
-
-
-
-        </div>
         <!-- Include JS file -->
         <script src="{{ url_for('static', filename='script.js') }}"></script>
     </body>

@@ -13,6 +13,15 @@ CREATE TABLE IF NOT EXISTS UserInfo (
 
 -- TRUNCATE TABLE Login;
 
+-- Create the reviews table
+CREATE TABLE reviews (
+    review_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    rating INT NOT NULL,
+    review_text TEXT NOT NULL,
+    date_made DATE NOT NULL
+);
+
 Select * from UserInfo;
 
 -- Create the menu table
