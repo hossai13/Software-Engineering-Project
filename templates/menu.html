@@ -3,48 +3,261 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>PROFILE</title>
-        
+        <title>Menu</title>
+
         <!-- Correct CSS file references -->
-        <link rel="stylesheet" href="{{ url_for('static', filename='CSS/registration.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='CSS/menu.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='CSS/navbar.css') }}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='CSS/styles.css') }}">
-    
-        <!-- Google Fonts -->
-        <style>@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');</style>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.5/lottie.min.js"></script>
     </head>
     <body>
         <nav>
             <a href="{{ url_for('homepage') }}" id="FP-Logo">
                 <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;&nbsp;PIZZA</h1>
             </a>
-            <ul>
+            <ul class="navbar">
                 <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
                 <li><a href="{{ url_for('register') }}">REGISTER</a></li>
                 <li><a href="{{ url_for('login') }}">LOGIN</a></li>
-                <li><a href="{{ url_for('profile') }}">PROFILE</a></li>
+                <li><a href="{{ url_for('profile') }}">ACCOUNT</a></li>
                 <li id="cart-icon">
                     <a href="#"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
                 </li>
             </ul>
         </nav>
-        <div>
-            <img src = "/static/Images_Videos/pizza.jpeg" height="100">
-            <h1>Menu List</h1>
-            <table>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Price</th>
-                </tr>
-                {% for row in menu_items %}
-                <tr>
-                    <td>{{ row.itemID }}</td>
-                    <td>{{ row.itemName }}</td>
-                    <td>{{ row.itemPrice }}</td>
-                </tr>
-                {% endfor %}
-            </table>
-        </div>
-    </body> 
+        <main class="menu-container">
+            <div class="scroll-container">
+                <button class="scroll-btn left">&lt;</button>
+                <div class="scroll-wrapper">
+                    <ul class="menu-options">
+                        <li>Pizza</li>
+                        <li>Cheesesteak</li>    
+                        <li>Strombolis</li>
+                        <li>Burgers</li>
+                        <li>Sides</li>
+                        <li>Drinks</li>
+                        <li>Breakfast</li>
+                        <li>Wings</li>
+                        <li>Fresh Salads</li>
+                        <li>Wraps</li>
+                        <li>Quesadillas</li>
+                        <li>Seafood</li>
+                        <li>Pasta</li>
+                        <li>Dinner Platters</li>
+                        <li>Fiesta Specials</li>
+                        <li>Kids Menu</li>
+                        <li>Desserts</li>
+                    </ul>
+                </div>
+                <button class="scroll-btn right">&gt;</button>
+            </div>
+
+            <section class="menu-section">
+                <h2 class="promo">FEATURED ITEMS</h2>
+                <div class="featured-items">
+                    <div class="item-card" 
+                         data-item-name="Pepperoni Pizza" 
+                         data-item-category="Pizza" 
+                         data-item-price="10.95" 
+                         data-item-img="{{ url_for('static', filename='Images_Videos/pizza.jpeg') }}">
+                        <img src="{{ url_for('static', filename='Images_Videos/pizza.jpeg') }}" alt="Pepperoni Pizza">
+                        <h3>Pepperoni Pizza</h3>
+                        <div class="tags">
+                            <span>Small 10"</span>
+                            <span>Large 14"</span>
+                            <span>Giant 18"</span>
+                        </div>
+                        <div class="price">
+                            <span>$10.95</span>
+                            <span>$15.50</span>
+                            <span>$24.50</span>
+                        </div>
+                        <button class="order-button">Order Now</button>
+                    </div>
+                    <div class="item-card" 
+                         data-item-name="Cheesesteak" 
+                         data-item-category="Cheesesteak" 
+                         data-item-price="14.99" 
+                         data-item-img="{{ url_for('static', filename='Images_Videos/cheesesteak.jpg') }}">
+                        <img src="{{ url_for('static', filename='Images_Videos/cheesesteak.jpg') }}" alt="Cheesesteak">
+                        <h3>Cheesesteak</h3>
+                        <div class="price">
+                            <span>$14.99</span>
+                        </div>
+                        <button class="order-button">Order Now</button>
+                    </div>
+                    <div class="item-card" 
+                         data-item-name="Burger" 
+                         data-item-category="Burger" 
+                         data-item-price="11.99" 
+                         data-item-img="{{ url_for('static', filename='Images_Videos/burger.jpg') }}">
+                        <img src="{{ url_for('static', filename='Images_Videos/burger.jpg') }}" alt="Burger">
+                        <h3>Burger</h3>
+                        <div class="price">
+                            <span>$11.99</span>
+                        </div>
+                        <button class="order-button">Order Now</button>
+                    </div>
+                </div>
+            </section>
+            <div id="item-modal" class="modal">
+                <div class="modal-content-order">
+                    <span class="close">&times;</span>
+                    <h2 id="item-name">Customize Your Order</h2>
+
+                    <div class="size-options">
+                        <h3>Choose an Option</h3>
+                        <div id="size-options-container">
+                            <!-- This will be dynamically populated -->
+                        </div>
+                    </div>
+
+                    <div class="toppings-options">
+                        <h3>Add Toppings</h3>
+                        <div>
+                            <label><input type="checkbox" name="topping" value="Extra Cheese" data-price="1.95"> Extra Cheese (+$1.95)</label>
+                        </div>
+                        <div>
+                            <label><input type="checkbox" name="topping" value="Pepperoni" data-price="2.25"> Pepperoni (+$2.25)</label>
+                        </div>
+                        <div>
+                            <label><input type="checkbox" name="topping" value="Mushrooms" data-price="1.50"> Mushrooms (+$1.50)</label>
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <div class="quantity-control">
+                            <button id="decrease-qty">-</button>
+                            <span id="quantity-display">1</span>
+                            <button id="increase-qty">+</button>
+                        </div>
+                        <button id="add-to-cart-button">ADD TO ORDER - $<span id="total-price">9.25</span></button>
+                    </div>
+                </div>
+            </div>
+
+            <section class="items-section">
+                <h2 class="categories">PIZZA</h2>
+                <div class="menu-items">
+                    {% for item in menu_items %}
+                    <div class="menu-item-card">
+                        <h3 class="menu-item-title">{{ item.itemName }}</h3>
+                        <p class="menu-item-description">
+                            {% if item.itemName == "Plain Cheese Pizza" %}
+                            Classic New York-style slice.
+                            {% elif item.itemName == "White Pizza" %}
+                            A creamy and cheesy delight.
+                            {% elif item.itemName == "Extra Cheese Pizza" %}
+                            Loaded with extra mozzarella.
+                            {% else %}
+                            {% endif %}
+                        </p>
+                        <div class="menu-item-price">
+                            <span class="original-price">${{ item.itemPrice }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="items-section">
+                <h2 class="categories">CHEESESTEAK</h2>
+                <div class="menu-items">
+                    <div class="menu-item-card">
+                        <h3 class="menu-item-title">Classic Cheesesteak</h3>
+                        <p class="menu-item-description">Grilled onions, mushrooms & cheese.</p>
+                        <div class="menu-item-price">
+                            <span class="original-price">$11.95</span>
+                        </div>
+                    </div>
+                    <div class="menu-item-card">
+                        <h3 class="menu-item-title">Chicken Cheesesteak</h3>
+                        <p class="menu-item-description">Grilled onions, mushrooms & cheese.</p>
+                        <div class="menu-item-price">
+                            <span class="original-price">$11.95</span>
+                        </div>
+                    </div>
+                    <div class="menu-item-card">
+                        <h3 class="menu-item-title">Buffalo Chicken Cheesesteak</h3>
+                        <p class="menu-item-description">Buffalo sauce, chicken & blue cheese.</p>
+                        <div class="menu-item-price">
+                            <span class="original-price">$12.95</span>
+                        </div>
+                    </div>
+                    <div class="menu-item-card">
+                        <h3 class="menu-item-title">BBQ Chicken Cheesesteak</h3>
+                        <p class="menu-item-description">BBQ sauce, chicken & red onions.</p>
+                        <div class="menu-item-price">
+                            <span class="original-price">$12.95</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            
+               
+            <aside class="order-summary">
+                <h2>YOUR ORDER</h2>
+                <div class="cart-items">
+                    <p class="empty-cart">Your cart is empty</p>
+                    <img src="{{ url_for('static', filename='Images_Videos/empty-cart.png') }}" alt="Empty Cart Illustration" class="empty-cart-img">
+                </div>
+                <div class="delivery">
+                    <button id="delivery-button" class="delivery-button">Delivery or Pickup Available</button>
+                </div>
+                <div class="tip-section">
+                    <p>Tip: <span id="tip-amount">$0.00</span></p>
+                    <div class="tip-bar">
+                        <button class="tip-option" data-tip="0">0%</button>
+                        <button class="tip-option" data-tip="10">10%</button>
+                        <button class="tip-option" data-tip="15">15%</button>
+                        <button class="tip-option" data-tip="other">Other</button>
+                    </div>
+                </div>
+                <span class="total-cost">TOTAL: $0.00</span>
+                <button class="checkout-button">Checkout</button>
+            </aside>
+
+            <div id="delivery-modal" class="modal">
+                <div class="modal-content-delivery">
+                    <span class="close-btn">&times;</span>
+
+                    <div class="toggle">
+                        <ul class="order-option">
+                            <li class="toggle-option active" id="toggle-delivery">Delivery</li>
+                            <li class="toggle-option" id="toggle-pickup">Pickup</li>
+                        </ul>
+                    </div>
+
+                    <div id="delivery-section" class="delivery-info">
+                        <label for="address-input">Enter your delivery address</label>
+                        <input type="text" id="address-input" placeholder="123 Main St, City, ZIP">
+                        <a href="#">Log in for saved address</a>
+                    </div>
+
+                    <div id="pickup-section" class="pickup-info hidden">
+                        <div class="pickup-location">
+                            <h3>Where</h3>
+                            <h4>Fiesta Pizza</h4>
+                            <p class="address">4518 Baltimore Ave, Philadelphia, PA 19143</p>
+                        </div>
+                        <div class="pickup-time">
+                            <h3>When</h3>
+                            <select id="pickup-schedule" class="time-select">
+                                <option value="ASAP">ASAP (15-30 min)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="instructions">
+                        <p><img src="{{ url_for('static', filename='Images_Videos/exclamation.png') }}" width="15px" height="15px">&nbsp;You can add special instructions at checkout.</p>
+                    </div>
+                    <button class="save-button">Save</button>
+                </div>
+            </div>
+        </main>
+        <script src="{{ url_for('static', filename='script.js') }}"></script>
+        <script src="{{ url_for('static', filename='menuscript.js') }}"></script>
+    </body>
 </html>

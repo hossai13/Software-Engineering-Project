@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_mysqldb import MySQL
-from datetime import datetime
 import mysql.connector
 import MySQLdb.cursors
 import re
@@ -13,48 +12,22 @@ app.secret_key = 'your secret key'
 # MySQL database configuration
 app.config['MYSQL_HOST'] = 'localhost'  
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'root1234'
+app.config['MYSQL_PASSWORD'] = '2113284'
 app.config['MYSQL_DB'] = 'PizzaInfo'
 
 # Initialize MySQL
 mysql = MySQL(app)
-
 
 # Route for the homepage
 @app.route('/')
 def homepage():
     return render_template('homepage.html')
 
-#Route for the user homepage/restaurant reviews
-@app.route('/userhomepage', methods=['GET', 'POST'])
+#Route for the user homepage
+@app.route('/userhomepage')
 def userhomepage():
     if 'loggedin' in session:
-        current_date = datetime.now().strftime('%Y-%m-%d')
-        if request.method == 'POST':
-            username = request.form['name']
-            rating = request.form['rating']
-            review_text = request.form['review']
-            date_made = request.form['DateMade']
-
-            try:
-                cursor = mysql.connection.cursor()
-                cursor.execute('''INSERT INTO reviews (username, rating, review_text, date_made)
-                                  VALUES (%s, %s, %s, %s)''',
-                               (username, rating, review_text, date_made))
-                mysql.connection.commit()
-                cursor.close()
-                return redirect(url_for('userhomepage'))
-
-            except Exception as error:
-                print(f"Error: {error}")
-                return "There was an error submitting your review."
-            
-        cursor = mysql.connection.cursor()
-        cursor.execute('SELECT username, rating, review_text, date_made FROM reviews ORDER BY date_made DESC')
-        reviews = cursor.fetchall()
-        cursor.close()
-
-        return render_template('userhomepage.html', username=session['username'], user_id=session['id'], current_date=current_date, reviews=reviews)
+        return render_template('userhomepage.html', username=session['username'])
     else:
         msg = 'Please log in to access your homepage.'
         return redirect(url_for('login'))
@@ -63,9 +36,10 @@ def userhomepage():
 @app.route('/menu')
 def menu():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT itemID, itemName, itemPrice FROM Menu")  # Assuming you have a Menu table
+    cursor.execute("SELECT DISTINCT itemName, itemPrice FROM Menu WHERE itemCategory = 'Pizza' ORDER BY itemName")
     menu_items = cursor.fetchall()
-    return render_template('menu.html', menu_items=menu_items)
+    
+    return render_template('menu.html', menu_items=menu_items)      
 
 # Registration route
 @app.route('/register', methods=['GET', 'POST'])

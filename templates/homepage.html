@@ -18,13 +18,12 @@
 <body>
     <nav>
         <a href="{{ url_for('homepage') }}" id="FP-Logo">
-            <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;&nbsp;PIZZA</h1>
+            <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
         </a>
         <ul>
             <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
             <li><a href="{{ url_for('register') }}">REGISTER</a></li>
             <li><a href="{{ url_for('login') }}">LOGIN</a></li>
-            <li><a href="{{ url_for('profile') }}">PROFILE</a></li>
             <li id="cart-icon">
                 <a href="#"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
             </li>
@@ -48,7 +47,7 @@
         
         <div class="whole-container">
             <div class="about-us-container">
-                <h3 class="title">🎉 FIESTA EXPERIENCE 🍕</h3>
+                <h3 class="title">FIESTA EXPERIENCE</h3>
                 <div class="slideshow-container"> 
                     <div class="slides fade">
                         <img src="{{ url_for('static', filename='Images_Videos/mural.jpeg') }}" alt="mural">
@@ -64,6 +63,8 @@
                     </div>
                 </div>
             </div>
+
+            
         
             <div class="contact-container">
                 <h3 class="title">CONTACT US</h3>
@@ -84,9 +85,9 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div>  
+    </div>
 
-        <!-- Include JS file -->
-        <script src="{{ url_for('static', filename='script.js') }}"></script>
-    </body>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
 </html>

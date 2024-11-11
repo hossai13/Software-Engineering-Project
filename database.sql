@@ -9,36 +9,27 @@ CREATE TABLE IF NOT EXISTS UserInfo (
     Email VARCHAR(255) NOT NULL, 
     LoginID INT AUTO_INCREMENT,
     PRIMARY KEY (LoginID)
-);
+);~
 
 -- TRUNCATE TABLE Login;
-
-
--- Create the reviews table
-CREATE TABLE reviews (
-    review_id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(255) NOT NULL,
-    rating INT NOT NULL,
-    review_text TEXT NOT NULL,
-    date_made DATE NOT NULL
-);
 
 Select * from UserInfo;
 
 -- Create the menu table
-create table if not exists Menu
-	(
-    itemID int not null auto_increment,
-    itemName varchar(50) not null,
-    itemPrice decimal(5,2),
-    itemCategory varchar(50),
-    constraint menu_pk primary key (itemID) );
+CREATE TABLE IF NOT EXISTS Menu (
+    itemID INT NOT NULL AUTO_INCREMENT,
+    itemName VARCHAR(50) NOT NULL,
+    itemPrice DECIMAL(5, 2),
+    itemCategory VARCHAR(50),
+    CONSTRAINT menu_pk PRIMARY KEY (itemID)
+);
 
-insert into menu(itemName,itemPrice,itemCategory) values('Plain Cheese Pizza', 8.99, 'Pizza'), 
+insert into menu(itemName,itemPrice,itemCategory) Values
+('Plain Cheese Pizza', 8.99, 'Pizza'), 
 ('White Pizza', 9.25,'Pizza'),
 ('Extra Cheese Pizza', 10.95,'Pizza'), 
 ('Onions & Green Pepper Pizza', 10.95,'Pizza'),
-('Salami Pizza',10.95,'Pizza'), 
+('Salami Pizza',10.95,'Pizza'),     
 ('Mushroom Pizza', 10.95,'Pizza'),
 ('Olive Pizza', 10.95,'Pizza'),
 ('Anchovies Pizza', 10.95,'Pizza'),
