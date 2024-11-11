@@ -37,6 +37,17 @@
                     <th>Name</th>
                     <th>Price</th>
                 </tr>
+                <!-- so here there will be add delete, and edit buttons if you are an admin, and clicking them will have a popup that you put the name, decription, and price of the new menu item, you say the name of the item you want to delete, and you can edit the price of an existing item-->
+                {% if is_admin %}
+                <tr>
+                    <td>
+                        <button on click=""></button>
+                        <button on click=""></button>
+                        <button on click=""></button>
+                    </td>
+                </tr>
+                {% endif %}
+
                 {% for row in menu_items %}
                 <tr>
                     <td>{{ row.itemID }}</td>
