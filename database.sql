@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS UserInfo (
     Password VARCHAR(255) NOT NULL,
     Email VARCHAR(255) NOT NULL, 
     LoginID INT AUTO_INCREMENT,
+    isAdmin VARCHAR(6) NOT NULL,
     PRIMARY KEY (LoginID)
 );
 
