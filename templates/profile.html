@@ -6,7 +6,6 @@
     <title>PROFILE</title>
     
     <!-- Correct CSS file references -->
-
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/navbar.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/profile.css') }}">
 
@@ -28,6 +27,18 @@
             </li>
         </ul>
     </nav>
+
+    <!-- Sidebar for Admin -->
+    {% if is_admin %}
+    <div class="admin-sidebar">
+        <h3>Admin Controls</h3>
+        <ul>
+            <li><a href="{{ url_for('admprofile') }}">Admin Panel</a></li>
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- Profile Details Section -->
     <div class="form-container">
         <h2>Your account details are below:</h2>
         <table>
@@ -58,7 +69,8 @@
         </div>
         <button><a href="{{ url_for('logout') }}">LOGOUT</a></button>
     </div>
+    
+    <!-- Include Script -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-
 </body>
 </html>

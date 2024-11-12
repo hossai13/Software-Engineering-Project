@@ -28,6 +28,7 @@ body {
     width: 50%;
     padding: 2rem;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-left: 220px; /* Leave space for the sidebar */
 }
 
 h2 {
@@ -113,4 +114,42 @@ button {
 
 button:hover {
     background: linear-gradient(90deg, #8d1b2dbd, #d4783a);
+}
+
+/* Admin Sidebar Styles */
+.admin-sidebar {
+    position: fixed;
+    top: 100px;
+    left: 0;
+    width: 200px;
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-right: 1px solid #ddd;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.admin-sidebar h3 {
+    margin-top: 0;
+    font-size: 1.5em;
+    font-family: 'Mori';
+    color: #000;
+}
+
+.admin-sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.admin-sidebar ul li {
+    margin-bottom: 10px;
+}
+
+.admin-sidebar ul li a {
+    text-decoration: none;
+    color: #007bff;
+    font-size: 1.25rem;
+}
+
+.admin-sidebar ul li a:hover {
+    text-decoration: underline;
 }

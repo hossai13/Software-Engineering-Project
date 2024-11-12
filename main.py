@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_mysqldb import MySQL
 from datetime import datetime
-import mysql.connector
 import MySQLdb.cursors
 import re
 
@@ -11,9 +10,9 @@ app = Flask(__name__)
 app.secret_key = 'your secret key'
 
 # MySQL database configuration
-app.config['MYSQL_HOST'] = 'localhost'  
+app.config['MYSQL_HOST'] = 'Jubayads-MacBook-Pro.local'  
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'root1234'
+app.config['MYSQL_PASSWORD'] = 'Minecraft100'
 app.config['MYSQL_DB'] = 'PizzaInfo'
 
 # Initialize MySQL
@@ -24,7 +23,7 @@ mysql = MySQL(app)
 def homepage():
     return render_template('homepage.html')
 
-#Route for the user homepage/restaurant reviews
+# Route for the user homepage/restaurant reviews
 @app.route('/userhomepage', methods=['GET', 'POST'])
 def userhomepage():
     if 'loggedin' in session:
@@ -55,10 +54,8 @@ def userhomepage():
 
         return render_template('userhomepage.html', username=session['username'], user_id=session['id'], current_date=current_date, reviews=reviews)
     else:
-        msg = 'Please log in to access your homepage.'
         return redirect(url_for('login'))
 
-    
 # Route for the menu page
 @app.route('/menu')
 def menu():
@@ -73,21 +70,19 @@ def menu():
 def register():
     msg = ''
     if request.method == 'POST':
-        # Debugging form data
         print("Form Data:", request.form)
 
         if 'Username' in request.form and 'Email' in request.form and 'Password' in request.form and 'ConfirmPassword' in request.form:
-            username = request.form['Username']  # Corrected variable to match form input
+            username = request.form['Username']
             email = request.form['Email']
             password = request.form['Password']
             confirm_password = request.form['ConfirmPassword']
 
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 
-            # Check if account exists (using correct case for 'Email')
             cursor.execute('SELECT * FROM UserInfo WHERE Email = %s', (email,))
             account = cursor.fetchone()
-            print("Account Check:", account)  # Check if an account was found
+            print("Account Check:", account)
 
             if account:
                 msg = 'Account already exists!'
@@ -102,7 +97,7 @@ def register():
             else:
                 cursor.execute('INSERT INTO UserInfo (Username, Password, Email) VALUES (%s, %s, %s)', (username, password, email))
                 mysql.connection.commit()
-                print("Insert executed")  # Check if the insert was executed
+                print("Insert executed")
                 msg = 'You have successfully registered!'
                 return redirect(url_for('login'))
         else:
@@ -113,13 +108,11 @@ def register():
 def validate_email(email):
     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
-
-# route for the Login
+# Route for the Login
 @app.route('/login', methods=['GET','POST'])
 def login():
     msg = ''
     if request.method == 'POST':
-        # Debugging form data
         print("Form Data:", request.form)
 
         if 'Username' in request.form and 'Password' in request.form:
@@ -143,16 +136,14 @@ def login():
             msg = 'Please fill out the form'
     return render_template('login.html', msg=msg)
 
+# Route for logout
 @app.route('/logout')
 def logout():
-    # Remove session data, this will log the user out
-   session.pop('loggedin', None)
-   session.pop('id', None)
-   session.pop('username', None)
-   # Redirect to login page
-   return redirect(url_for('login'))
+    session.pop('loggedin', None)
+    session.pop('id', None)
+    session.pop('username', None)
+    return redirect(url_for('login'))
 
-# Route for profile page
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
     msg = ''
@@ -160,21 +151,47 @@ def profile():
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT * FROM UserInfo WHERE LoginID = %s', (session['id'],))
         account = cursor.fetchone()
-        print("Account Check:", account)
+
         if 'UsernameChange' in request.form and 'PasswordChange' not in request.form:
             username = request.form['UsernameChange']
             cursor.execute('UPDATE UserInfo SET Username = %s WHERE LoginID = %s', (username, session['id']))
             mysql.connection.commit()
             msg = 'Username updated successfully!'
+
         if 'PasswordChange' in request.form and 'UsernameChange' not in request.form:
             password = request.form['PasswordChange']
             cursor.execute('UPDATE UserInfo SET Password = %s WHERE LoginID = %s', (password, session['id']))
             mysql.connection.commit()
             msg = 'Password updated successfully!'
+        
+        # Check if the logged-in user is an admin
+        is_admin = account['isAdmin']
+        
+        return render_template('profile.html', account=account, msg=msg, is_admin=is_admin)
     else:
         return redirect(url_for('login'))
-    return render_template('profile.html', account=account, msg=msg)
     
+@app.route('/admprofile', methods=['GET', 'POST'])
+def admprofile():
+    if 'loggedin' in session and session.get('is_admin'):
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+        # Handle account deletion if requested
+        if request.method == 'POST' and 'delete_account' in request.form:
+            user_id = request.form['delete_account']
+            cursor.execute('DELETE FROM UserInfo WHERE LoginID = %s', (user_id,))
+            mysql.connection.commit()
+
+        # Fetch all user accounts
+        cursor.execute('SELECT LoginID, Username, Email, isAdmin FROM UserInfo')
+        accounts = cursor.fetchall()
+
+        return render_template('admprofile.html', accounts=accounts)
+    else:
+        return redirect(url_for('login'))
+
+
+
 # Running the Flask app
 if __name__ == '__main__':
     app.run(debug=True)

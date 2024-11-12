@@ -86,51 +86,54 @@
             </div>
         </div>
         <div class="restaurant-review-container">
-        <div class="restaurant-review-header"> 
-            <h2 class="title"> RESTAURANT REVIEWS</h2>
-            <h4> Please give us your feedback and we will improve upon it!!! </h4>
-        </div>
-        <div class="review-submission-container">
-            <form id="Review-form" method="POST" action="{{ url_for('userhomepage') }}">
-                <div>
-                    <td>Username:</td>
-                    <input type= "text" id="name" name="name" value="{{ username }}" readonly>
-                </div>
+            <div class="restaurant-review-header"> 
+                <h2 class="title"> RESTAURANT REVIEWS</h2>
+                <h4> Please give us your feedback and we will improve upon it!!! </h4>
+            </div>
+            <div class="review-submission-container">
+                <form id="Review-form" method="POST" action="{{ url_for('userhomepage') }}">
+                    <div>
+                        <label>Username:</label>
+                        <input type="text" id="name" name="name" value="{{ username }}" readonly>
+                    </div>
 
-                <div class="date-field-review">
-                    <label>Date:</label>
-                    <input type= "text" id="DateMade" name="DateMade" value="{{ current_date }}" readonly>
-                </div>
+                    <div class="date-field-review">
+                        <label>Date:</label>
+                        <input type="text" id="DateMade" name="DateMade" value="{{ current_date }}" readonly>
+                    </div>
 
-                <div class="star-rating-container">
-                    <label for="star1">
-                        <img src="static/Images_Videos/icons8-star-50-2.png" alt="1 Star" id="star1" class="star" data-value="1">
-                    </label>
-                    <label for="star2">
-                        <img src="static/Images_Videos/icons8-star-50-2.png" alt="2 Stars" id="star2" class="star" data-value="2">
-                    </label>
-                    <label for="star3">
-                        <img src="static/Images_Videos/icons8-star-50-2.png" alt="3 Stars" id="star3" class="star" data-value="3">
-                    </label>
-                    <label for="star4">
-                        <img src="static/Images_Videos/icons8-star-50-2.png" alt="4 Stars" id="star4" class="star" data-value="4">
-                    </label>
-                    <label for="star5">
-                        <img src="static/Images_Videos/icons8-star-50-2.png" alt="5 Stars" id="star5" class="star" data-value="5">
-                    </label>
-                </div>
-                <input type="hidden" id="rating" name="rating">
-                </div>
+                    <div class="star-rating-container">
+                        <label for="rating">Rating:</label>
+                        <div class="star-rating">
+                            <label for="star1">
+                                <img src="{{ url_for('static', filename='Images_Videos/icons8-star-50-2.png') }}" alt="1 Star" id="star1" class="star" data-value="1">
+                            </label>
+                            <label for="star2">
+                                <img src="{{ url_for('static', filename='Images_Videos/icons8-star-50-2.png') }}" alt="2 Stars" id="star2" class="star" data-value="2">
+                            </label>
+                            <label for="star3">
+                                <img src="{{ url_for('static', filename='Images_Videos/icons8-star-50-2.png') }}" alt="3 Stars" id="star3" class="star" data-value="3">
+                            </label>
+                            <label for="star4">
+                                <img src="{{ url_for('static', filename='Images_Videos/icons8-star-50-2.png') }}" alt="4 Stars" id="star4" class="star" data-value="4">
+                            </label>
+                            <label for="star5">
+                                <img src="{{ url_for('static', filename='Images_Videos/icons8-star-50-2.png') }}" alt="5 Stars" id="star5" class="star" data-value="5">
+                            </label>
+                        </div>
+                        <input type="hidden" id="rating" name="rating">
+                    </div>
 
-                <div class="review-description">
-                    <label for="review">Leave A Review:</label>
-                    <textarea id="review" name="review" rows="6" cols="50" required></textarea>
-                </div>
+                    <div class="review-description">
+                        <label for="review">Leave A Review:</label>
+                        <textarea id="review" name="review" rows="6" cols="50" required></textarea>
+                    </div>
 
-                <div class="review-submit-button">
-                    <input type="submit" value="Submit Review">
-                </div>
-            </form>
+                    <div class="review-submit-button">
+                        <input type="submit" value="Submit Review">
+                    </div>
+                </form>
+            </div>
         </div>
 
         <script>
@@ -141,10 +144,10 @@
                     document.getElementById('rating').value = value;
                     stars.forEach(star => {
                         if (star.getAttribute('data-value') <= value) {
-                            star.src = 'static/Images_Videos/icons8-star-50-3.png';
+                            star.src = '{{ url_for("static", filename="Images_Videos/icons8-star-50-3.png") }}';
                         } 
                         else {
-                            star.src = 'static/Images_Videos/icons8-star-50-2.png';
+                            star.src = '{{ url_for("static", filename="Images_Videos/icons8-star-50-2.png") }}';
                         }
                     });
                 });
