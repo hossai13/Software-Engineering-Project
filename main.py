@@ -19,7 +19,6 @@ app.config['MYSQL_DB'] = 'PizzaInfo'
 # Initialize MySQL
 mysql = MySQL(app)
 
-
 # Route for the homepage
 @app.route('/')
 def homepage():
@@ -58,14 +57,16 @@ def userhomepage():
     else:
         msg = 'Please log in to access your homepage.'
         return redirect(url_for('login'))
+
     
 # Route for the menu page
 @app.route('/menu')
 def menu():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT itemID, itemName, itemPrice FROM Menu")  # Assuming you have a Menu table
+    cursor.execute("SELECT DISTINCT itemName, itemPrice FROM Menu WHERE itemCategory = 'Pizza' ORDER BY itemName")
     menu_items = cursor.fetchall()
-    return render_template('menu.html', menu_items=menu_items)
+    
+    return render_template('menu.html', menu_items=menu_items)      
 
 # Registration route
 @app.route('/register', methods=['GET', 'POST'])

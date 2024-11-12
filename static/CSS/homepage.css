@@ -8,7 +8,10 @@
     src: url('/static/Fonts/PPMori-Regular.otf') format("opentype");
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+@font-face {
+    font-family: 'Atop';
+    src: url('/static/Fonts/Atop-R99O3.ttf') format("truetype");
+}
 
 body {
     background-color: #f8f6f8;
@@ -32,8 +35,6 @@ body {
     align-items: center;
     overflow: hidden;
     background: rgba(182, 182, 182, 0.05);
-    box-shadow: 0 0.25rem 1rem rgba(31, 38, 135, 0.37);
-    backdrop-filter: blur(0.25rem);
     overflow: hidden;
 }
 
@@ -50,9 +51,9 @@ body {
 .video h2 {
     font-size: 4vw;
     color: white;
-    font-family: 'Quartzo';
+    font-family: 'Gum';
     text-align: center;
-    text-shadow: 0.125rem 0.125rem 0.25rem #f5f5f540;
+    text-shadow: 0.25rem 0.25rem 0.35rem #f5f5f540;
     position: absolute;
     top: 25%;
     left: 50%;
@@ -72,11 +73,11 @@ body {
 
 .order-button {
     background-color: #cf4d4d;
-    padding: 0.75rem 2rem;
+    padding: 0.80rem 3rem;
     color: #fff;
     font-family: 'Mori';
-    font-size: 1rem;
-    font-weight: 800;
+    font-size: 1.25rem;
+    font-weight: 50;
     border: none;
     border-radius: 1rem;
     position: absolute;
@@ -84,26 +85,45 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.order-button a:hover, .order-button:hover {
+    color: white;
+    background-color: #8d3434;
+}
+
+.whole-container {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: 20vh;
+    gap: 2rem;
 }
 
 .about-us-container {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     margin: auto 0;
     width: 55vw;
-    background: rgba(217, 212, 212, 0.25);
-    border-radius: 0.625rem;
+    background: rgba(206, 201, 201, 0.25); 
+    border-radius: 0.85rem;
     padding: 2rem;
     margin-left: 5vw;
+    z-index: 1;
+    overflow: hidden;
 }
 
 .title {
-    font-family: 'Quartzo';
+    font-family: 'Gum';
     font-size: 4rem;
     position: relative;
     margin-bottom: 1.5rem;
     margin-top: -0.025rem;
+    text-shadow: 0.12rem 0.12rem 0.25rem #9b949440;
 }
 
 .title::after {
@@ -129,7 +149,6 @@ body {
     position: relative;
     border-radius: 0.25rem;
     padding: 0.25rem;
-    overflow: hidden;
 }
 
 .slides {
@@ -188,15 +207,8 @@ body {
     100% { background-position: 0 0; }
 }
 
-.whole-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-top: 20vh;
-    gap: 2rem;
-}
-
 .contact-container {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -204,19 +216,20 @@ body {
     margin-right: 10vw;
     width: 20vw;
     height: 50vh;
-    background: rgba(217, 212, 212, 0.25);
-    border-radius: 0.625rem;
+    background: rgba(206, 201, 201, 0.25); 
+    text-shadow: 0.12rem 0.12rem 0.25rem #9b949440;
+    border-radius: 0.85rem;
 }
 
 .contact-container h3 {
-    font-family: 'Quartzo';
+    font-family: 'Atop';
     font-size: clamp(2.5rem, 5vw, 3.25rem); 
     margin-top: 1.8rem;
     margin-bottom: -0.5rem;
 }
 
 .contact h4 {
-    font-family: 'Quartzo';
+    font-family: 'Gum';
     font-size: clamp(1.5rem, 3.5vw, 1.85rem); 
     text-decoration: underline;
 }
@@ -225,9 +238,6 @@ body {
     font-size: clamp(0.9rem, 2.5vw, 1.20rem); 
     margin-top: -1rem;
 }
-
-/* Userhomepage CSS */
-
 .restaurant-review-container {
     display: flex;
     font-family: 'Mori';
@@ -238,6 +248,21 @@ body {
     background: rgba(217, 212, 212, 0.25);
     border-radius: 0.625rem;
     padding: 2rem;
+    padding: 4rem;
     margin-left: 5vw;
 }
 
+/* <a target="_blank" href="https://icons8.com/icon/104/star">Star</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a> */
+
+.star-rating-container img {
+    margin-right: 5px;
+    width: 40px; 
+    height: 40px;
+    cursor: pointer;
+    transition: transform 1.5s ease-in-out; 
+    
+}
+
+.star-rating-container img:hover {
+    transform: rotate(360deg); 
+}

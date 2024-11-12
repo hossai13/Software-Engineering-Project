@@ -8,22 +8,19 @@
     <!-- Correct CSS file references -->
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/registration.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/navbar.css') }}">
-    <!-- link rel="stylesheet" href="{{ url_for('static', filename='CSS/styles.css') }}"-->
 
     <!-- Google Fonts -->
-    <style>@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');</style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.5/lottie.min.js"></script>
 </head>
 <body>
     <nav>
         <a href="{{ url_for('homepage') }}" id="FP-Logo">
-            <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;&nbsp;PIZZA</h1>
+            <h1>FIESTA<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">PIZZA</h1>
         </a>
         <ul>
             <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
             <li><a href="{{ url_for('register') }}">REGISTER</a></li>
             <li><a href="{{ url_for('login') }}">LOGIN</a></li>
-            <li><a href="{{ url_for('profile') }}">PROFILE</a></li>
             <li id="cart-icon">
                 <a href="#"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
             </li>

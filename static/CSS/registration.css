@@ -45,11 +45,11 @@ h1 {
     justify-content: center;     
     gap: 1rem;                    
     color: #fff;
-    --color-one: #cf4d4d;
+    --color-one: #e2c51e;
     --color-two: #d64d76;
     --stretch-multiplier: 5;
     font-size: clamp(2rem, 14vmin, 4rem);
-    font-family: 'Quartzo';
+    font-family: 'Gum';
     line-height: 1;
     --stretch: 1;
     cursor: url('/static/Images_Videos/icon.png'), auto;
@@ -75,10 +75,10 @@ h1 {
 }
 
 .stretch-o {
-    height: 1.45rem; 
-    width: calc(var(--stretch) * 1.5rem);
+    height: 1.25rem; 
+    width: calc(var(--stretch) * 1.35rem);
     translate: 0 -0.01ch;
-    border: 0.25ch solid white;
+    border: 0.45ch solid white;
     border-radius: 50%;
     transition: width 0.2s;
     position: relative;
@@ -93,7 +93,7 @@ h1:hover {
 .stretch-o:after,
 .stretch-o:before {
     content: "";
-    border: 0.25ch solid var(--color);
+    border: 0.45ch solid var(--color);
     position: absolute;
     inset: -0.25ch;
     border-radius: 50%;
@@ -154,9 +154,9 @@ input:focus {
 
 button {
     margin: 0 auto;
-    width: 45%;
-    padding: 1rem;
-    font-size: 1.25rem;
+    width: 40%;
+    padding: 0.75rem;
+    font-size: 1.5rem;
     cursor: pointer;
     color: #fff;
     backdrop-filter: blur(7px) saturate(172%);
@@ -164,11 +164,13 @@ button {
     background: linear-gradient(90deg, #af2238bd, #f19659);
     border-radius: 1.75rem;
     border: 1px solid rgba(255, 255, 255, 0.125);
-    font-family: 'Mori';
+    font-family: 'Atop';
+    transition: background 0.5s ease;
 }
 
 button:hover {
     background: linear-gradient(90deg, #8d1b2dbd, #d4783a);
+    transition: background 0.5s ease;
 }
 
 p {

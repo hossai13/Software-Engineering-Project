@@ -103,17 +103,23 @@
                 </div>
 
                 <div class="star-rating-container">
-                    <label>Rating:</label>
-                    <label for="1-star">1 Star</label>
-                    <input type="radio" id="star1" name="rating" value="1" required>
-                    <label for="2-star">2 Stars</label>
-                    <input type="radio" id="star2" name="rating" value="2">
-                    <label for="3-star">3 Stars</label>
-                    <input type="radio" id="star3" name="rating" value="3">
-                    <label for="4-star">4 Stars</label>
-                    <input type="radio" id="star4" name="rating" value="4">
-                    <label for="5-star">5 Stars</label>
-                    <input type="radio" id="star5" name="rating" value="5">
+                    <label for="star1">
+                        <img src="static/Images_Videos/icons8-star-50-2.png" alt="1 Star" id="star1" class="star" data-value="1">
+                    </label>
+                    <label for="star2">
+                        <img src="static/Images_Videos/icons8-star-50-2.png" alt="2 Stars" id="star2" class="star" data-value="2">
+                    </label>
+                    <label for="star3">
+                        <img src="static/Images_Videos/icons8-star-50-2.png" alt="3 Stars" id="star3" class="star" data-value="3">
+                    </label>
+                    <label for="star4">
+                        <img src="static/Images_Videos/icons8-star-50-2.png" alt="4 Stars" id="star4" class="star" data-value="4">
+                    </label>
+                    <label for="star5">
+                        <img src="static/Images_Videos/icons8-star-50-2.png" alt="5 Stars" id="star5" class="star" data-value="5">
+                    </label>
+                </div>
+                <input type="hidden" id="rating" name="rating">
                 </div>
 
                 <div class="review-description">
@@ -126,6 +132,24 @@
                 </div>
             </form>
         </div>
+
+        <script>
+            const stars = document.querySelectorAll('.star-rating-container .star');
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    document.getElementById('rating').value = value;
+                    stars.forEach(star => {
+                        if (star.getAttribute('data-value') <= value) {
+                            star.src = 'static/Images_Videos/icons8-star-50-3.png';
+                        } 
+                        else {
+                            star.src = 'static/Images_Videos/icons8-star-50-2.png';
+                        }
+                    });
+                });
+            });
+        </script>
         
         <!-- Include JS file -->
         <script src="{{ url_for('static', filename='script.js') }}"></script>
