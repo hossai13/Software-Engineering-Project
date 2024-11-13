@@ -62,8 +62,36 @@ def menu():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT DISTINCT itemName, itemPrice FROM Menu WHERE itemCategory = 'Pizza' ORDER BY itemName")
     menu_items = cursor.fetchall()
+    # this is for deleting the menu items
+    if 'loggedin' in session and session.get('is_admin'):
+        if request.method == 'POST' and 'delete=name' in request.form:
+            item_name = request.form['delete=name']
+            cursor.execute('DELETE FROM Menu WHERE itemName = %s', (item_name,))
+            mysql.connection.commit()
+            return redirect(url_for('menu'))
+        if request.method == 'POST' and 'add-item' in request.form and 'add-price' in request.form and 'add-category' in request.form:
+            item_name = request.form['add-item']
+            item_price = request.form['add-price']
+            item_category = request.form['add-category']
+            cursor.execute('INSERT INTO Menu (itemName, itemPrice, itemCategory) VALUES (%s, %s, %s)', (item_name, item_price, item_category))
+            mysql.connection.commit()
+            return redirect(url_for('menu'))
+        if request.method == 'POST' and 'update_item' in request.form:
+            item_name = request.form['update_item']
+            item_price = request.form['update_price']
+            cursor.execute('UPDATE Menu SET itemPrice = %s WHERE itemName = %s', (item_price, item_name))
+            mysql.connection.commit()
+            return redirect(url_for('menu'))
+        if request.method == 'POST' and 'special-name' in request.form and 'special-percent' in request.form:
+            special_name = request.form['special-name']
+            special_percent = request.form['special-percent']
+            cursor.execute('UPDATE Menu SET itemPrice = itemPrice * %s WHERE itemName = %s', (1 - float(special_percent) / 100, special_name))
+            
+
+            return redirect(url_for('menu'))
     
     return render_template('menu.html', menu_items=menu_items)      
+
 
 # Registration route
 @app.route('/register', methods=['GET', 'POST'])
