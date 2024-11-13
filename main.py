@@ -223,7 +223,7 @@ def admprofile():
 
 def is_admin():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute('SELECT isAdmin FROM UserInfo WHERE LoginID = %s', (session['id'],))
+    cursor.execute('SELECT Username, Email FROM UserInfo WHERE isAdmin = FALSE')
     account = cursor.fetchone()
     return account['isAdmin']
 
