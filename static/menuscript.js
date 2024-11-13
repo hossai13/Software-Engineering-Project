@@ -264,4 +264,5 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.addEventListener("cartUpdated", updateTotalCost);
+    
 });

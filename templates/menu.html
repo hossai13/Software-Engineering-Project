@@ -52,76 +52,59 @@
                 <button class="scroll-btn right">&gt;</button>
             </div>
             {% if is_admin %}
-            <div class="admin-buttons">
-                <h3>Admin Controls</h3>
-                <!-- here i want to add a button that opens a pop up to a form-->
-                <button class="admin-button">Add Item
-                    <div id="add-item-modal" class="modal">
-                        <div class="modal-content-add-item">
-                            <span class="close">&times;</span>
-                            <h2>Add New Item</h2>
-                            <form action="{{ url_for('menu') }}" method="POST">
-                                <label for="add-item">Item Name</label>
-                                <input type="text" id="add-item" name="add-item" required>
-                                <label for="add-category">Category</label>
-                                <input type="text" id="add-category" name="add-category" required>
-                                <label for="add-price">Price</label>
-                                <input type="number" id="add-price" name="add-price" required>
-                                <label for="add-description">Description</label>
-                                <textarea id="add-description" name="add-description" required></textarea>
-                                <button type="submit">Add Item</button>
-                            </form>
-                        </div>
-                    </div>
-                </button>
-                <button class="admin-button">Edit Item
-                    <div id="edit-item-modal" class="modal">
-                        <div class="modal-content-edit-item">
-                            <span class="close">&times;</span>
-                            <h2>Edit Item</h2>
-                            <form action="{{ url_for('menu') }}" method="POST">
-                                <label for="edit-name">Item Name</label>
-                                <input type="text" id="item-name" name="item-name" required>
-                                <label for="item-category">Category</label>
-                                <input type="text" id="item-category" name="item-category" required>
-                                <label for="item-price">Price</label>
-                                <input type="number" id="item-price" name="item-price" required>
-                                <label for="item-description">Description</label>
-                                <textarea id="item-description" name="item-description" required></textarea>
-                                <button type="submit">Edit Item</button>
-                            </form>
-                        </div>
-                    </div>
-                </button>
-                <button class="admin-button">Delete Item
-                    <div id="delete-item-modal" class="modal">
-                        <div class="modal-content-delete-item">
-                            <span class="close">&times;</span>
-                            <h2>Delete Item</h2>
-                            <form action="{{ url_for('menu') }}" method="POST">
-                                <label for="delete-name">Item Name</label>
-                                <input type="text" id="delete-name" name="delete-name" required>
-                                <button type="submit">Delete Item</button>
-                            </form>
-                        </div>
-                    </div>
-                </button>
-                <button class="admin-button">Make special
-                    <div id="special-item-modal" class="modal">
-                        <div class="modal-content-special-item">
-                            <span class="close">&times;</span>
-                            <h2>Make Item Special</h2>
-                            <form action="{{ url_for('special_item') }}" method="POST">
-                                <label for="special-name">Item Name</label>
-                                <input type="text" id="special-name" name="special-name" required>
-                                <label for="special-percent">Special Percent</label>
-                                <input type="number" id="special-percent" name="special-percent" required>
-                                <button type="submit">Make Special</button>
-                            </form>
-                        </div>
-                    </div>
-                </button>
-            </div>
+            <section class="admin-section">
+                <h2 class="promo">ADMIN TOOLS</h2>
+                <!-- just want four forms for adding editing, deleting, and specials-->
+                <form class="admin-form" id="add-item-form" action="{{ url_for('menu') }}" method="POST">
+                    <h3>Add Item</h3>
+                    <label for="add-name">Item Name</label>
+                    <input type="text" id="add-name" name="add-name" required>
+                    <label for="add-category">Item Category</label>
+                    <input type="text" id="add-category" name="add-category" required>
+                    <label for="add-price">Item Price</label>
+                    <input type="float" id="add-price" name="add-price" required>
+                    <button type="submit">Add Item</button>
+                </form>
+                <form class="admin-form" id="edit-item-form" action="{{ url_for('menu') }}" method="POST">
+                    <h3>Edit Item</h3>
+                    <label for="edit-name">Item Name</label>
+                    <input type="text" id="edit-name" name="edit-name" required>
+                    <label for="edit-category">Item Category</label>
+                    <input type="float" id="edit-price" name="edit-price" required>
+                    <button type="submit">Edit Item</button>
+                </form>
+                <table class="menu-table">
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Item Category</th>
+                            <th>Item Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in menu_items %}
+                        <tr>
+                            <td>{{ item.itemName }}</td>
+                            <td>{{ item.itemCategory }}</td>
+                            <td>{{ item.itemPrice }}</td>
+                            <td>
+                                <form method="post" action="{{ url_for('menu') }}" style="display:inline;">
+                                    <button type="submit" name="delete_menu" value="{{ item.itemName }}" class="delete-btn">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                <form class="admin-form" id="specials-form" action="{{ url_for('menu') }}" method="POST">
+                    <h3>Specials</h3>
+                    <label for="specials">Specials</label>
+                    <input type="text" id="special-name" name="special-name" required>
+                    <label for="special-price">Special Percent</label>
+                    <input type="number" id="special-percent" name="special-percent" required>
+                    <button type="submit">Add Special</button>
+                </form>
+                    
             {% endif %}
             <section class="menu-section">
                 <h2 class="promo">FEATURED ITEMS</h2>
