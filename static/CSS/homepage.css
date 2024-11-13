@@ -1,9 +1,4 @@
 @font-face {
-    font-family: 'Quartzo';
-    src: url('/static/Fonts/QuartzoBold-W9lv.ttf') format("truetype");
-}
-
-@font-face {
     font-family: 'Mori';
     src: url('/static/Fonts/PPMori-Regular.otf') format("opentype");
 }
@@ -11,6 +6,16 @@
 @font-face {
     font-family: 'Atop';
     src: url('/static/Fonts/Atop-R99O3.ttf') format("truetype");
+}
+
+@font-face {
+    font-family: 'Gum';
+    src: url('/static/Fonts/Bubblegum.ttf') format("truetype");
+}
+
+@font-face {
+    font-family: 'Moods';
+    src: url('/static/Fonts/Super Moods.ttf') format("truetype");
 }
 
 body {
@@ -49,7 +54,7 @@ body {
 }
 
 .video h2 {
-    font-size: 4vw;
+    font-size: 5vw;
     color: white;
     font-family: 'Gum';
     text-align: center;
@@ -76,12 +81,13 @@ body {
     padding: 0.80rem 3rem;
     color: #fff;
     font-family: 'Mori';
-    font-size: 1.25rem;
-    font-weight: 50;
+    font-weight: 850;
+    font-size: 1.45rem;
+    letter-spacing: 1px;
     border: none;
     border-radius: 1rem;
     position: absolute;
-    top: 53%;
+    top: 54%;
     left: 50%;
     transform: translate(-50%, -50%);
     cursor: pointer;
@@ -120,6 +126,8 @@ body {
 .title {
     font-family: 'Gum';
     font-size: 4rem;
+    font-weight: 450;
+    letter-spacing: 1.5px;
     position: relative;
     margin-bottom: 1.5rem;
     margin-top: -0.025rem;
@@ -222,47 +230,195 @@ body {
 }
 
 .contact-container h3 {
-    font-family: 'Atop';
+    font-family: 'Gum';
     font-size: clamp(2.5rem, 5vw, 3.25rem); 
-    margin-top: 1.8rem;
+    margin-top: 3rem;
     margin-bottom: -0.5rem;
 }
 
 .contact h4 {
-    font-family: 'Gum';
-    font-size: clamp(1.5rem, 3.5vw, 1.85rem); 
+    font-family: 'Mori';
+    font-size: clamp(1.5rem, 3.65vw, 1.85rem); 
     text-decoration: underline;
+    font-weight: 850;
+    margin-top: 4rem;
 }
 
 .contact-container p {
     font-size: clamp(0.9rem, 2.5vw, 1.20rem); 
     margin-top: -1rem;
 }
+
 .restaurant-review-container {
+    width: 80%;
+    margin: 2rem auto;
+    margin-top: 6.5rem;
+    background: rgba(206, 201, 201, 0.25);
+    padding: 1.5rem;
+    border-radius: 0.85rem;
+}
+
+.restaurant-review-header h2 {
+    text-align: center;
+    font-size: 3.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.restaurant-review-header h4 {
+    text-align: center;
+    font-size: 1.75rem;
+    color: #666;
+}
+
+.reviews-container {
+    margin-top: 1.5rem;
+}
+
+.review-display {
+    background-color: #f9f9f9;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.review-header {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #cf4d4d;
+    margin-bottom: 0.5rem;
+}
+
+.review-title-stars {
     display: flex;
-    font-family: 'Mori';
-    flex-direction: column;
     align-items: center;
-    margin-top: 10vh;
-    width: 82vw;
-    background: rgba(217, 212, 212, 0.25);
-    border-radius: 0.625rem;
-    padding: 2rem;
-    padding: 4rem;
-    margin-left: 5vw;
+    margin-bottom: 0.5rem;
 }
 
-/* <a target="_blank" href="https://icons8.com/icon/104/star">Star</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a> */
-
-.star-rating-container img {
+.star-rating-display img {
+    width: 24px;
+    height: 24px;
     margin-right: 5px;
-    width: 40px; 
-    height: 40px;
-    cursor: pointer;
-    transition: transform 1.5s ease-in-out; 
-    
 }
 
-.star-rating-container img:hover {
-    transform: rotate(360deg); 
+.review-photo img {
+    width: 100%;
+    max-width: 400px;
+    margin-top: 1rem;
+    border-radius: 5px;
 }
+
+.review-content {
+    margin-top: 0.5rem;
+    font-size: 1rem;
+}
+
+.review-date, .review-username {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Create Review Button */
+#create-review-btn {
+    display: block;
+    width: fit-content;
+    margin: 1rem auto;
+    padding: 0.8rem 2rem;
+    background-color: #cf4d4d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+#create-review-btn:hover {
+    background-color: #8d3434;
+}
+
+/* Modal Styling */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content-order {
+    background-color: white;
+    margin: 10% auto;
+    padding: 20px;
+    width: 40%;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content-order h2 {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.close {
+    float: right;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: #cf4d4d;
+}
+
+/* Form Fields in Modal */
+form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+form input[type="text"], form textarea, form input[type="file"] {
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+form textarea {
+    resize: none;
+}
+
+form input[type="submit"] {
+    background-color: #cf4d4d;
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+form input[type="submit"]:hover {
+    background-color: #8d3434;
+}
+
+/* File Upload Styling */
+.photo-upload {
+    margin-bottom: 1rem;
+}
+
+.photo-upload input {
+    padding: 0.5rem;
+}
+
+.header-description input {
+    font-size: 1rem;
+}
+/* <a target="_blank" href="https://icons8.com/icon/104/star">Star</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a> */

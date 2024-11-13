@@ -20,12 +20,17 @@
         <a href="{{ url_for('homepage') }}" id="FP-Logo">
             <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
         </a>
-        <ul>
+        <ul class="navbar">
             <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
-            <li><a href="{{ url_for('register') }}">REGISTER</a></li>
-            <li><a href="{{ url_for('login') }}">LOGIN</a></li>
+            {% if 'loggedin' in session %}
+                <li><a href="{{ url_for('profile') }}">PROFILE</a></li>
+                <li><a href="{{ url_for('logout') }}">LOGOUT</a></li>
+            {% else %}
+                <li><a href="{{ url_for('register') }}">REGISTER</a></li>
+                <li><a href="{{ url_for('login') }}">LOGIN</a></li>
+            {% endif %}
             <li id="cart-icon">
-                <a href="#"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
+                <a href="{{ url_for('menu') }}"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
             </li>
         </ul>
     </nav>
@@ -87,7 +92,7 @@
             </div>
         </div>  
     </div>
-
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ url_for('static', filename='cartani.js') }}"></script>
+    <script src="{{ url_for('static', filename='slideshow.js') }}"></script>
 </body>
 </html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Profile - Manage Users</title>
+
+    <!-- Correct CSS file references -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/registration.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/styles.css') }}">
+
+    <!-- Google Fonts -->
+    <style>@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');</style>
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('homepage') }}" id="FP-Logo">
+            <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
+        </a>
+        <ul class="navbar">
+            <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
+            {% if 'loggedin' in session %}
+                <li><a href="{{ url_for('profile') }}">PROFILE</a></li>
+                <li><a href="{{ url_for('logout') }}">LOGOUT</a></li>
+            {% else %}
+                <li><a href="{{ url_for('register') }}">REGISTER</a></li>
+                <li><a href="{{ url_for('login') }}">LOGIN</a></li>
+            {% endif %}
+            <li id="cart-icon">
+                <a href="#"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="admin-container">
+        <h2>Admin Panel - User Management</h2>
+        <p>Below is the list of all user accounts. You can delete any account from here.</p>
+
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>LoginID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Admin Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for account in accounts %}
+                <tr>
+                    <td>{{ account['LoginID'] }}</td>
+                    <td>{{ account['Username'] }}</td>
+                    <td>{{ account['Email'] }}</td>
+                    <td>{{ 'Yes' if account['isAdmin'] else 'No' }}</td>
+                    <td>
+                        <!-- Delete Account Button -->
+                        <form method="post" action="{{ url_for('admprofile') }}" style="display:inline;">
+                            <button type="submit" name="delete_account" value="{{ account['LoginID'] }}" class="delete-btn">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <a href="{{ url_for('profile') }}" class="back-btn">Back to Profile</a>
+    </div>
+
+    <script src="{{ url_for('static', filename='cartani.js') }}"></script>
+</body> 
+</html>

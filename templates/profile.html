@@ -3,62 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PROFILE</title>
+    <title>Profile</title>
     
-    <!-- Correct CSS file references -->
-
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/navbar.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/profile.css') }}">
 
-    <!-- Google Fonts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.5/lottie.min.js"></script>
 </head>
 <body>
     <nav>
         <a href="{{ url_for('homepage') }}" id="FP-Logo">
-            <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;&nbsp;PIZZA</h1>
+            <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
         </a>
-        <ul>
-            <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
-            <li><a href="{{ url_for('register') }}">REGISTER</a></li>
-            <li><a href="{{ url_for('login') }}">LOGIN</a></li>
-            <li><a href="{{ url_for('profile') }}">PROFILE</a></li>
+        <ul class="navbar">
+            <li><a href="{{ url_for('menu') }}">Order Now</a></li>
+            {% if 'loggedin' in session %}
+                <li><a href="{{ url_for('profile') }}">Profile</a></li>
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            {% else %}
+                <li><a href="{{ url_for('register') }}">Register</a></li>
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+            {% endif %}
             <li id="cart-icon">
-                <a href="#"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
+                <a href="{{ url_for('menu') }}"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
             </li>
         </ul>
     </nav>
-    <div class="form-container">
-        <h2>Your account details are below:</h2>
-        <table>
-            <tr>
-                <td class="header">Username:</td>
-                <td>{{ account['Username'] }}</td>
-            </tr>
-            <tr>
-                <td class="header">Password:</td>
-                <td>******</td>
-            </tr>
-            <tr>
-                <td class="header">Email:</td>
-                <td>{{ account['Email'] }}</td>
-            </tr>
-        </table>
-        <div class="change-container">
-            <form action="{{ url_for('profile') }}" method="POST">
-                <label for="name">Change Your Username:</label>
-                <input type="text" id="name" name="UsernameChange">
-                <button type="submit">Change Username</button>
-            </form>
-            <form action="{{ url_for('profile') }}" method="POST">
-                <label for="password">Change Your Password:</label>
-                <input type="password" id="password" name="PasswordChange">
-                <button type="submit">Change Password</button>
-            </form>
+    <main class="container">
+        {% if is_admin %}
+        <div class="admin-sidebar">
+            <h3>Admin Controls</h3>
+            <ul>
+                <li><a href="#" id="admin-panel-link">User Management</a></li>
+            </ul>
         </div>
-        <button><a href="{{ url_for('logout') }}">LOGOUT</a></button>
-    </div>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-
+        {% endif %}
+    
+        <div class="profile-container">
+            <h2>Your Account Details</h2>
+            <table class="account-details">
+                <tr>
+                    <td class="header">Username:</td>
+                    <td>{{ account['Username'] }}</td>
+                </tr>
+                <tr>
+                    <td class="header">Password:</td>
+                    <td>******</td>
+                </tr>
+                <tr>
+                    <td class="header">Email:</td>
+                    <td>{{ account['Email'] }}</td>
+                </tr>
+            </table>
+    
+            <div class="change-container">
+                <form action="{{ url_for('profile') }}" method="POST" class="change-form">
+                    <label for="name">Change Your Username:</label>
+                    <input type="text" id="name" name="UsernameChange" placeholder="New Username">
+                    <button type="submit">Change Username</button>
+                </form>
+    
+                <form action="{{ url_for('profile') }}" method="POST" class="change-form">
+                    <label for="password">Change Your Password:</label>
+                    <input type="password" id="password" name="PasswordChange" placeholder="New Password">
+                    <button type="submit">Change Password</button>
+                </form>
+            </div>
+    
+            <button class="logout-button">
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </button>
+        </div>
+    
+        {% if is_admin %}
+        <div class="admin-container" style="display: none;">
+            <h1>Admin Panel - User Management</h1>
+            <p>Below is the list of all user accounts. You can delete any account from here.</p>
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th>LoginID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Admin Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for account in accounts %}
+                    <tr>
+                        <td>{{ account['LoginID'] }}</td>
+                        <td>{{ account['Username'] }}</td>
+                        <td>{{ account['Email'] }}</td>
+                        <td>{{ 'Yes' if account['isAdmin'] else 'No' }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('profile') }}" style="display:inline;">
+                                <button type="submit" name="delete_account" value="{{ account['LoginID'] }}" class="delete-btn">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <button id="back-to-profile" class="back-btn">Back to Profile</button>
+        </div>
+        {% endif %}
+    </main>
+    <script src="{{ url_for('static', filename='accmgmt.js') }}"></script>
+    <script src="{{ url_for('static', filename='cartani.js') }}"></script>
 </body>
 </html>

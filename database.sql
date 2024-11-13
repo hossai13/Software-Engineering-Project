@@ -8,21 +8,24 @@ CREATE TABLE IF NOT EXISTS UserInfo (
     Password VARCHAR(255) NOT NULL,
     Email VARCHAR(255) NOT NULL, 
     LoginID INT AUTO_INCREMENT,
-    Points INT(10),
-    Admin varchar(6) not null,
+    Points INT(10) default 0,
+    isAdmin boolean not null default false,
+    Address varchar(255),
     PRIMARY KEY (LoginID)
-);~
-
+);
+insert into userinfo (username, password, email, isAdmin) values ('admintest', 'admin123', 'adtest@gmail.com', true);
 -- TRUNCATE TABLE Login;
 
 -- Create the reviews table
-CREATE TABLE reviews (
-    review_id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(255) NOT NULL,
+CREATE TABLE IF NOT EXISTS reviews (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL,
     rating INT NOT NULL,
     review_text TEXT NOT NULL,
+    header VARCHAR(255) NOT NULL,
+    photo VARCHAR(255),
     date_made DATE NOT NULL
-);
+)
 
 Select * from UserInfo;
 
@@ -425,3 +428,5 @@ insert into menu(itemName,itemPrice,itemCategory) Values
 ('Vitamin Water',2.99,'Beverages'),
 ('Gold Peak',2.99,'Beverages'),
 ('Aloe',2.99,'Beverages');
+
+select * from menu;
