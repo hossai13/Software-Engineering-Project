@@ -16,13 +16,15 @@ insert into userinfo (username, password, email, isAdmin) values ('admintest', '
 -- TRUNCATE TABLE Login;
 
 -- Create the reviews table
-CREATE TABLE if not exists reviews (
-    review_id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(255) NOT NULL,
+CREATE TABLE IF NOT EXISTS reviews (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL,
     rating INT NOT NULL,
     review_text TEXT NOT NULL,
+    header VARCHAR(255) NOT NULL,
+    photo VARCHAR(255),
     date_made DATE NOT NULL
-);
+)
 
 Select * from UserInfo;
 

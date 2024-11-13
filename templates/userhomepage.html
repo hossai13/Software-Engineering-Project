@@ -5,28 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Homepage</title>
     
-    <!-- Reference to CSS in static/CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/navbar.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/homepage.css') }}">
-    
-    <!-- Google fonts (external link) -->
-    <style>@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');</style>
 
-    <!-- Bodymovin (Lottie animation library) from CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.5/lottie.min.js"></script>
 </head>
 <body>
     <nav>
-        <a href="{{ url_for('userhomepage') }}" id="FP-Logo">
-            <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;&nbsp;PIZZA</h1>
+        <a href="{{ url_for('homepage') }}" id="FP-Logo">
+            <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
         </a>
-        <ul>
+        <ul class="navbar">
             <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
-            <li><a href="{{ url_for('register') }}">REGISTER</a></li>
-            <li><a href="{{ url_for('login') }}">LOGIN</a></li>
-            <li><a href="{{ url_for('profile') }}">PROFILE</a></li>
+            {% if 'loggedin' in session %}
+                <li><a href="{{ url_for('profile') }}">PROFILE</a></li>
+                <li><a href="{{ url_for('logout') }}">LOGOUT</a></li>
+            {% else %}
+                <li><a href="{{ url_for('register') }}">REGISTER</a></li>
+                <li><a href="{{ url_for('login') }}">LOGIN</a></li>
+            {% endif %}
             <li id="cart-icon">
-                <a href="#"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
+                <a href="{{ url_for('menu') }}"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
             </li>
         </ul>
     </nav>
@@ -48,7 +47,7 @@
         
         <div class="whole-container">
             <div class="about-us-container">
-                <h3 class="title">🎉 FIESTA EXPERIENCE 🍕</h3>
+                <h3 class="title">FIESTA EXPERIENCE</h3>
                 <div class="slideshow-container"> 
                     <div class="slides fade">
                         <img src="{{ url_for('static', filename='Images_Videos/mural.jpeg') }}" alt="mural">
@@ -85,76 +84,88 @@
                 </div>
             </div>
         </div>
+
         <div class="restaurant-review-container">
-            <div class="restaurant-review-header"> 
-                <h2 class="title"> RESTAURANT REVIEWS</h2>
-                <h4> Please give us your feedback and we will improve upon it!!! </h4>
+            <div class="restaurant-review-header">
+                <h2 class="title">RESTAURANT REVIEWS</h2>
+                <h4>We value your feedback and are committed to improving your experience!</h4>
             </div>
-            <div class="review-submission-container">
-                <form id="Review-form" method="POST" action="{{ url_for('userhomepage') }}">
-                    <div>
+            <div class="reviews-container">
+                {% for review in reviews %}
+                    <div class="review-display">
+                        <h3 class="review-header">{{ review[3] }}</h3> <!-- Header from the database -->
+    
+                        <div class="review-title-stars">
+                            <div class="star-rating-display">
+                                {% for _ in range(review[1]|int) %}
+                                    <img src="{{ url_for('static', filename='Images_Videos/icons8-star-50-3.png') }}" alt="Star">
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% if review[5] %}
+                            <div class="review-photo">
+                                <img src="{{ url_for('static', filename='uploads/' + review[5]) }}" alt="Review Photo" class="photo">
+                            </div>
+                        {% endif %}
+
+                        <p class="review-content">{{ review[2] }}</p>
+                        <p class="review-date">Reviewed on: {{ review[4] }}</p>
+                        <p class="review-username">{{ review[0] }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+            <button id="create-review-btn">CREATE A REVIEW</button>
+        </div>
+        
+        <div id="review-modal" class="modal">
+            <div class="modal-content-order">
+                <span class="close">&times;</span>
+                <h2>Create Review</h2>
+        
+                <form id="Review-form" method="POST" action="{{ url_for('userhomepage') }}" enctype="multipart/form-data">
+                    <div class="username-review">
                         <label>Username:</label>
                         <input type="text" id="name" name="name" value="{{ username }}" readonly>
                     </div>
-
+        
                     <div class="date-field-review">
                         <label>Date:</label>
                         <input type="text" id="DateMade" name="DateMade" value="{{ current_date }}" readonly>
                     </div>
-
+        
                     <div class="star-rating-container">
-                        <label for="rating">Rating:</label>
+                        <label for="rating">Overall Rating</label>
                         <div class="star-rating">
-                            <label for="star1">
-                                <img src="{{ url_for('static', filename='Images_Videos/icons8-star-50-2.png') }}" alt="1 Star" id="star1" class="star" data-value="1">
-                            </label>
-                            <label for="star2">
-                                <img src="{{ url_for('static', filename='Images_Videos/icons8-star-50-2.png') }}" alt="2 Stars" id="star2" class="star" data-value="2">
-                            </label>
-                            <label for="star3">
-                                <img src="{{ url_for('static', filename='Images_Videos/icons8-star-50-2.png') }}" alt="3 Stars" id="star3" class="star" data-value="3">
-                            </label>
-                            <label for="star4">
-                                <img src="{{ url_for('static', filename='Images_Videos/icons8-star-50-2.png') }}" alt="4 Stars" id="star4" class="star" data-value="4">
-                            </label>
-                            <label for="star5">
-                                <img src="{{ url_for('static', filename='Images_Videos/icons8-star-50-2.png') }}" alt="5 Stars" id="star5" class="star" data-value="5">
-                            </label>
+                            {% for i in range(1, 6) %}
+                                <img src="{{ url_for('static', filename='Images_Videos/icons8-star-50-2.png') }}" alt="{{ i }} Star" class="star" data-value="{{ i }}">
+                            {% endfor %}
                         </div>
-                        <input type="hidden" id="rating" name="rating">
+                        <input type="hidden" id="rating" name="rating" required>
                     </div>
-
+        
+                    <div class="header-description">
+                        <label for="header">Add a Header:</label>
+                        <input type="text" id="header" name="header" placeholder="What's most important to know?" required>
+                    </div>
+        
+                    <div class="photo-upload">
+                        <label for="photo">Add a Photo:</label>
+                        <input type="file" id="photo" name="photo" accept="image/*">
+                    </div>
+        
                     <div class="review-description">
-                        <label for="review">Leave A Review:</label>
-                        <textarea id="review" name="review" rows="6" cols="50" required></textarea>
+                        <label for="review">Add a Written Review:</label>
+                        <textarea id="review" name="review" rows="6" cols="50" placeholder="What did you like or dislike? What did you use this product for?" required></textarea>
                     </div>
-
+        
                     <div class="review-submit-button">
                         <input type="submit" value="Submit Review">
                     </div>
                 </form>
             </div>
         </div>
-
-        <script>
-            const stars = document.querySelectorAll('.star-rating-container .star');
-            stars.forEach(star => {
-                star.addEventListener('click', function() {
-                    const value = this.getAttribute('data-value');
-                    document.getElementById('rating').value = value;
-                    stars.forEach(star => {
-                        if (star.getAttribute('data-value') <= value) {
-                            star.src = '{{ url_for("static", filename="Images_Videos/icons8-star-50-3.png") }}';
-                        } 
-                        else {
-                            star.src = '{{ url_for("static", filename="Images_Videos/icons8-star-50-2.png") }}';
-                        }
-                    });
-                });
-            });
-        </script>
-        
-        <!-- Include JS file -->
-        <script src="{{ url_for('static', filename='script.js') }}"></script>
+        <script src="{{ url_for('static', filename='reviews.js') }}"></script>
+        <script src="{{ url_for('static', filename='slideshow.js') }}"></script>
+        <script src="{{ url_for('static', filename='cartani.js') }}"></script>
     </body>
 </html>

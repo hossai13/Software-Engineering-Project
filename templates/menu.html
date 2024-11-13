@@ -5,7 +5,6 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Menu</title>
 
-        <!-- Correct CSS file references -->
         <link rel="stylesheet" href="{{ url_for('static', filename='CSS/menu.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='CSS/navbar.css') }}">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.5/lottie.min.js"></script>
@@ -13,15 +12,22 @@
     <body>
         <nav>
             <a href="{{ url_for('homepage') }}" id="FP-Logo">
-                <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;&nbsp;PIZZA</h1>
+                <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
             </a>
             <ul class="navbar">
                 <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
-                <li><a href="{{ url_for('register') }}">REGISTER</a></li>
-                <li><a href="{{ url_for('login') }}">LOGIN</a></li>
-                <li><a href="{{ url_for('profile') }}">ACCOUNT</a></li>
+                {% if 'loggedin' in session %}
+                    <li><a href="{{ url_for('profile') }}">PROFILE</a></li>
+                    <li><a href="{{ url_for('logout') }}">LOGOUT</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('register') }}">REGISTER</a></li>
+                    <li><a href="{{ url_for('login') }}">LOGIN</a></li>
+                {% endif %}
+                {% if session['isAdmin'] %}
+                    <li><button id="admin-tools-btn" class="nav-btn">ADMIN TOOLS</button></li>
+                {% endif %} 
                 <li id="cart-icon">
-                    <a href="#"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
+                    <a href="{{ url_for('menu') }}"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
                 </li>
             </ul>
         </nav>
@@ -30,83 +36,103 @@
                 <button class="scroll-btn left">&lt;</button>
                 <div class="scroll-wrapper">
                     <ul class="menu-options">
-                        <li>Pizza</li>
-                        <li>Cheesesteak</li>    
-                        <li>Strombolis</li>
-                        <li>Burgers</li>
-                        <li>Sides</li>
-                        <li>Drinks</li>
-                        <li>Breakfast</li>
-                        <li>Wings</li>
-                        <li>Fresh Salads</li>
-                        <li>Wraps</li>
-                        <li>Quesadillas</li>
-                        <li>Seafood</li>
-                        <li>Pasta</li>
-                        <li>Dinner Platters</li>
-                        <li>Fiesta Specials</li>
-                        <li>Kids Menu</li>
-                        <li>Desserts</li>
+                        <li><button class="nav-btn" data-target="pizza-section">Pizza</button></li>
+                        <li><button class="nav-btn" data-target="stromboli-section">Strombolis</button></li>
+                        <li><button class="nav-btn" data-target="sandwich-section">Sandwiches</button></li>
+                        <li><button class="nav-btn" data-target="burger-section">Burgers</button></li>
+                        <li><button class="nav-btn" data-target="wrap-section">Wraps</button></li>
+                        <li><button class="nav-btn" data-target="quesadilla-section">Quesadillas</button></li>
+                        <li><button class="nav-btn" data-target="seafood-section">Seafood</button></li>
+                        <li><button class="nav-btn" data-target="side-section">Sides</button></li>
+                        <li><button class="nav-btn" data-target="salad-section">Salads</button></li>
+                        <li><button class="nav-btn" data-target="special-section">Fiesta Specials</button></li>
+                        <li><button class="nav-btn" data-target="specplatter-section">Special Platters</button></li>
+                        <li><button class="nav-btn" data-target="dinner-section">Dinner Platters</button></li>
+                        <li><button class="nav-btn" data-target="greek-section">Greek</button></li>
+                        <li><button class="nav-btn" data-target="breakfast-section">Breakfast</button></li>
+                        <li><button class="nav-btn" data-target="drink-section">Drinks</button></li>
+                        <li><button class="nav-btn" data-target="steak-section">Steak</button></li>
+                        <li><button class="nav-btn" data-target="chsteak-section">Chicken Steak</button></li>
+                        <li><button class="nav-btn" data-target="chicken-section">Chicken</button></li>
+                        <li><button class="nav-btn" data-target="hoagie-section">Hoagies</button></li>
+                        <li><button class="nav-btn" data-target="grinder-section">Grinders</button></li>
+                        <li><button class="nav-btn" data-target="kids-section">Kids Menu</button></li>
+                        <li><button class="nav-btn" data-target="dessert-section">Desserts</button></li>
                     </ul>
                 </div>
                 <button class="scroll-btn right">&gt;</button>
             </div>
-        {% if session['isAdmin'] == True %}
-            <section class="admin-section">
-                <h2 class="promo">ADMIN TOOLS</h2>
-                <!-- just want four forms for adding editing, deleting, and specials-->
-                <form class="admin-form" id="addItem-form" action="{{ url_for('menu') }}" method="POST">
-                    <h3>Add Item</h3>
-                    <label for="addName">Item Name</label>
-                    <input type="text" id="addName" name="addName" required>
-                    <label for="add-category">Item Category</label>
-                    <input type="text" id="addCategory" name="addCategory" required>
-                    <label for="addPrice">Item Price</label>
-                    <input type="float" id="addPrice" name="addPrice" required>
-                    <button type="submit">Add Item</button>
-                </form>
-                <form class="admin-form" id="edit-item-form" action="{{ url_for('menu') }}" method="POST">
-                    <h3>Edit Item</h3>
-                    <label for="editName">Item you want to edit</label>
-                    <input type="text" id="editName" name="editName" required>
-                    <label for="updatePrice">Edit Price</label>
-                    <input type="float" id="updatePrice" name="updatePrice" required>
-                    <button type="submit">Edit Item</button>
-                </form>
-                <table class="menu-table">
-                    <thead>
-                        <tr>
-                            <th>Item Name</th>
-                            <th>Item Category</th>
-                            <th>Item Price</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in menu_items %}
-                        <tr>
-                            <td>{{ item.itemName }}</td>
-                            <td>{{ item.itemCategory }}</td>
-                            <td>{{ item.itemPrice }}</td>
-                            <td>
-                                <form method="post" action="{{ url_for('menu') }}" style="display:inline;">
-                                    <button type="submit" name="delete_menu" value="{{ item.itemName }}" class="delete-btn">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                <form class="admin-form" id="specials-form" action="{{ url_for('menu') }}" method="POST">
-                    <h3>Specials</h3>
-                    <label for="specialName">Item you want a Special on</label>
-                    <input type="text" id="specialName" name="specialName" required>
-                    <label for="specialPercent">Special Percent</label>
-                    <input type="number" id="specialPercent" name="specialPercent" required>
-                    <button type="submit">Add Special</button>
-                </form>
-                    
-            {% endif %}
+
+            <div id="admin-tools-modal" class="modal">
+                <div class="modal-content-admin">
+                    <span class="close-btn">&times;</span>
+                    <section class="admin-section">
+                        <h2 class="promo">ADMIN TOOLS</h2>
+            
+                        <form class="admin-form" id="addItem-form" action="{{ url_for('menu') }}" method="POST">
+                            <h3>Add Item</h3>
+                            <label for="addName">Item Name</label>
+                            <input type="text" id="addName" name="addName" required>
+            
+                            <label for="addCategory">Item Category</label>
+                            <input type="text" id="addCategory" name="addCategory" required>
+            
+                            <label for="addPrice">Item Price</label>
+                            <input type="number" step="0.01" id="addPrice" name="addPrice" required>
+            
+                            <button type="submit">Add Item</button>
+                        </form>
+            
+                        <form class="admin-form" id="editItem-form" action="{{ url_for('menu') }}" method="POST">
+                            <h3>Edit Item</h3>
+                            <label for="editName">Item to Edit</label>
+                            <input type="text" id="editName" name="editName" required>
+            
+                            <label for="updatePrice">New Price</label>
+                            <input type="number" step="0.01" id="updatePrice" name="updatePrice" required>
+            
+                            <button type="submit">Edit Item</button>
+                        </form>
+
+                        <form class="admin-form" id="specials-form" action="{{ url_for('menu') }}" method="POST">
+                            <h3>Specials</h3>
+                            <label for="specialName">Item for Special</label>
+                            <input type="text" id="specialName" name="specialName" required>
+            
+                            <label for="specialPercent">Discount Percentage</label>
+                            <input type="number" id="specialPercent" name="specialPercent" required>
+            
+                            <button type="submit">Add Special</button>
+                        </form>
+            
+                        <table class="menu-table">
+                            <thead>
+                                <tr>
+                                    <th>Item Name</th>
+                                    <th>Item Category</th>
+                                    <th>Item Price</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in all_menu_items %}
+                                <tr>
+                                    <td>{{ item.itemName }}</td>
+                                    <td>{{ item.itemCategory }}</td>
+                                    <td>{{ item.itemPrice }}</td>
+                                    <td>
+                                        <form method="post" action="{{ url_for('menu') }}" style="display:inline;">
+                                            <button type="submit" name="delete_menu" value="{{ item.itemName }}" class="delete-btn">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </section>
+                </div>
+            </div>
+            
             <section class="menu-section">
                 <h2 class="promo">FEATURED ITEMS</h2>
                 <div class="featured-items">
@@ -117,29 +143,22 @@
                          data-item-img="{{ url_for('static', filename='Images_Videos/pizza.jpeg') }}">
                         <img src="{{ url_for('static', filename='Images_Videos/pizza.jpeg') }}" alt="Pepperoni Pizza">
                         <h3>Pepperoni Pizza</h3>
-                        <div class="tags">
-                            <span>Small 10"</span>
-                            <span>Large 14"</span>
-                            <span>Giant 18"</span>
-                        </div>
                         <div class="price">
                             <span>$10.95</span>
-                            <span>$15.50</span>
-                            <span>$24.50</span>
                         </div>
-                        <button class="order-button">Order Now</button>
+                        <button class="order-button">ORDER NOW</button>
                     </div>
                     <div class="item-card" 
-                         data-item-name="Cheesesteak" 
-                         data-item-category="Cheesesteak" 
-                         data-item-price="14.99" 
-                         data-item-img="{{ url_for('static', filename='Images_Videos/cheesesteak.jpg') }}">
-                        <img src="{{ url_for('static', filename='Images_Videos/cheesesteak.jpg') }}" alt="Cheesesteak">
-                        <h3>Cheesesteak</h3>
+                         data-item-name="Plain Stromboli" 
+                         data-item-category="Strombolis" 
+                         data-item-price="6.50" 
+                         data-item-img="{{ url_for('static', filename='Images_Videos/stromboli.png') }}">
+                        <img src="{{ url_for('static', filename='Images_Videos/stromboli.png') }}" alt="Stromboli">
+                        <h3>Stromboli</h3>
                         <div class="price">
-                            <span>$14.99</span>
+                            <span>$6.50</span>
                         </div>
-                        <button class="order-button">Order Now</button>
+                        <button class="order-button">ORDER NOW</button>
                     </div>
                     <div class="item-card" 
                          data-item-name="Burger" 
@@ -151,7 +170,7 @@
                         <div class="price">
                             <span>$11.99</span>
                         </div>
-                        <button class="order-button">Order Now</button>
+                        <button class="order-button">ORDER NOW</button>
                     </div>
                 </div>
             </section>
@@ -192,8 +211,8 @@
                 </div>
             </div>
 
-            <section class="items-section">
-                <h2 class="categories">PIZZA</h2>
+            <section id="pizza-section" class="items-section">
+                <h2 class="categories">PIZZAS</h2>
                 <div class="menu-items">
                     {% for item in menu_items %}
                     <div class="menu-item-card">
@@ -216,50 +235,102 @@
                 </div>
             </section>
 
-            <section class="items-section">
-                <h2 class="categories">CHEESESTEAK</h2>
+            <section id="stromboli-section" class="items-section">
+                <h2 class="categories">STROMBOLIS</h2>
                 <div class="menu-items">
+                    {% for item in strombolis_items %}
                     <div class="menu-item-card">
-                        <h3 class="menu-item-title">Classic Cheesesteak</h3>
-                        <p class="menu-item-description">Grilled onions, mushrooms & cheese.</p>
+                        <h3 class="menu-item-title">{{ item.itemName }}</h3>
+                        <p class="menu-item-description">
+                            {% if item.itemName == "Plain Stromboli" %}
+                            A classic and simple delight.
+                            {% elif item.itemName == "Vegetarian Stromboli" %}
+                            Loaded with fresh vegetables.
+                            {% elif item.itemName == "Meatball Stromboli" %}
+                            Stuffed with savory meatballs.
+                            {% elif item.itemName == "Buffalo Chicken Stromboli" %}
+                            Spicy buffalo chicken wrapped in dough.
+                            {% elif item.itemName == "House Special Stromboli" %}
+                            A loaded stromboli with all the house favorites.
+                            {% else %}
+                            {% endif %}
+                        </p>
                         <div class="menu-item-price">
-                            <span class="original-price">$11.95</span>
+                            <span class="original-price">${{ item.itemPrice }}</span>
                         </div>
                     </div>
-                    <div class="menu-item-card">
-                        <h3 class="menu-item-title">Chicken Cheesesteak</h3>
-                        <p class="menu-item-description">Grilled onions, mushrooms & cheese.</p>
-                        <div class="menu-item-price">
-                            <span class="original-price">$11.95</span>
-                        </div>
-                    </div>
-                    <div class="menu-item-card">
-                        <h3 class="menu-item-title">Buffalo Chicken Cheesesteak</h3>
-                        <p class="menu-item-description">Buffalo sauce, chicken & blue cheese.</p>
-                        <div class="menu-item-price">
-                            <span class="original-price">$12.95</span>
-                        </div>
-                    </div>
-                    <div class="menu-item-card">
-                        <h3 class="menu-item-title">BBQ Chicken Cheesesteak</h3>
-                        <p class="menu-item-description">BBQ sauce, chicken & red onions.</p>
-                        <div class="menu-item-price">
-                            <span class="original-price">$12.95</span>
-                        </div>
-                    </div>
+                    {% endfor %}
                 </div>
             </section>
 
-            
-               
+            <section id="sandwich-section" class="items-section">
+                <h2 class="categories">SANDWICHES</h2>
+                <div class="menu-items">
+                    {% for item in sandwiches_items %}
+                    <div class="menu-item-card">
+                        <h3 class="menu-item-title">{{ item.itemName }}</h3>
+                        <p class="menu-item-description">
+                            {% if item.itemName == "Chicken Salad Sandwich" %}
+                            Fresh chicken salad on a soft sandwich roll.
+                            {% elif item.itemName == "Tuna Salad Sandwich" %}
+                            A classic tuna salad sandwich.
+                            {% elif item.itemName == "Grilled Cheese Sandwich" %}
+                            Golden, buttery toast with melted cheese.
+                            {% elif item.itemName == "B.L.T Sandwich" %}
+                            Crispy bacon, lettuce, and tomato.
+                            {% elif item.itemName == "Cheeseburger Melt Sandwich" %}
+                            Juicy cheeseburger between toasted bread.
+                            {% elif item.itemName == "Hot Roast Beef Sandwich" %}
+                            Tender roast beef served hot.
+                            {% elif item.itemName == "Grilled Chicken Club Double Decker Sandwich" %}
+                            Grilled chicken stacked high in a club sandwich.
+                            {% else %}
+                            {% endif %}
+                        </p>
+                        <div class="menu-item-price">
+                            <span class="original-price">${{ item.itemPrice }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section id="burger-section" class="items-section">
+                <h2 class="categories">BURGERS</h2>
+                <div class="menu-items">
+                    {% for item in burgers_items %}
+                    <div class="menu-item-card">
+                        <h3 class="menu-item-title">{{ item.itemName }}</h3>
+                        <p class="menu-item-description">
+                            {% if item.itemName == "Cheeseburger" %}
+                            A classic cheeseburger.
+                            {% elif item.itemName == "Bacon Cheeseburger" %}
+                            A cheeseburger with crispy bacon.
+                            {% elif item.itemName == "Mushroom Swiss Burger" %}
+                            A juicy burger with mushrooms and swiss cheese.
+                            {% elif item.itemName == "Veggie Burger" %}
+                            A meatless burger patty.
+                            {% elif item.itemName == "Turkey Burger" %}
+                            A lean turkey burger.
+                            {% else %}
+                            {% endif %}
+                        </p>
+                        <div class="menu-item-price">
+                            <span class="original-price">${{ item.itemPrice }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
             <aside class="order-summary">
                 <h2>YOUR ORDER</h2>
-                <div class="cart-items">
-                    <p class="empty-cart">Your cart is empty</p>
-                    <img src="{{ url_for('static', filename='Images_Videos/empty-cart.png') }}" alt="Empty Cart Illustration" class="empty-cart-img">
-                </div>
                 <div class="delivery">
                     <button id="delivery-button" class="delivery-button">Delivery or Pickup Available</button>
+                </div>
+                <div class="cart-items">
+                    <p class="empty-cart">Your cart is empty</p>
+                    <img src="{{ url_for('static', filename='Images_Videos/pizza-oven2.png') }}" alt="Pizza Stove" class="empty-cart-img">
                 </div>
                 <div class="tip-section">
                     <p>Tip: <span id="tip-amount">$0.00</span></p>
@@ -271,7 +342,7 @@
                     </div>
                 </div>
                 <span class="total-cost">TOTAL: $0.00</span>
-                <button class="checkout-button">Checkout</button>
+                <button class="checkout-button">CHECKOUT</button>
             </aside>
 
             <div id="delivery-modal" class="modal">
@@ -312,7 +383,7 @@
                 </div>
             </div>
         </main>
-        <script src="{{ url_for('static', filename='script.js') }}"></script>
+        <script src="{{ url_for('static', filename='cartani.js') }}"></script>
         <script src="{{ url_for('static', filename='menuscript.js') }}"></script>
     </body>
 </html>

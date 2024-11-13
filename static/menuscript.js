@@ -2,11 +2,51 @@ document.querySelectorAll('.scroll-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
         const scrollWrapper = document.querySelector('.scroll-wrapper');
         const direction = e.target.classList.contains('left') ? -1 : 1;
-        const scrollAmount = 500;
+        const scrollAmount = 425;
         scrollWrapper.scrollBy({
             left: direction * scrollAmount,
             behavior: 'smooth'
         });
+    });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    const menuNavButtons = document.querySelectorAll(".nav-btn");
+    const navBarHeight = 80;
+
+    menuNavButtons.forEach(button => {
+        button.addEventListener("click", (e) => {
+            const targetId = button.getAttribute("data-target");
+            const targetSection = document.getElementById(targetId);
+
+            if (targetSection) {
+                const scrollPosition = targetSection.offsetTop - navBarHeight; // Calculate position with margin
+                window.scrollTo({
+                    top: scrollPosition,
+                    behavior: "smooth"
+                });
+            }
+        });
+    });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    const adminToolsBtn = document.getElementById("admin-tools-btn");
+    const adminToolsModal = document.getElementById("admin-tools-modal");
+    const closeAdminModal = document.querySelector(".close-btn");
+
+    adminToolsBtn.addEventListener("click", () => {
+        adminToolsModal.style.display = "block";
+    });
+
+    closeAdminModal.addEventListener("click", () => {
+        adminToolsModal.style.display = "none";
+    });
+
+    window.addEventListener("click", (event) => {
+        if (event.target === adminToolsModal) {
+            adminToolsModal.style.display = "none";
+        }
     });
 });
 
@@ -38,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
             quantity: 1
         };
 
-        itemName.textContent = `Customize Your ${name}`;
+        itemName.textContent = `${name}`;
         basePrice = parseFloat(price);
         toppingsPrice = 0;
         quantity = 1;
@@ -264,5 +304,4 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.addEventListener("cartUpdated", updateTotalCost);
-    
 });

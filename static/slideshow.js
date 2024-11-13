@@ -1,11 +1,3 @@
-var animation = lottie.loadAnimation({
-    container: document.getElementById('lottie-cart'),
-    renderer: 'svg',
-    loop: true,
-    autoplay: true,
-    path: '/static/Cart.json'
-  });
-
 document.addEventListener('DOMContentLoaded', function() {
   const title = document.querySelector('.title');
   const slideshow = document.querySelector('.slideshow-container');

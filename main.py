@@ -1,10 +1,18 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_mysqldb import MySQL
 from datetime import datetime
+import os
+from werkzeug.utils import secure_filename
 import MySQLdb.cursors
 import re
 
 app = Flask(__name__)
+
+# File upload configuration
+def allowed_file(filename):
+    """Check if the uploaded file has an allowed extension."""
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Secret key for session management
 app.secret_key = 'your secret key'
@@ -12,8 +20,12 @@ app.secret_key = 'your secret key'
 # MySQL database configuration
 app.config['MYSQL_HOST'] = 'localhost'  
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'root'
+app.config['MYSQL_PASSWORD'] = '2113284'
 app.config['MYSQL_DB'] = 'PizzaInfo'
+
+# File upload configuration
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 # Initialize MySQL
 mysql = MySQL(app)
@@ -32,23 +44,29 @@ def userhomepage():
             username = request.form['name']
             rating = request.form['rating']
             review_text = request.form['review']
+            header = request.form['header']
             date_made = request.form['DateMade']
+            photo = request.files['photo']
+
+            photo_filename = None
+            if photo and allowed_file(photo.filename):
+                photo_filename = secure_filename(photo.filename)
+                photo.save(os.path.join(app.config['UPLOAD_FOLDER'], photo_filename))
 
             try:
                 cursor = mysql.connection.cursor()
-                cursor.execute('''INSERT INTO reviews (username, rating, review_text, date_made)
-                                  VALUES (%s, %s, %s, %s)''',
-                               (username, rating, review_text, date_made))
+                cursor.execute('''INSERT INTO reviews (username, rating, review_text, header, date_made, photo)
+                                  VALUES (%s, %s, %s, %s, %s, %s)''',
+                               (username, rating, review_text, header, date_made, photo_filename))
                 mysql.connection.commit()
                 cursor.close()
                 return redirect(url_for('userhomepage'))
-
             except Exception as error:
                 print(f"Error: {error}")
                 return "There was an error submitting your review."
-            
+        
         cursor = mysql.connection.cursor()
-        cursor.execute('SELECT username, rating, review_text, date_made FROM reviews ORDER BY date_made DESC')
+        cursor.execute('SELECT username, rating, review_text, header, date_made, photo FROM reviews ORDER BY date_made DESC')
         reviews = cursor.fetchall()
         cursor.close()
 
@@ -60,8 +78,21 @@ def userhomepage():
 @app.route('/menu', methods=['GET', 'POST'])
 def menu():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT DISTINCT itemName, itemCategory, itemPrice FROM Menu ORDER BY itemName")
+    all_menu_items = cursor.fetchall()
+    
     cursor.execute("SELECT DISTINCT itemName, itemPrice FROM Menu WHERE itemCategory = 'Pizza' ORDER BY itemName")
     menu_items = cursor.fetchall()
+    
+    cursor.execute("SELECT DISTINCT itemName, itemPrice FROM Menu WHERE itemCategory = 'Strombolis'")
+    strombolis_items = cursor.fetchall()
+    
+    cursor.execute("SELECT DISTINCT itemName, itemPrice FROM Menu WHERE itemCategory = 'Sandwiches'")
+    sandwiches_items = cursor.fetchall()
+    
+    cursor.execute("SELECT DISTINCT itemName, itemPrice FROM Menu WHERE itemCategory = 'Burgers'")
+    burgers_items = cursor.fetchall()
+    
     if is_admin():
     # this is for deleting the menu items
         if request.method == 'POST' and 'delete_menu' in request.form:
@@ -89,10 +120,20 @@ def menu():
             cursor.execute('UPDATE Menu SET itemPrice = itemPrice * %s WHERE itemName = %s', (special_percent, special_name))
             return redirect(url_for('menu'))
     if is_admin():
-        return render_template('menu.html', menu_items=menu_items, is_admin=is_admin())
+        return render_template('menu.html', 
+                               all_menu_items=all_menu_items,
+                               menu_items=menu_items,
+                               strombolis_items=strombolis_items,
+                               sandwiches_items=sandwiches_items,
+                               burgers_items=burgers_items,
+                               is_admin=is_admin())
     else:
-        return render_template('menu.html', menu_items=menu_items)  
-
+        return render_template('menu.html',
+                               all_menu_items=all_menu_items,
+                               menu_items=menu_items,
+                               strombolis_items=strombolis_items,
+                               sandwiches_items=sandwiches_items,
+                               burgers_items=burgers_items)  
 
 # Registration route
 @app.route('/register', methods=['GET', 'POST'])
@@ -184,12 +225,14 @@ def profile():
         cursor.execute('SELECT * FROM UserInfo WHERE LoginID = %s', (session['id'],))
         account = cursor.fetchone()
 
+        # Update username
         if 'UsernameChange' in request.form and 'PasswordChange' not in request.form:
             username = request.form['UsernameChange']
             cursor.execute('UPDATE UserInfo SET Username = %s WHERE LoginID = %s', (username, session['id']))
             mysql.connection.commit()
             msg = 'Username updated successfully!'
 
+        # Update password
         if 'PasswordChange' in request.form and 'UsernameChange' not in request.form:
             password = request.form['PasswordChange']
             cursor.execute('UPDATE UserInfo SET Password = %s WHERE LoginID = %s', (password, session['id']))
@@ -199,26 +242,21 @@ def profile():
         # Check if the logged-in user is an admin
         is_admin = account['isAdmin']
         
-        return render_template('profile.html', account=account, msg=msg, is_admin=is_admin)
-    else:
-        return redirect(url_for('login'))
-    
-@app.route('/admprofile', methods=['GET', 'POST'])
-def admprofile():
-    if 'loggedin' in session and session.get('isAdmin'):
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-
-        # Handle account deletion if requested
-        if request.method == 'POST' and 'delete_account' in request.form:
-            user_id = request.form['delete_account']
-            cursor.execute('DELETE FROM UserInfo WHERE LoginID = %s', (user_id,))
-            mysql.connection.commit()
-
-        # Fetch all user accounts
-        cursor.execute('Select Username, Email FROM UserInfo')
-        accounts = cursor.fetchall()
-
-        return render_template('admprofile.html', accounts=accounts)
+        # If admin, handle user management
+        accounts = []
+        if is_admin:
+            # Handle account deletion if requested
+            if 'delete_account' in request.form:
+                user_id = request.form['delete_account']
+                cursor.execute('DELETE FROM UserInfo WHERE LoginID = %s', (user_id,))
+                mysql.connection.commit()
+                msg = 'Account deleted successfully!'
+            
+            # Fetch all user accounts
+            cursor.execute('SELECT * FROM UserInfo')
+            accounts = cursor.fetchall()
+        
+        return render_template('profile.html', account=account, msg=msg, is_admin=is_admin, accounts=accounts)
     else:
         return redirect(url_for('login'))
 

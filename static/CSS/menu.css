@@ -23,6 +23,11 @@ body {
     font-family: 'Mori';
     margin: 0;
     padding: 0;
+    padding-bottom: 5rem;
+}
+
+body.modal-open {
+    overflow: hidden;
 }
 
 #lottie-cart {
@@ -49,11 +54,14 @@ body {
     border-radius: 35px;
     font-family: 'Gum';
     font-weight: 100;
-    font-size: 1rem;
+    font-size: 1rem;    
     height: auto;
-    padding: 0.85rem;
+    padding: 1rem;
     max-height: 5vh;
     width: 100%;
+    box-shadow: 0 0.5rem 2rem 0 rgba(31, 38, 135, 0.10);
+    backdrop-filter: blur(0.09375rem);
+    -webkit-backdrop-filter: blur(0.09375rem);
 }
 
 .scroll-wrapper {
@@ -75,7 +83,7 @@ body {
     border: none;
     cursor: pointer;
     font-size: 1.5rem;
-    padding: 0.30rem;
+    padding: 0.3rem;
     position: absolute;
     z-index: 1;
     height: 100%;
@@ -83,7 +91,7 @@ body {
 
 .scroll-btn.left {
     left: 0;
-}
+}       
 
 .scroll-btn.right {
     right: 0;
@@ -102,21 +110,27 @@ body {
     margin: 0;
 }
 
-.menu-options li {
-    display: inline-block;
-    background-color: rgb(207, 77, 77, 0.85);
+.nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, #9b0a36, #7e082b);
     padding: 0.65rem;
     border-radius: 45px;
-    width: auto;
-    width: 7.75rem;
+    border: none;
+    width: 8.5rem;
     margin-left: 10px;
     color: white;
+    -webkit-text-stroke: 1px black;
     cursor: pointer;
     text-align: center;
+    font-size: 0.95rem;
+    font-family: 'Gum';
 }
 
-.menu-options li:hover {
+.nav-btn:hover {
     background-color: #7e311e;
+    border-radius: 45px;
 }
 
 .menu-section {
@@ -128,8 +142,8 @@ body {
     font-weight: bold;
     margin-bottom: 20px;
     font-family: 'Gum';
+    letter-spacing: 1px;
 }
-
 
 .featured-items {
     display: flex;
@@ -147,19 +161,16 @@ body {
     border-radius: 55px;
     width: calc(28.75%);
     padding: 1.05rem;
-    height: 36vh;
+    height: 32vh;
     text-align: center;
     overflow: hidden;
-    box-shadow: 0 0.5rem 2rem 0 rgba(31, 38, 135, 0.10);
-    backdrop-filter: blur(0.09375rem);
-    -webkit-backdrop-filter: blur(0.09375rem);
 }
 
 .item-card img {
     align-items: center;
     transform: scale(1.25);
     width: 110%;
-    height: 20vh;
+    height: 17vh;
     object-fit: cover;
     border-radius: 20px;
 }
@@ -186,13 +197,14 @@ body {
 
 .order-button {
     padding: 10px;
-    background-color: #cf4d4d;
+    background: linear-gradient(180deg, #7e082b,#c70b43, #7e082b);
     color: white;
     border: none;
-    border-radius: 35px;
+    border-radius: 15px;
     cursor: pointer;
     width: 85%;
     font-size: 1.25em;
+    font-weight: 550;
     transition: 0.3s ease;
     margin-bottom: 10px;
     margin-top: auto;
@@ -204,12 +216,16 @@ body {
 }
 
 .items-section {
-    margin-top: 1rem;
+    margin-top: 0.5rem;
 }
 
 .categories {
-    font-size: 2.5rem;
+    font-size: 2.75rem;
     font-family: 'Gum';
+    color: white; 
+    -webkit-text-stroke: 2px #b84141;
+    text-shadow: 0 0 10px #f33670; 
+    letter-spacing: 1px; 
 }
 
 .menu-items {
@@ -264,17 +280,22 @@ body {
     padding: 20px;
     border-left: 1px solid #ddd;
     box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .order-summary h2 {
-    font-size: 1.75rem;
+    font-size: 3rem;
     font-weight: 850;
     font-family: 'Gum';
+    color: white;
+    -webkit-text-stroke: 2px black;
 }
 
 .cart-items {
-    margin-top: 10px;
-    max-height: 200px;
+    margin-top: 35px;
+    max-height: 550px;
     overflow-y: auto;
     padding: 10px;
     border: none;
@@ -283,7 +304,7 @@ body {
 
 .empty-cart {
     text-align: center;
-    font-size: 1rem;
+    font-size: 1.25rem;
     color: #555;
     margin-bottom: 10px;
 }
@@ -291,30 +312,35 @@ body {
 .empty-cart-img {
     width: 100%;
     object-fit: contain;
-    max-height: 150px;
+    max-height: 250px;
 }
 
 .tip-section {
     display: flex;
     justify-content: space-between;
-    margin-top: 50px;
     flex-direction: column;
+    margin-top: 50px;
     width: 100%;
+    margin-top: auto;
+    margin-bottom: 75px;
 }
 
 .tip-section p {
-    font-size: 1.5rem;
+    font-size: 2.25rem;
     font-weight: 650;
     text-align: left;
     font-family: 'Gum';
+    color: white;
+    -webkit-text-stroke: 2px black;
 }
 
 #tip-amount {
-    font-size: 1.25rem;
+    font-size: 2rem;
     font-weight: 550;
     text-align: right;
     font-family: 'Mori';
-    margin-left: calc(80%);
+    margin-left: calc(70%);
+    color: black;
 }
 
 .tip-bar {
@@ -350,13 +376,13 @@ body {
     background-color: #e2e2e2;
 }
 
-
 .cost, .total-cost {
     font-size: 1.5em;
     font-weight: bold;
     margin: 10px 0;
+    color: white;
+    -webkit-text-stroke: 1px black;
 }
-
 
 .tip-option:hover, .tip-option.active {
     background-color: #cf4d4d;
@@ -365,30 +391,34 @@ body {
 
 .total-cost {
     font-size: 1.5rem;
-    font-weight: bold;
+    font-weight: bolder;
     display: block;
-    margin-top: 20px;
     text-align: center;
+    margin-bottom: 30px;
 }
 
 .checkout-button {
-    width: 100%;
-    background-color: #cf4d4d;
+    width: 70%;
+    justify-content: center;
+    align-items: center;
+    background-color: #201e1e;
     color: white;
-    padding: 10px;
+    padding: 25px;
+    margin-bottom: 125px;
     font-size: 1.2rem;
+    font-weight: 850;
     border: none;
-    border-radius: 5px;
-    margin-top: 20px;
+    border-radius: 10px;
     cursor: pointer;
+    align-self: center;
+    transition: 03
 }
 
 .checkout-button:hover {
-    background-color: #b84141;
+    background-color: #0a0909;
 }
 
 .delivery {
-    margin-top: 20px;
     justify-content: center;
     display: flex;  
 }
@@ -418,6 +448,129 @@ body {
     background-color: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(5px); 
     overflow: hidden;
+}
+
+.modal-content-admin {
+    background-color: #f9f9f9;
+    margin: 5% auto;
+    padding: 20px 30px;
+    border-radius: 12px;
+    width: 60%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); 
+    font-family: 'Mori';
+    max-height: 80%;
+    overflow-y: auto;
+}
+
+.modal-content-admin h2 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.modal-content-admin .admin-form {
+    margin-bottom: 25px;
+    border: 1px solid #ddd;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content-admin h3 {
+    font-size: 20px;
+    color: #444;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.modal-content-admin label {
+    font-size: 14px;
+    color: #555;
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.modal-content-admin input[type="text"],
+.modal-content-admin input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 14px;
+    background-color: #f8f8f8;
+}
+
+.modal-content-admin button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #4caf50;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.modal-content-admin button:hover {
+    background-color: #45a049;
+}
+
+.menu-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+#specials-form {
+    margin-top: 20px;
+}
+
+.menu-table thead {
+    background-color: #f1f1f1;
+}
+
+.menu-table th, 
+.menu-table td {
+    text-align: left;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.menu-table th {
+    font-size: 16px;
+    color: #333;
+    text-transform: uppercase;
+}
+
+.menu-table td {
+    font-size: 14px;
+    color: #555;
+}
+
+.menu-table .delete-btn {
+    background-color: #e74c3c;
+    color: #fff;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.menu-table .delete-btn:hover {
+    background-color: #c0392b;
 }
 
 .modal-content-delivery {
@@ -456,17 +609,17 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    top: 15px;
-    right: 15px;
-    font-size: 1.75rem;
+    top: 5px;
+    right: 5px;
+    font-size: 1.25rem;
     font-weight: 450;
     cursor: pointer;
-    color: white;
+    color: #ffffff;
     background-color: #cf4d4d;
     border-radius: 50%;
     padding: 0.5rem;
-    width: 20px;
-    height: 20px;
+    width: 5px;
+    height: 5px;
     overflow: hidden;
 }
 
@@ -512,6 +665,7 @@ body {
 
 .quantity-control {
     display: flex;
+    font-size: 1.25rem;
     justify-content: center;
     align-items: center;
     gap: 10px;
@@ -540,6 +694,7 @@ body {
     cursor: pointer;
     margin: 10px auto;
     text-align: center;
+    font-weight: 850;
 }
 
 #add-to-cart-button:hover {
@@ -548,10 +703,10 @@ body {
 
 .modal-footer {
     margin-top: auto;
-    width: 100%;
+    width: 80%;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-self: center;
 }
 
 .toggle {
