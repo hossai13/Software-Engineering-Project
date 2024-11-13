@@ -10,9 +10,9 @@ app = Flask(__name__)
 app.secret_key = 'your secret key'
 
 # MySQL database configuration
-app.config['MYSQL_HOST'] = 'Jubayads-MacBook-Pro.local'  
+app.config['MYSQL_HOST'] = 'localhost'  
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'Minecraft100'
+app.config['MYSQL_PASSWORD'] = 'root'
 app.config['MYSQL_DB'] = 'PizzaInfo'
 
 # Initialize MySQL
@@ -57,39 +57,41 @@ def userhomepage():
         return redirect(url_for('login'))
 
 # Route for the menu page
-@app.route('/menu')
+@app.route('/menu', methods=['GET', 'POST'])
 def menu():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT DISTINCT itemName, itemPrice FROM Menu WHERE itemCategory = 'Pizza' ORDER BY itemName")
     menu_items = cursor.fetchall()
     # this is for deleting the menu items
-    if 'loggedin' in session and session.get('is_admin'):
-        if request.method == 'POST' and 'delete=name' in request.form:
-            item_name = request.form['delete=name']
-            cursor.execute('DELETE FROM Menu WHERE itemName = %s', (item_name,))
+    if request.method == 'POST' and 'delete_menu' in request.form:
+            menu_id = request.form['delete_menu']
+            cursor.execute('DELETE FROM menu WHERE itemName = %s', (menu_id,))
             mysql.connection.commit()
-            return redirect(url_for('menu'))
-        if request.method == 'POST' and 'add-item' in request.form and 'add-price' in request.form and 'add-category' in request.form:
+    if request.method == 'POST' and 'add-item' in request.form and 'add-price' in request.form and 'add-category' in request.form:
             item_name = request.form['add-item']
             item_price = request.form['add-price']
             item_category = request.form['add-category']
-            cursor.execute('INSERT INTO Menu (itemName, itemPrice, itemCategory) VALUES (%s, %s, %s)', (item_name, item_price, item_category))
+            cursor.execute('INSERT INTO menu (itemName, itemPrice, itemCategory) VALUES (%s, %s, %s)', (item_name, item_price, item_category))
             mysql.connection.commit()
             return redirect(url_for('menu'))
-        if request.method == 'POST' and 'update_item' in request.form:
-            item_name = request.form['update_item']
-            item_price = request.form['update_price']
+    if request.method == 'POST' and 'update-item' in request.form:
+            item_name = request.form['update-item']
+            item_price = request.form['update-price']
             cursor.execute('UPDATE Menu SET itemPrice = %s WHERE itemName = %s', (item_price, item_name))
             mysql.connection.commit()
             return redirect(url_for('menu'))
-        if request.method == 'POST' and 'special-name' in request.form and 'special-percent' in request.form:
+    if request.method == 'POST' and 'special-name' in request.form and 'special-percent' in request.form and 'special-duration' in request.form:
             special_name = request.form['special-name']
             special_percent = request.form['special-percent']
-            cursor.execute('UPDATE Menu SET itemPrice = itemPrice * %s WHERE itemName = %s', (1 - float(special_percent) / 100, special_name))
+
+            cursor.execute('UPDATE Menu SET itemPrice = itemPrice * %s WHERE itemName = %s', (1 - float(special_percent) / 100, special_name),)
 
             return redirect(url_for('menu'))
     
-    return render_template('menu.html', menu_items=menu_items)      
+    if is_admin():
+        return render_template('menu.html', menu_items=menu_items, is_admin=is_admin())
+    else:
+        return render_template('menu.html', menu_items=menu_items)  
 
 
 # Registration route
@@ -156,6 +158,8 @@ def login():
                 session['id'] = account['LoginID']
                 session['username'] = account['Username']
                 msg = 'Logged in successfully!'
+                if account['isAdmin']:
+                    session['isAdmin'] = True
                 return redirect(url_for('userhomepage'))
             else:
                 msg = 'Incorrect username/password!'
@@ -200,7 +204,7 @@ def profile():
     
 @app.route('/admprofile', methods=['GET', 'POST'])
 def admprofile():
-    if 'loggedin' in session and session.get('is_admin'):
+    if 'loggedin' in session and session.get('isAdmin'):
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 
         # Handle account deletion if requested
@@ -217,7 +221,11 @@ def admprofile():
     else:
         return redirect(url_for('login'))
 
-
+def is_admin():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('SELECT isAdmin FROM UserInfo WHERE LoginID = %s', (session['id'],))
+    account = cursor.fetchone()
+    return account['isAdmin']
 
 # Running the Flask app
 if __name__ == '__main__':
