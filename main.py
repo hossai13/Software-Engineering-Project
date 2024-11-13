@@ -10,9 +10,9 @@ app = Flask(__name__)
 app.secret_key = 'your secret key'
 
 # MySQL database configuration
-app.config['MYSQL_HOST'] = 'Jubayads-MacBook-Pro.local'  
+app.config['MYSQL_HOST'] = 'localhost'  
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'Minecraft100'
+app.config['MYSQL_PASSWORD'] = 'root'
 app.config['MYSQL_DB'] = 'PizzaInfo'
 
 # Initialize MySQL
@@ -82,10 +82,12 @@ def menu():
             cursor.execute('UPDATE Menu SET itemPrice = %s WHERE itemName = %s', (item_price, item_name))
             mysql.connection.commit()
             return redirect(url_for('menu'))
-        if request.method == 'POST' and 'special-name' in request.form and 'special-percent' in request.form:
+        if request.method == 'POST' and 'special-name' in request.form and 'special-percent' in request.form and 'special-duration' in request.form:
             special_name = request.form['special-name']
             special_percent = request.form['special-percent']
-            cursor.execute('UPDATE Menu SET itemPrice = itemPrice * %s WHERE itemName = %s', (1 - float(special_percent) / 100, special_name))
+            special_duration = request.form['special-duration']
+
+            cursor.execute('UPDATE Menu SET itemPrice = itemPrice * %s WHERE itemName = %s', (1 - float(special_percent) / 100, special_name),)
 
             return redirect(url_for('menu'))
     
