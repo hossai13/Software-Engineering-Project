@@ -214,7 +214,7 @@ def admprofile():
             mysql.connection.commit()
 
         # Fetch all user accounts
-        cursor.execute('SELECT LoginID, Username, Email, isAdmin FROM UserInfo')
+        cursor.execute('Select Username, Email FROM UserInfo')
         accounts = cursor.fetchall()
 
         return render_template('admprofile.html', accounts=accounts)
