@@ -86,7 +86,6 @@ def menu():
             special_name = request.form['special-name']
             special_percent = request.form['special-percent']
             cursor.execute('UPDATE Menu SET itemPrice = itemPrice * %s WHERE itemName = %s', (1 - float(special_percent) / 100, special_name))
-            
 
             return redirect(url_for('menu'))
     
