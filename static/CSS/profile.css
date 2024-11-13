@@ -122,10 +122,12 @@ button:hover {
     top: 100px;
     left: 0;
     width: 200px;
+    height: calc(100% - 100px);
     background-color: #f8f9fa;
     padding: 15px;
     border-right: 1px solid #ddd;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 1;
 }
 
 .admin-sidebar h3 {
@@ -152,4 +154,17 @@ button:hover {
 
 .admin-sidebar ul li a:hover {
     text-decoration: underline;
+}
+
+.form-container {
+    margin: 10rem auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(217, 212, 212, 0.25);
+    border-radius: 1.5rem;
+    width: 50%;
+    padding: 2rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-left: 240px; /* Leave space for the sidebar */
 }
