@@ -84,9 +84,9 @@ def menu():
         if request.method == 'POST' and 'specialName' in request.form and 'specialPercent' in request.form:
             special_name = request.form['specialName']
             special_percent = request.form['specialPercent']
-            special_percent = int(special_percent) / 100 + 1
+            special_percent = 1 - (int(special_percent) / 100)
+            print (special_percent)
             cursor.execute('UPDATE Menu SET itemPrice = itemPrice * %s WHERE itemName = %s', (special_percent, special_name))
-
             return redirect(url_for('menu'))
     if is_admin():
         return render_template('menu.html', menu_items=menu_items, is_admin=is_admin())
