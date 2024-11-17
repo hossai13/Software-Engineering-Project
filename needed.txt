@@ -1,0 +1,15 @@
+show toppings in cart when added
+clicking home page while loggin in sends u to user homepage
+an itemid is held even when the item is deleted
+send an email to change password or username
+fix special's admin function
+certain distance cant order delivery / distance prevention
+
+
+
+Priority List
+1. Fix & add Tables - order table & order history & deleted & inventory table
+2. Milestone Report
+3. Order/Delivery System
+4. Server(if possible)
+

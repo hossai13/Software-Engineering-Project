@@ -19,13 +19,15 @@ insert into userinfo (username, password, email, isAdmin) values ('admintest', '
 -- Create the reviews table
 CREATE TABLE IF NOT EXISTS reviews (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    LoginID int not null,
     username VARCHAR(100) NOT NULL,
     rating INT NOT NULL,
     review_text TEXT NOT NULL,
     header VARCHAR(255) NOT NULL,
     photo VARCHAR(255),
-    date_made DATE NOT NULL
-)
+    date_made DATE NOT NULL,
+    FOREIGN KEY (LoginID) references UserInfo(LoginID)
+);
 
 Select * from UserInfo;
 
@@ -38,6 +40,27 @@ CREATE TABLE IF NOT EXISTS Menu (
     CONSTRAINT menu_pk PRIMARY KEY (itemID)
 );
 
+-- Create the order history table
+create table if not exists order_History (
+	orderid int not null,
+    LoginID int not null,
+    date_ordered date,
+    total_price decimal(5,2),
+    constraint orderh_pk primary key (orderID),
+    constraint orderh_fk foreign key (LoginID) references UserInfo(LoginID)
+);
+
+-- Create the inventory table
+-- Optional table which will subtract inventory quantity - order quantity
+-- Stock/quantity will be 99 and will reset each day
+create table if not exists inventory (
+    inventoryID int primary key AUTO_INCREMENT,
+    itemID int,
+    quantity int,
+    FOREIGN KEY (itemID) references menu(itemID)
+);
+
+-- Insert menu list
 insert into menu(itemName,itemPrice,itemCategory) Values
 ('Plain Cheese Pizza', 8.99, 'Pizza'), 
 ('White Pizza', 9.25,'Pizza'),
