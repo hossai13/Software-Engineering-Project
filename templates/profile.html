@@ -38,8 +38,28 @@
             </ul>
         </div>
         {% endif %}
-    
         <div class="profile-container">
+            <!-- Profile Picture Section -->
+            <h1 class="profile-pic" onclick="openModal()">
+                <img id="profile-pic" src="{{ url_for('static', filename='Images_Videos/pizzausericon.png') }}" alt="Profile Picture">
+                <img id="profile-pic-hover" src="{{ url_for('static', filename='Images_Videos/whitepizzausericon.png') }}" alt="Profile Picture Hover" class="hover-img">
+            </h1>
+
+            <!-- Modal for Picture Selection -->
+            <div id="pic-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeModal()">&times;</span>
+                    <h2>Select Your Profile Picture</h2>
+                    <div class="pic-options">
+                        <img src="{{ url_for('static', filename='Images_Videos/bluepizzausericon.png') }}" alt="Profile Option 1" onclick="changeProfilePic('{{ url_for('static', filename='Images_Videos/bluepizzausericon.png') }}')">
+                        <img src="{{ url_for('static', filename='Images_Videos/greenpizzausericon.png') }}" alt="Profile Option 2" onclick="changeProfilePic('{{ url_for('static', filename='Images_Videos/greenpizzausericon.png') }}')">
+                        <img src="{{ url_for('static', filename='Images_Videos/purplepizzausericon.png') }}" alt="Profile Option 3" onclick="changeProfilePic('{{ url_for('static', filename='Images_Videos/purplepizzausericon.png') }}')">
+                        <img src="{{ url_for('static', filename='Images_Videos/orangepizzausericon.png') }}" alt="Profile Option 4" onclick="changeProfilePic('{{ url_for('static', filename='Images_Videos/orangepizzausericon.png') }}')">
+                        <img src="{{ url_for('static', filename='Images_Videos/pizzausericon.png') }}" alt="Profile Option 5" onclick="changeProfilePic('{{ url_for('static', filename='Images_Videos/pizzausericon.png') }}')">
+                    </div>
+                </div>
+            </div>
+
             <h2>Your Account Details</h2>
             <table class="account-details">
                 <tr>
@@ -111,5 +131,6 @@
     </main>
     <script src="{{ url_for('static', filename='accmgmt.js') }}"></script>
     <script src="{{ url_for('static', filename='cartani.js') }}"></script>
+    <script src="{{ url_for('static', filename='profpic.js') }}"></script>
 </body>
 </html>
