@@ -20,7 +20,7 @@ app.secret_key = 'your secret key'
 # MySQL database configuration
 app.config['MYSQL_HOST'] = 'localhost'  
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = '2113284'
+app.config['MYSQL_PASSWORD'] = 'root'
 app.config['MYSQL_DB'] = 'PizzaInfo'
 
 # File upload configuration
@@ -251,7 +251,17 @@ def profile():
                 cursor.execute('DELETE FROM UserInfo WHERE LoginID = %s', (user_id,))
                 mysql.connection.commit()
                 msg = 'Account deleted successfully!'
-            
+            if is_owner():
+                if 'make_admin' in request.form:
+                    user_id = request.form['make_admin']
+                    cursor.execute('UPDATE UserInfo SET isAdmin = 1 WHERE LoginID = %s', (user_id,))
+                    mysql.connection.commit()
+                    msg = 'Account promoted to admin!'
+                if 'remove_admin' in request.form:
+                    user_id = request.form['remove_admin']
+                    cursor.execute('UPDATE UserInfo SET isAdmin = 0 WHERE LoginID = %s', (user_id,))
+                    mysql.connection.commit()
+                    msg = 'Admin status removed!'
             # Fetch all user accounts
             cursor.execute('SELECT * FROM UserInfo')
             accounts = cursor.fetchall()
@@ -263,6 +273,13 @@ def profile():
 def is_admin():
     if 'isAdmin' in session:
         return True
+    else:
+        return False
+
+# this is how we check if the user is the owner account where we check if the account has the same loginID as the owner account
+def is_owner():
+    if 'id' in session:
+        return session['id'] == 1
     else:
         return False
 
