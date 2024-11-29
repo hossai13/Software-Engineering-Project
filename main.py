@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+import math
+from io import BytesIO
+from flask import Flask, flash, jsonify, render_template, request, redirect, url_for, session, Response
 from flask_mysqldb import MySQL
 from datetime import datetime
 import os
@@ -20,7 +22,7 @@ app.secret_key = 'your secret key'
 # MySQL database configuration
 app.config['MYSQL_HOST'] = 'localhost'  
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = '2113284'
+app.config['MYSQL_PASSWORD'] = 'root1234'
 app.config['MYSQL_DB'] = 'PizzaInfo'
 
 # File upload configuration
@@ -33,46 +35,92 @@ mysql = MySQL(app)
 # Route for the homepage
 @app.route('/')
 def homepage():
-    return render_template('homepage.html')
+    rating_filter = request.args.get('rating') 
+    cursor = mysql.connection.cursor()
+    if rating_filter:
+        cursor.execute("SELECT header, review_text, username, rating, date_made, photo FROM reviews WHERE rating = %s ORDER BY date_made DESC", [rating_filter])
+    else:
+        cursor.execute("SELECT header, review_text, username, rating, date_made, photo FROM reviews ORDER BY RAND() LIMIT 5")
+    reviews = cursor.fetchall()
+    cursor.close()
+    return render_template('homepage.html', reviews=reviews, rating_filter=rating_filter)
 
 # Route for the user homepage/restaurant reviews
 @app.route('/userhomepage', methods=['GET', 'POST'])
 def userhomepage():
     if 'loggedin' in session:
         current_date = datetime.now().strftime('%Y-%m-%d')
+    
         if request.method == 'POST':
+            user_id = session.get('id')  
+            if not isinstance(user_id, int):
+                return "Error: Invalid user ID, it must be an integer."
             username = request.form['name']
             rating = request.form['rating']
             review_text = request.form['review']
             header = request.form['header']
-            date_made = request.form['DateMade']
-            photo = request.files['photo']
-
-            photo_filename = None
-            if photo and allowed_file(photo.filename):
-                photo_filename = secure_filename(photo.filename)
-                photo.save(os.path.join(app.config['UPLOAD_FOLDER'], photo_filename))
-
+            date_made = current_date  
             try:
+                if not rating.isdigit():
+                    raise ValueError("Rating must be an integer.")
+                rating = int(rating) 
+                photo = request.files['photo']  
+                photo_data = None  
+                if photo:
+                    photo_data = photo.read() 
+                    
                 cursor = mysql.connection.cursor()
-                cursor.execute('''INSERT INTO reviews (username, rating, review_text, header, date_made, photo)
-                                  VALUES (%s, %s, %s, %s, %s, %s)''',
-                               (username, rating, review_text, header, date_made, photo_filename))
+                cursor.execute('''INSERT INTO reviews (LoginID, username, rating, review_text, header, date_made, photo)
+                                  VALUES (%s, %s, %s, %s, %s, %s, %s)''',
+                               (user_id, username, rating, review_text, header, date_made, photo_data))
                 mysql.connection.commit()
                 cursor.close()
-                return redirect(url_for('userhomepage'))
+                return redirect(url_for('userhomepage'))  
+
+            except ValueError as e:
+                print(f"Error: {e}")
+                return f"Error: {e}"
             except Exception as error:
                 print(f"Error: {error}")
                 return "There was an error submitting your review."
         
+        star_filter = request.args.get('star_rating')  
+        view_my_reviews = request.args.get('my_reviews')  
         cursor = mysql.connection.cursor()
-        cursor.execute('SELECT username, rating, review_text, header, date_made, photo FROM reviews ORDER BY date_made DESC')
+        if view_my_reviews: 
+            cursor.execute('''SELECT review_id, username, rating, review_text, header, date_made, photo 
+                              FROM reviews 
+                              WHERE LoginID = %s 
+                              ORDER BY date_made DESC''', (session['id'],))
+        elif star_filter:  
+            cursor.execute('''SELECT review_id, username, rating, review_text, header, date_made, photo 
+                              FROM reviews 
+                              WHERE rating = %s 
+                              ORDER BY date_made DESC''', (star_filter,))
+        else:  
+            cursor.execute('''SELECT review_id, username, rating, review_text, header, date_made, photo 
+                              FROM reviews 
+                              ORDER BY date_made DESC''')
+        
         reviews = cursor.fetchall()
         cursor.close()
 
-        return render_template('userhomepage.html', username=session['username'], user_id=session['id'], current_date=current_date, reviews=reviews)
+        return render_template('userhomepage.html', username=session['username'], user_id=session['id'], 
+                               current_date=current_date, reviews=reviews, view_my_reviews=view_my_reviews)
     else:
         return redirect(url_for('login'))
+    
+@app.route('/review/photo/<int:review_id>')
+def review_photo(review_id):
+    cursor = mysql.connection.cursor()
+    cursor.execute("SELECT photo FROM reviews WHERE review_id = %s", (review_id,))
+    review = cursor.fetchone()
+    cursor.close()
+
+    if review and review[0]:
+        return Response(review[0], mimetype='image/jpeg')  
+    else:
+        return Response(open('static/placeholder.jpg', 'rb').read(), mimetype='image/jpeg')
 
 # Route for the menu page
 @app.route('/menu', methods=['GET', 'POST'])
@@ -217,6 +265,28 @@ def logout():
     session.pop('isAdmin', None)
     return redirect(url_for('login'))
 
+@app.route('/update-profile-pic', methods=['POST'])
+def update_profile_pic():
+    if 'loggedin' in session:
+        data = request.get_json()
+        new_profile_pic = data.get('profile_pic')
+
+        # Update the database with the new profile picture path
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('UPDATE UserInfo SET profile_pic = %s WHERE LoginID = %s', (new_profile_pic, session['id']))
+        mysql.connection.commit()
+
+        # Check if the update was successful
+        cursor.execute('SELECT profile_pic FROM UserInfo WHERE LoginID = %s', (session['id'],))
+        result = cursor.fetchone()
+        if result and result['profile_pic'] == new_profile_pic:
+            return jsonify({'message': 'Profile picture updated successfully!'}), 200
+        else:
+            return jsonify({'message': 'Failed to update profile picture!'}), 500
+    else:
+        return jsonify({'message': 'User not logged in!'}), 401
+
+# Route for Profile Management
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
     msg = ''
@@ -224,6 +294,7 @@ def profile():
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT * FROM UserInfo WHERE LoginID = %s', (session['id'],))
         account = cursor.fetchone()
+        current_profile_pic = account.get('profile_pic', 'Images_Videos/whitepizzausericon.png')
 
         # Update username
         if 'UsernameChange' in request.form and 'PasswordChange' not in request.form:
@@ -238,7 +309,7 @@ def profile():
             cursor.execute('UPDATE UserInfo SET Password = %s WHERE LoginID = %s', (password, session['id']))
             mysql.connection.commit()
             msg = 'Password updated successfully!'
-        
+            
         # Check if the logged-in user is an admin
         is_admin = account['isAdmin']
         
@@ -256,7 +327,7 @@ def profile():
             cursor.execute('SELECT * FROM UserInfo')
             accounts = cursor.fetchall()
         
-        return render_template('profile.html', account=account, msg=msg, is_admin=is_admin, accounts=accounts)
+        return render_template('profile.html', account=account, msg=msg, is_admin=is_admin, accounts=accounts, current_profile_pic=current_profile_pic)
     else:
         return redirect(url_for('login'))
 

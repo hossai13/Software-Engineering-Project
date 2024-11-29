@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Homepage</title>
+    <title>UserHomepage</title>
     
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/navbar.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/homepage.css') }}">
@@ -12,13 +12,17 @@
 </head>
 <body>
     <nav>
-        <a href="{{ url_for('homepage') }}" id="FP-Logo">
+        <a href="{{ url_for('userhomepage') }}" id="FP-Logo">
             <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
         </a>
         <ul class="navbar">
             <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
             {% if 'loggedin' in session %}
-                <li><a href="{{ url_for('profile') }}">PROFILE</a></li>
+                <li>
+                    <a href="{{ url_for('profile') }}">
+                        <img src="{{ url_for('static', filename=current_profile_pic) }}" alt="Profile" class="profile-pic-nav">
+                    </a>
+                </li>
                 <li><a href="{{ url_for('logout') }}">LOGOUT</a></li>
             {% else %}
                 <li><a href="{{ url_for('register') }}">REGISTER</a></li>
@@ -90,31 +94,60 @@
                 <h2 class="title">RESTAURANT REVIEWS</h2>
                 <h4>We value your feedback and are committed to improving your experience!</h4>
             </div>
+            <button id="create-review-btn">CREATE A REVIEW</button>
+
+            <div class="star-rating-filter">
+                <form method="GET" action="{{ url_for('userhomepage') }}">
+                    <label for="star_rating">Filter by Rating:</label>
+                    <select name="star_rating" id="star_rating" onchange="this.form.submit()">
+                        <option value="">All Ratings</option>
+                        <option value="1" {% if request.args.get('star_rating') == '1' %}selected{% endif %}>1 Star</option>
+                        <option value="2" {% if request.args.get('star_rating') == '2' %}selected{% endif %}>2 Stars</option>
+                        <option value="3" {% if request.args.get('star_rating') == '3' %}selected{% endif %}>3 Stars</option>
+                        <option value="4" {% if request.args.get('star_rating') == '4' %}selected{% endif %}>4 Stars</option>
+                        <option value="5" {% if request.args.get('star_rating') == '5' %}selected{% endif %}>5 Stars</option>
+                    </select>
+                </form>
+            </div>
+
             <div class="reviews-container">
                 {% for review in reviews %}
                     <div class="review-display">
-                        <h3 class="review-header">{{ review[3] }}</h3> <!-- Header from the database -->
-    
+                        <h3 class="review-header">{{ review[4] }}</h3> <!-- Review Header (header column) -->
+                        
                         <div class="review-title-stars">
                             <div class="star-rating-display">
-                                {% for _ in range(review[1]|int) %}
-                                    <img src="{{ url_for('static', filename='Images_Videos/icons8-star-50-3.png') }}" alt="Star">
+                                {% for i in range(1, 6) %}
+                                    {% if i <= review[2] %}
+                                        <img src="{{ url_for('static', filename='Images_Videos/icons8-star-50-3.png') }}" alt="Full Star">
+                                    {% else %}
+                                        <img src="{{ url_for('static', filename='Images_Videos/icons8-star-50-2.png') }}" alt="Empty Star">
+                                    {% endif %}
                                 {% endfor %}
                             </div>
                         </div>
-                        {% if review[5] %}
+                        
+                        <p class="review-content">{{ review[3] }}</p>  <!-- Review Text (review_text column) -->
+                        
+                        <p class="review-username">Reviewed by: {{ review[1] }}</p> <!-- Username (username column) -->
+                        <p class="review-date">Reviewed on: {{ review[5] }}</p> <!-- Date (date_made column) -->
+        
+                        {% if review[6] %}
                             <div class="review-photo">
-                                <img src="{{ url_for('static', filename='uploads/' + review[5]) }}" alt="Review Photo" class="photo">
+                                <img src="{{ url_for('review_photo', review_id=review[0]) }}" alt="Review Photo" class="photo">
                             </div>
                         {% endif %}
-
-                        <p class="review-content">{{ review[2] }}</p>
-                        <p class="review-date">Reviewed on: {{ review[4] }}</p>
-                        <p class="review-username">{{ review[0] }}</p>
                     </div>
                 {% endfor %}
             </div>
-            <button id="create-review-btn">CREATE A REVIEW</button>
+        </div>
+
+        <div class="user-reviews-filter">
+            <form method="GET" action="{{ url_for('userhomepage') }}">
+                <button type="submit" name="my_reviews" value="true">
+                    View My Reviews
+                </button>
+            </form>
         </div>
         
         <div id="review-modal" class="modal">
@@ -127,12 +160,12 @@
                         <label>Username:</label>
                         <input type="text" id="name" name="name" value="{{ username }}" readonly>
                     </div>
-        
+                
                     <div class="date-field-review">
                         <label>Date:</label>
                         <input type="text" id="DateMade" name="DateMade" value="{{ current_date }}" readonly>
                     </div>
-        
+                
                     <div class="star-rating-container">
                         <label for="rating">Overall Rating</label>
                         <div class="star-rating">
@@ -142,22 +175,22 @@
                         </div>
                         <input type="hidden" id="rating" name="rating" required>
                     </div>
-        
+                
                     <div class="header-description">
                         <label for="header">Add a Header:</label>
                         <input type="text" id="header" name="header" placeholder="What's most important to know?" required>
                     </div>
-        
+                
                     <div class="photo-upload">
                         <label for="photo">Add a Photo:</label>
                         <input type="file" id="photo" name="photo" accept="image/*">
                     </div>
-        
+                
                     <div class="review-description">
                         <label for="review">Add a Written Review:</label>
                         <textarea id="review" name="review" rows="6" cols="50" placeholder="What did you like or dislike? What did you use this product for?" required></textarea>
                     </div>
-        
+                
                     <div class="review-submit-button">
                         <input type="submit" value="Submit Review">
                     </div>

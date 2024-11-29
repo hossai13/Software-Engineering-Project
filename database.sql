@@ -11,20 +11,21 @@ CREATE TABLE IF NOT EXISTS UserInfo (
     Points INT(10) default 0,
     isAdmin boolean not null default false,
     Address varchar(255),
+    profile_pic VARCHAR(255),
     PRIMARY KEY (LoginID)
 );
-insert into userinfo (username, password, email, isAdmin) values ('admintest', 'admin123', 'adtest@gmail.com', true);
+
 -- TRUNCATE TABLE Login;
 
 -- Create the reviews table
 CREATE TABLE IF NOT EXISTS reviews (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    review_id INT AUTO_INCREMENT PRIMARY KEY,
     LoginID int not null,
     username VARCHAR(100) NOT NULL,
     rating INT NOT NULL,
     review_text TEXT NOT NULL,
     header VARCHAR(255) NOT NULL,
-    photo VARCHAR(255),
+    photo LONGBLOB,
     date_made DATE NOT NULL,
     FOREIGN KEY (LoginID) references UserInfo(LoginID)
 );

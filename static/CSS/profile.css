@@ -253,17 +253,8 @@ button:hover {
     object-fit: cover;
     opacity: 0; 
     transition: opacity 0.65s ease;
-    animation: rotation 5s infinite linear;
 }
 
-@keyframes rotation {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(359deg);
-    }
-  }
 
 .profile-pic:hover .hover-img {
     opacity: 1;
