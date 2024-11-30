@@ -22,7 +22,7 @@ app.secret_key = 'your secret key'
 # MySQL database configuration
 app.config['MYSQL_HOST'] = 'localhost'  
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'root1234'
+app.config['MYSQL_PASSWORD'] = 'root'
 app.config['MYSQL_DB'] = 'PizzaInfo'
 
 # File upload configuration
@@ -147,6 +147,8 @@ def menu():
             menu_id = request.form['delete_menu']
             cursor.execute('DELETE FROM menu WHERE itemName = %s', (menu_id,))
             mysql.connection.commit()
+        
+    #this is for adding a menu item
         if request.method == 'POST' and 'addName' in request.form and 'addPrice' in request.form and 'addCategory' in request.form:
             item_name = request.form['addName']
             item_price = request.form['addPrice']
@@ -154,19 +156,34 @@ def menu():
             cursor.execute('INSERT INTO menu (itemName, itemPrice, itemCategory) VALUES (%s, %s, %s)', (item_name, item_price, item_category))
             mysql.connection.commit()
             return redirect(url_for('menu'))
+    #this is for updating the menu item
         if request.method == 'POST' and 'editName' in request.form and 'updatePrice' in request.form:
             item_name = request.form['editName']
             item_price = request.form['updatePrice']
             cursor.execute('UPDATE Menu SET itemPrice = %s WHERE itemName = %s', (item_price, item_name))
             mysql.connection.commit()
             return redirect(url_for('menu'))
+    #this is for putting a special on the menu item
         if request.method == 'POST' and 'specialName' in request.form and 'specialPercent' in request.form:
             special_name = request.form['specialName']
-            special_percent = request.form['specialPercent']
-            special_percent = 1 - (int(special_percent) / 100)
-            print (special_percent)
-            cursor.execute('UPDATE Menu SET itemPrice = itemPrice * %s WHERE itemName = %s', (special_percent, special_name))
+            try:
+                special_percent = int(request.form['specialPercent'])
+                if special_percent < 0 or special_percent > 100:
+                    return "Special percent must be between 0 and 100"
+                special_percent = 1 - (special_percent / 100)
+            except ValueError:
+                return "Special percent must be an integer"
+            
+            try:
+                cursor.execute('UPDATE Menu SET itemPrice = itemPrice * %s WHERE itemName = %s', (special_percent, special_name))
+                mysql.connection.commit()
+            except Exception as e:
+                cursor.rollback()
+                print(f"Database Error: {e}")
+                return "Database Error"
             return redirect(url_for('menu'))
+            
+            
     if is_admin():
         return render_template('menu.html', 
                                all_menu_items=all_menu_items,
@@ -322,7 +339,18 @@ def profile():
                 cursor.execute('DELETE FROM UserInfo WHERE LoginID = %s', (user_id,))
                 mysql.connection.commit()
                 msg = 'Account deleted successfully!'
-            
+            if is_owner():
+                if 'promote_user' in request.form:
+                    user_id = request.form['promote_user']
+                    cursor.execute('UPDATE UserInfo SET isAdmin = 1 WHERE LoginID = %s', (user_id,))
+                    mysql.connection.commit()
+                    msg = 'User promoted to admin!'
+                if 'demote_admin' in request.form:
+                    user_id = request.form['demote_admin']
+                    cursor.execute('UPDATE UserInfo SET isAdmin = 0 WHERE LoginID = %s', (user_id,))
+                    mysql.connection.commit()
+                    msg = 'Admin demoted to user!'
+                
             # Fetch all user accounts
             cursor.execute('SELECT * FROM UserInfo')
             accounts = cursor.fetchall()
@@ -336,6 +364,13 @@ def is_admin():
         return True
     else:
         return False
+
+def is_owner():
+    if session['id'] == 1:
+        return True
+    else:
+        return False
+
 
 # Running the Flask app
 if __name__ == '__main__':
