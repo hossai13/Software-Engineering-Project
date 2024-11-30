@@ -114,10 +114,23 @@ def menu():
             return redirect(url_for('menu'))
         if request.method == 'POST' and 'specialName' in request.form and 'specialPercent' in request.form:
             special_name = request.form['specialName']
-            special_percent = request.form['specialPercent']
-            special_percent = 1 - (int(special_percent) / 100)
+            try:
+                special_percent = int(request.form['specialPercent'])
+                if special_percent < 0 or special_percent > 100:
+                    return "Please enter a valid number for the discount percentage."
+                special_percent = 1 - (special_percent / 100)
+            except ValueError:
+                return "Please enter a valid number for the discount percentage."
+            
             print (special_percent)
-            cursor.execute('UPDATE Menu SET itemPrice = itemPrice * %s WHERE itemName = %s', (special_percent, special_name))
+            try:
+                cursor.execute('UPDATE Menu SET itemPrice = itemPrice * %s WHERE itemName = %s', (special_percent, special_name))
+                mysql.connection.commit()
+            except Exception as error:
+                mysql.connection.rollback()
+                print(f"Databse Error: {error}")    
+                return "There was an error updating the price."
+
             return redirect(url_for('menu'))
     if is_admin():
         return render_template('menu.html', 
