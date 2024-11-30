@@ -1,0 +1,79 @@
+body {
+    font-family: 'Mori', sans-serif;
+    background-color: #f8f6f8;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 20px;
+    background-color: #333;
+    color: white;
+}
+
+.checkout-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    margin-top: 5rem;
+    padding: 20px;
+    background-color: #fff;
+}
+
+section {
+    margin-top: 2rem;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    background-color: #fff;
+}
+
+.details-section,
+.contact-section,
+.payment-section {
+    grid-column: 1;
+}
+
+.cart-summary {
+    grid-column: 2;
+    background-color: #f9f9f9;
+    padding: 20px;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.cart-total p {
+    font-size: 1rem;
+    margin: 5px 0;
+}
+
+button {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.place-order-button {
+    background-color: #333;
+    color: white;
+    width: 100%;
+    padding: 15px;
+    margin-top: 20px;
+    font-size: 1.2rem;
+}
+
+.place-order-button:hover {
+    background-color: #000;
+}

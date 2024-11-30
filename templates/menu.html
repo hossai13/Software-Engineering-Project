@@ -42,12 +42,15 @@
                         <li><button class="nav-btn" data-target="burger-section">Burgers</button></li>
                         <li><button class="nav-btn" data-target="wrap-section">Wraps</button></li>
                         <li><button class="nav-btn" data-target="quesadilla-section">Quesadillas</button></li>
+                        <li><button class="nav-btn" data-target="wing-section">Wing</button></li>
                         <li><button class="nav-btn" data-target="seafood-section">Seafood</button></li>
                         <li><button class="nav-btn" data-target="side-section">Sides</button></li>
                         <li><button class="nav-btn" data-target="salad-section">Salads</button></li>
+                        <li><button class="nav-btn" data-target="pasta-section">Pasta</button></li>
                         <li><button class="nav-btn" data-target="special-section">Fiesta Specials</button></li>
                         <li><button class="nav-btn" data-target="specplatter-section">Special Platters</button></li>
                         <li><button class="nav-btn" data-target="dinner-section">Dinner Platters</button></li>
+                        <li><button class="nav-btn" data-target="cold-section">Cold Platters</button></li>
                         <li><button class="nav-btn" data-target="greek-section">Greek</button></li>
                         <li><button class="nav-btn" data-target="breakfast-section">Breakfast</button></li>
                         <li><button class="nav-btn" data-target="drink-section">Drinks</button></li>
@@ -63,48 +66,53 @@
                 <button class="scroll-btn right">&gt;</button>
             </div>
 
+            {% if session['isAdmin'] %}
             <div id="admin-tools-modal" class="modal">
                 <div class="modal-content-admin">
                     <span class="close-btn">&times;</span>
                     <section class="admin-section">
                         <h2 class="promo">ADMIN TOOLS</h2>
-            
+                
+                        <!-- Add Item Form -->
                         <form class="admin-form" id="addItem-form" action="{{ url_for('menu') }}" method="POST">
                             <h3>Add Item</h3>
                             <label for="addName">Item Name</label>
                             <input type="text" id="addName" name="addName" required>
-            
+
                             <label for="addCategory">Item Category</label>
                             <input type="text" id="addCategory" name="addCategory" required>
-            
+
                             <label for="addPrice">Item Price</label>
                             <input type="number" step="0.01" id="addPrice" name="addPrice" required>
-            
+
                             <button type="submit">Add Item</button>
                         </form>
-            
+                
+                        <!-- Edit Item Form -->
                         <form class="admin-form" id="editItem-form" action="{{ url_for('menu') }}" method="POST">
                             <h3>Edit Item</h3>
                             <label for="editName">Item to Edit</label>
                             <input type="text" id="editName" name="editName" required>
-            
+
                             <label for="updatePrice">New Price</label>
                             <input type="number" step="0.01" id="updatePrice" name="updatePrice" required>
-            
+
                             <button type="submit">Edit Item</button>
                         </form>
 
+                        <!-- Specials Form -->
                         <form class="admin-form" id="specials-form" action="{{ url_for('menu') }}" method="POST">
                             <h3>Specials</h3>
                             <label for="specialName">Item for Special</label>
                             <input type="text" id="specialName" name="specialName" required>
-            
+
                             <label for="specialPercent">Discount Percentage</label>
                             <input type="number" id="specialPercent" name="specialPercent" required>
-            
+
                             <button type="submit">Add Special</button>
                         </form>
-            
+                
+                        <!-- Menu Table -->
                         <table class="menu-table">
                             <thead>
                                 <tr>
@@ -122,7 +130,7 @@
                                     <td>{{ item.itemPrice }}</td>
                                     <td>
                                         <form method="post" action="{{ url_for('menu') }}" style="display:inline;">
-                                            <button type="submit" name="delete_menu" value="{{ item.itemName }}" class="delete-btn">Delete</button>
+                                            <button type="submit" name="delete_menu" value="{{ item.itemID }}" class="delete-btn">Delete</button>
                                         </form>
                                     </td>
                                 </tr>
@@ -132,15 +140,19 @@
                     </section>
                 </div>
             </div>
+            {% endif %}
             
             <section class="menu-section">
                 <h2 class="promo">FEATURED ITEMS</h2>
                 <div class="featured-items">
                     <div class="item-card" 
+                         data-item-id="23"
                          data-item-name="Pepperoni Pizza" 
                          data-item-category="Pizza" 
                          data-item-price="10.95" 
-                         data-item-img="{{ url_for('static', filename='Images_Videos/pizza.jpeg') }}">
+                         data-item-img="{{ url_for('static', filename='Images_Videos/pizza.jpeg') }}"
+                         data-has-sizes="true"
+                         data-has-toppings="true">
                         <img src="{{ url_for('static', filename='Images_Videos/pizza.jpeg') }}" alt="Pepperoni Pizza">
                         <h3>Pepperoni Pizza</h3>
                         <div class="price">
@@ -149,18 +161,20 @@
                         <button class="order-button">ORDER NOW</button>
                     </div>
                     <div class="item-card" 
+                         data-item-id="2"
                          data-item-name="Plain Stromboli" 
                          data-item-category="Strombolis" 
                          data-item-price="6.50" 
                          data-item-img="{{ url_for('static', filename='Images_Videos/stromboli.png') }}">
                         <img src="{{ url_for('static', filename='Images_Videos/stromboli.png') }}" alt="Stromboli">
-                        <h3>Stromboli</h3>
+                        <h3>Plain Stromboli</h3>
                         <div class="price">
                             <span>$6.50</span>
                         </div>
                         <button class="order-button">ORDER NOW</button>
                     </div>
                     <div class="item-card" 
+                         data-item-id="3"
                          data-item-name="Burger" 
                          data-item-category="Burger" 
                          data-item-price="11.99" 
@@ -174,154 +188,59 @@
                     </div>
                 </div>
             </section>
+
             <div id="item-modal" class="modal">
                 <div class="modal-content-order">
                     <span class="close">&times;</span>
-                    <h2 id="item-name">Customize Your Order</h2>
-
+                    <h2 id="item-name">CUSTOMIZE YOUR ORDER</h2>
                     <div class="size-options">
-                        <h3>Choose an Option</h3>
-                        <div id="size-options-container">
-                            <!-- This will be dynamically populated -->
-                        </div>
+                        <h3>CHOOSE AN OPTION</h3>
+                        <div id="size-options-container"></div>
                     </div>
-
                     <div class="toppings-options">
-                        <h3>Add Toppings</h3>
-                        <div>
-                            <label><input type="checkbox" name="topping" value="Extra Cheese" data-price="1.95"> Extra Cheese (+$1.95)</label>
-                        </div>
-                        <div>
-                            <label><input type="checkbox" name="topping" value="Pepperoni" data-price="2.25"> Pepperoni (+$2.25)</label>
-                        </div>
-                        <div>
-                            <label><input type="checkbox" name="topping" value="Mushrooms" data-price="1.50"> Mushrooms (+$1.50)</label>
-                        </div>
-
+                        <h3>CHOOSE TOPPINGS</h3>
+                        <div id="toppings-options-container"></div>
                     </div>
-
                     <div class="modal-footer">
                         <div class="quantity-control">
                             <button id="decrease-qty">-</button>
                             <span id="quantity-display">1</span>
                             <button id="increase-qty">+</button>
                         </div>
-                        <button id="add-to-cart-button">ADD TO ORDER - $<span id="total-price">9.25</span></button>
+                        <button id="add-to-cart-button">ADD TO ORDER - $<span id="total-price">0.00</span></button>
                     </div>
                 </div>
             </div>
 
-            <section id="pizza-section" class="items-section">
-                <h2 class="categories">PIZZAS</h2>
+            {% for category, items in menu_items_by_category.items() %}
+            <section id="{{ category|lower }}-section" class="items-section">
+                <h2 class="categories">{{ category }}</h2>
                 <div class="menu-items">
-                    {% for item in menu_items %}
-                    <div class="menu-item-card">
+                    {% for item in items %}
+                    <div class="menu-item-card"
+                        data-item-id="{{ item.itemID }}"
+                        data-item-name="{{ item.itemName }}"
+                        data-item-price="{{ item.defaultPrice }}"
+                        data-item-category="{{ item.itemCategory }}"
+                        data-has-sizes="{{ 'true' if item.hasSizes else 'false' }}">
                         <h3 class="menu-item-title">{{ item.itemName }}</h3>
                         <p class="menu-item-description">
                             {% if item.itemName == "Plain Cheese Pizza" %}
                             Classic New York-style slice.
                             {% elif item.itemName == "White Pizza" %}
                             A creamy and cheesy delight.
-                            {% elif item.itemName == "Extra Cheese Pizza" %}
-                            Loaded with extra mozzarella.
                             {% else %}
+                            <!-- Add more descriptions as needed -->
                             {% endif %}
                         </p>
                         <div class="menu-item-price">
-                            <span class="original-price">${{ item.itemPrice }}</span>
+                            <span class="original-price">${{ item.defaultPrice }}</span>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
             </section>
-
-            <section id="stromboli-section" class="items-section">
-                <h2 class="categories">STROMBOLIS</h2>
-                <div class="menu-items">
-                    {% for item in strombolis_items %}
-                    <div class="menu-item-card">
-                        <h3 class="menu-item-title">{{ item.itemName }}</h3>
-                        <p class="menu-item-description">
-                            {% if item.itemName == "Plain Stromboli" %}
-                            A classic and simple delight.
-                            {% elif item.itemName == "Vegetarian Stromboli" %}
-                            Loaded with fresh vegetables.
-                            {% elif item.itemName == "Meatball Stromboli" %}
-                            Stuffed with savory meatballs.
-                            {% elif item.itemName == "Buffalo Chicken Stromboli" %}
-                            Spicy buffalo chicken wrapped in dough.
-                            {% elif item.itemName == "House Special Stromboli" %}
-                            A loaded stromboli with all the house favorites.
-                            {% else %}
-                            {% endif %}
-                        </p>
-                        <div class="menu-item-price">
-                            <span class="original-price">${{ item.itemPrice }}</span>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </section>
-
-            <section id="sandwich-section" class="items-section">
-                <h2 class="categories">SANDWICHES</h2>
-                <div class="menu-items">
-                    {% for item in sandwiches_items %}
-                    <div class="menu-item-card">
-                        <h3 class="menu-item-title">{{ item.itemName }}</h3>
-                        <p class="menu-item-description">
-                            {% if item.itemName == "Chicken Salad Sandwich" %}
-                            Fresh chicken salad on a soft sandwich roll.
-                            {% elif item.itemName == "Tuna Salad Sandwich" %}
-                            A classic tuna salad sandwich.
-                            {% elif item.itemName == "Grilled Cheese Sandwich" %}
-                            Golden, buttery toast with melted cheese.
-                            {% elif item.itemName == "B.L.T Sandwich" %}
-                            Crispy bacon, lettuce, and tomato.
-                            {% elif item.itemName == "Cheeseburger Melt Sandwich" %}
-                            Juicy cheeseburger between toasted bread.
-                            {% elif item.itemName == "Hot Roast Beef Sandwich" %}
-                            Tender roast beef served hot.
-                            {% elif item.itemName == "Grilled Chicken Club Double Decker Sandwich" %}
-                            Grilled chicken stacked high in a club sandwich.
-                            {% else %}
-                            {% endif %}
-                        </p>
-                        <div class="menu-item-price">
-                            <span class="original-price">${{ item.itemPrice }}</span>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </section>
-
-            <section id="burger-section" class="items-section">
-                <h2 class="categories">BURGERS</h2>
-                <div class="menu-items">
-                    {% for item in burgers_items %}
-                    <div class="menu-item-card">
-                        <h3 class="menu-item-title">{{ item.itemName }}</h3>
-                        <p class="menu-item-description">
-                            {% if item.itemName == "Cheeseburger" %}
-                            A classic cheeseburger.
-                            {% elif item.itemName == "Bacon Cheeseburger" %}
-                            A cheeseburger with crispy bacon.
-                            {% elif item.itemName == "Mushroom Swiss Burger" %}
-                            A juicy burger with mushrooms and swiss cheese.
-                            {% elif item.itemName == "Veggie Burger" %}
-                            A meatless burger patty.
-                            {% elif item.itemName == "Turkey Burger" %}
-                            A lean turkey burger.
-                            {% else %}
-                            {% endif %}
-                        </p>
-                        <div class="menu-item-price">
-                            <span class="original-price">${{ item.itemPrice }}</span>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </section>
+            {% endfor %}
 
             <aside class="order-summary">
                 <h2>YOUR ORDER</h2>
@@ -329,8 +248,7 @@
                     <button id="delivery-button" class="delivery-button">Delivery or Pickup Available</button>
                 </div>
                 <div class="cart-items">
-                    <p class="empty-cart">Your cart is empty</p>
-                    <img src="{{ url_for('static', filename='Images_Videos/pizza-oven2.png') }}" alt="Pizza Stove" class="empty-cart-img">
+
                 </div>
                 <div class="tip-section">
                     <p>Tip: <span id="tip-amount">$0.00</span></p>
@@ -342,7 +260,7 @@
                     </div>
                 </div>
                 <span class="total-cost">TOTAL: $0.00</span>
-                <button class="checkout-button">CHECKOUT</button>
+                <button class="checkout-button" onclick="window.location.href='/cart'">PROCEED TO CHECKOUT</button>
             </aside>
 
             <div id="delivery-modal" class="modal">

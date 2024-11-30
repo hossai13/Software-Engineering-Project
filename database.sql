@@ -15,8 +15,6 @@ CREATE TABLE IF NOT EXISTS UserInfo (
     PRIMARY KEY (LoginID)
 );
 
--- TRUNCATE TABLE Login;
-
 -- Create the reviews table
 CREATE TABLE IF NOT EXISTS reviews (
     review_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -30,25 +28,65 @@ CREATE TABLE IF NOT EXISTS reviews (
     FOREIGN KEY (LoginID) references UserInfo(LoginID)
 );
 
-Select * from UserInfo;
-
--- Create the menu table
+-- Create the Menu table
 CREATE TABLE IF NOT EXISTS Menu (
-    itemID INT NOT NULL AUTO_INCREMENT,
-    itemName VARCHAR(50) NOT NULL,
-    itemPrice DECIMAL(5, 2),
-    itemCategory VARCHAR(50),
-    CONSTRAINT menu_pk PRIMARY KEY (itemID)
+    itemID INT AUTO_INCREMENT PRIMARY KEY,
+    itemName VARCHAR(50) NOT NULL UNIQUE,
+    itemCategory VARCHAR(50) NOT NULL,
+    itemPrice DECIMAL(5, 2) NOT NULL
 );
 
--- Create the order history table
-create table if not exists order_History (
-	orderid int not null,
-    LoginID int not null,
-    date_ordered date,
-    total_price decimal(5,2),
-    constraint orderh_pk primary key (orderID),
-    constraint orderh_fk foreign key (LoginID) references UserInfo(LoginID)
+-- Create the PizzaSizes table
+CREATE TABLE IF NOT EXISTS PizzaSizes (
+    sizeID INT AUTO_INCREMENT PRIMARY KEY,
+    itemID INT NOT NULL,
+    size VARCHAR(10) NOT NULL,
+    price DECIMAL(5, 2) NOT NULL,
+    FOREIGN KEY (itemID) REFERENCES Menu(itemID) ON DELETE CASCADE,
+    UNIQUE (itemID, size)
+);
+-- Create the MenuSizes table to associate sizes with menu items (specific to Pizza)
+CREATE TABLE IF NOT EXISTS MenuSizes (
+    menuSizeID INT AUTO_INCREMENT PRIMARY KEY,
+    itemID INT NOT NULL, -- Links to Menu
+    sizeID INT NOT NULL, -- Links to PizzaSizes
+    FOREIGN KEY (itemID) REFERENCES Menu(itemID) ON DELETE CASCADE,
+    FOREIGN KEY (sizeID) REFERENCES PizzaSizes(sizeID) ON DELETE CASCADE
+);
+
+-- Create the Toppings table (independent of pizzas)
+CREATE TABLE IF NOT EXISTS Toppings (
+    toppingID INT AUTO_INCREMENT PRIMARY KEY,
+    toppingName VARCHAR(50) NOT NULL UNIQUE,
+    price DECIMAL(5, 2) NOT NULL -- Price for this topping
+);
+
+-- Create the OrderHistory table to track orders
+CREATE TABLE IF NOT EXISTS OrderHistory (
+    orderID INT AUTO_INCREMENT PRIMARY KEY,
+    LoginID INT NOT NULL,
+    itemID INT NOT NULL, -- Pizza or other item
+    sizeID INT, -- NULL if not a Pizza
+    date_ordered DATE NOT NULL,
+    quantity INT DEFAULT 1,
+    FOREIGN KEY (LoginID) REFERENCES UserInfo(LoginID) ON DELETE CASCADE,
+    FOREIGN KEY (itemID) REFERENCES Menu(itemID) ON DELETE CASCADE,
+    FOREIGN KEY (sizeID) REFERENCES PizzaSizes(sizeID)
+);
+
+-- Create the OrderToppings table to associate toppings with orders
+CREATE TABLE IF NOT EXISTS OrderToppings (
+    orderToppingID INT AUTO_INCREMENT PRIMARY KEY,
+    orderID INT NOT NULL,
+    toppingID INT NOT NULL,
+    FOREIGN KEY (orderID) REFERENCES OrderHistory(orderID) ON DELETE CASCADE,
+    FOREIGN KEY (toppingID) REFERENCES Toppings(toppingID) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Categories (
+    categoryID INT AUTO_INCREMENT PRIMARY KEY,
+    itemCategory VARCHAR(50) NOT NULL UNIQUE,
+    categoryOrder INT DEFAULT 0
 );
 
 -- Create the inventory table
@@ -62,11 +100,11 @@ create table if not exists inventory (
 );
 
 -- Insert menu list
-insert into menu(itemName,itemPrice,itemCategory) Values
+insert into menu(itemName, itemPrice, itemCategory) VALUES
 ('Plain Cheese Pizza', 8.99, 'Pizza'), 
 ('White Pizza', 9.25,'Pizza'),
-('Extra Cheese Pizza', 10.95,'Pizza'), 
-('Onions & Green Pepper Pizza', 10.95,'Pizza'),
+('Extra Cheese Pizza', 10.95, 'Pizza'),
+('Onions & Green Pepper Pizza', 10.95, 'Pizza'),
 ('Salami Pizza',10.95,'Pizza'),     
 ('Mushroom Pizza', 10.95,'Pizza'),
 ('Olive Pizza', 10.95,'Pizza'),
@@ -85,6 +123,7 @@ insert into menu(itemName,itemPrice,itemCategory) Values
 ('Buffalo Chicken Pizza', 11.95,'Pizza'),
 ('Meat Lovers Pizza', 12.25,'Pizza'), 
 ('Fiesta Special Pizza', 12.25,'Pizza'),
+('Pepperoni Pizza', 10.95, 'Pizza'),
 ('Beef Pepperoni Pizza', 10.75,'Pizza'), 
 ('Beef Sausage Pizza', 10.95,'Pizza'),
 ('BBQ Chicken Pizza', 10.95,'Pizza'), 
@@ -364,9 +403,9 @@ insert into menu(itemName,itemPrice,itemCategory) Values
 ('Chicken Parmigiana Pasta',12.95,'Pasta'),
 ('Veal Parmigiana Pasta',12.50,'Pasta'),
 ('Eggplant Parmigiana Pasta',12.50,'Pasta'),
-('Porkchops Center Cut Platter',13.95,'Dinner'),
-('Chopped Steak Platter',13.95,'Dinner'),
-('Baked Meatloaf Platter',13.95,'Dinner'),
+('Porkchops Center Cut Platter',13.95,'Dinner Platters'),
+('Chopped Steak Platter',13.95,'Dinner Platters'),
+('Baked Meatloaf Platter',13.95,'Dinner Platters'),
 ('Tuna Salad Platter',12.50,'Cold Platters'),
 ('Chicken Salad Platter',12.50,'Cold Platters'),
 ('Broiled Ham & Cheese Platter',12.50,'Cold Platters'),
@@ -375,18 +414,18 @@ insert into menu(itemName,itemPrice,itemCategory) Values
 ('Roast Beef Special Platter',7.95,'Cold Platters'),
 ('Turkey Special Platter',7.95,'Cold Platters'),
 ('Reuben Deluxe Platter',11.50,'Cold Platters'),
-('Chicken Cacciatore', 13.95,'FSP'),
-('Chicken Marsala', 13.95,'FSP'),
-('Chicken Piccanti', 13.95,'FSP'),
-('Chicken Scampi', 13.95,'FSP'),
-('Chicken Curry', 13.95,'FSP'),
-('Shrimp Oriental', 13.95,'FSP'),
-('Chicken Stir Fry', 13.95,'FSP'),
-('Chicken Oriental', 13.95,'FSP'),
-('Chicken Teriyaki', 13.95,'FSP'),
-('Shrimp Scampi', 13.95,'FSP'),
-('Shrimp Stir Fry', 13.95,'FSP'),
-('Cajun Chicken', 13.95,'FSP'),
+('Chicken Cacciatore', 13.95,'Special Platters'),
+('Chicken Marsala', 13.95,'Special Platters'),
+('Chicken Piccanti', 13.95,'Special Platters'),
+('Chicken Scampi', 13.95,'Special Platters'),
+('Chicken Curry', 13.95,'Special Platters'),
+('Shrimp Oriental', 13.95,'Special Platters'),
+('Chicken Stir Fry', 13.95,'Special Platters'),
+('Chicken Oriental', 13.95,'Special Platters'),
+('Chicken Teriyaki', 13.95,'Special Platters'),
+('Shrimp Scampi', 13.95,'Special Platters'),
+('Shrimp Stir Fry', 13.95,'Special Platters'),
+('Cajun Chicken', 13.95,'Special Platters'),
 ('Fish & Chips', 13.95,'Seafood'),
 ('Deviled Crab', 13.95,'Seafood'),
 ('Shrimp in a Basket', 13.95,'Seafood'),
@@ -404,22 +443,22 @@ insert into menu(itemName,itemPrice,itemCategory) Values
 ('Lamb Souvlaki Sandwich', 8.50,'Greek'),
 ('Lamb Souvlaki Platter', 12.95,'Greek'),
 ('Spinach Pie Platter', 10.95,'Greek'),
-('Chicken Nuggets',6.95,'Chicken'),
-('Chicken Nuggets Platter',11.50,'Chicken'),
-('Half Broiled Chicken',9.95,'Chicken'),
-('Half Broiled Chicken Platter',13.95,'Chicken'),
-('Half Broiled BBQ Chicken',9.95,'Chicken'),
-('Half Broiled BBQ Chicken Platter',13.95,'Chicken'),
-('Chicken Fingers',8.95,'Chicken'),
-('Chicken Fingers Platter',13.95,'Chicken'),
-('Half BBQ Chicken',9.95,'Chicken'),
-('Half BBQ Chicken Platter',11.95,'Chicken'),
-('Fried Chicken Wings',10.50,'Chicken'),
-('Fried Chicken Wings Platter',13.50,'Chicken'),
-('Fried Chicken',10.99,'Chicken'),
-('Fried Chicken Platter',13.95,'Chicken'),
-('Whole BBQ Chicken Platter',17.95,'Chicken'),
-('Whole Broiled Chicken Platter',17.95,'Chicken'),
+('Chicken Nuggets', 6.95,'Chicken'),
+('Chicken Nuggets Platter', 11.50,'Chicken'),
+('Half Broiled Chicken', 9.95,'Chicken'),
+('Half Broiled Chicken Platter', 13.95,'Chicken'),
+('Half Broiled BBQ Chicken', 9.95,'Chicken'),
+('Half Broiled BBQ Chicken Platter', 13.95,'Chicken'),
+('Chicken Fingers', 8.95,'Chicken'),
+('Chicken Fingers Platter', 13.95,'Chicken'),
+('Half BBQ Chicken', 9.95,'Chicken'),
+('Half BBQ Chicken Platter', 11.95,'Chicken'),
+('Fried Chicken Wings', 10.50,'Chicken'),
+('Fried Chicken Wings Platter', 13.50,'Chicken'),
+('Fried Chicken', 10.99,'Chicken'),
+('Fried Chicken Platter', 13.95,'Chicken'),
+('Whole BBQ Chicken Platter', 17.95,'Chicken'),
+('Whole Broiled Chicken Platter', 17.95,'Chicken'),
 ('Kids Chicken Nuggets & Fries', 7.50,'Kids'),
 ('Kids Chicken Fingers & Fries', 7.50,'Kids'),
 ('Kids Chicken Wings & Fries', 7.50,'Kids'),
@@ -427,30 +466,99 @@ insert into menu(itemName,itemPrice,itemCategory) Values
 ('Kids Flouder & Fries', 7.50,'Kids'),
 ('Kids Cheeseburger & Fries', 7.50,'Kids'),
 ('Kids Pizza with One Topping', 5.25,'Kids'),
-('Cheesecake',4.25,'Dessert'),
-('Cake',4.25,'Dessert'),
-('Assorted Pies',3.50,'Dessert'),
-('Corn Muffins',3.25,'Dessert'),
-('Cinnamon Buns',3.25,'Dessert'),
-('Bagels',2.50,'Dessert'),
-('Rice Pudding',4.50,'Dessert'),
-('Banana Pudding',4.50,'Dessert'),
-('Ice Cream',1.95,'Dessert'),
-('Mistic',2.75,'Beverages'),
-('Snapple',2.75,'Beverages'),
-('Water',1.00,'Beverages'),
-('Red Bull',2.99,'Beverages'),
-('Arizona',2.50,'Beverages'),
-('Minutemaid',2.75,'Beverages'),
-('Calypso',2.95,'Beverages'),
-('Nesquick',2.75,'Beverages'),
-('Coffee',1.55,'Beverages'),
-('Milkshake',6.25,'Beverages'),
-('Nantucket',2.95,'Beverages'),
-('Soda',1.75,'Beverages'),
-('Gatorade',2.99,'Beverages'),
-('Vitamin Water',2.99,'Beverages'),
-('Gold Peak',2.99,'Beverages'),
-('Aloe',2.99,'Beverages');
+('Cheesecake', 4.25,'Dessert'),
+('Cake', 4.25,'Dessert'),
+('Assorted Pies', 3.50,'Dessert'),
+('Corn Muffins', 3.25,'Dessert'),
+('Cinnamon Buns', 3.25,'Dessert'),
+('Bagels', 2.50,'Dessert'),
+('Rice Pudding', 4.50,'Dessert'),
+('Banana Pudding', 4.50,'Dessert'),
+('Ice Cream', 1.95,'Dessert'),
+('Mistic', 2.75,'Drinks'),
+('Snapple', 2.75,'Drinks'),
+('Water', 1.00,'Drinks'),
+('Red Bull', 2.99,'Drinks'),
+('Arizona', 2.50,'Drinks'),
+('Minutemaid', 2.75,'Drinks'),
+('Calypso', 2.95,'Drinks'),
+('Nesquick', 2.75,'Drinks'),
+('Coffee', 1.55,'Drinks'),
+('Milkshake', 6.25,'Drinks'),
+('Nantucket', 2.95,'Drinks'),
+('Soda', 1.75,'Drinks'),
+('Gatorade', 2.99,'Drinks'),
+('Vitamin Water', 2.99,'Drinks'),
+('Gold Peak', 2.99,'Drinks'),
+('Aloe', 2.99,'Drinks');
 
-select * from menu;
+INSERT INTO PizzaSizes (itemID, size, price) VALUES
+(1, 'Small', 8.99), (1, 'Large', 12.95), (1, 'Giant', 18.95),
+(2, 'Small', 9.25), (2, 'Large', 12.97), (2, 'Giant', 18.95),
+(3, 'Small', 10.95), (3, 'Large', 15.50), (3, 'Giant', 24.50),
+(4, 'Small', 10.95), (4, 'Large', 15.50), (4, 'Giant', 23.95),
+(5, 'Small', 10.95), (5, 'Large', 15.50), (5, 'Giant', 24.50),
+(6, 'Small', 10.95), (6, 'Large', 15.50), (6, 'Giant', 24.50),
+(7, 'Small', 10.95), (7, 'Large', 15.50), (7, 'Giant', 23.85),
+(8, 'Small', 10.95), (8, 'Large', 15.50), (8, 'Giant', 23.95),
+(9, 'Small', 10.95), (9, 'Large', 15.50), (9, 'Giant', 24.50),
+(10, 'Small', 10.95), (10, 'Large', 15.50), (10, 'Giant', 26.00),
+(11, 'Small', 11.95), (11, 'Large', 15.50), (11, 'Giant', 26.00),
+(12, 'Small', 11.95), (12, 'Large', 15.50), (12, 'Giant', 26.00),
+(13, 'Small', 11.95), (13, 'Large', 15.50), (13, 'Giant', 26.00),
+(14, 'Small', 11.95), (14, 'Large', 15.50), (14, 'Giant', 26.00),
+(15, 'Small', 11.95), (15, 'Large', 16.95), (15, 'Giant', 26.00),
+(16, 'Small', 11.95), (16, 'Large', 16.95), (16, 'Giant', 26.00),
+(17, 'Small', 11.95), (17, 'Large', 16.95), (17, 'Giant', 26.00),
+(18, 'Small', 11.95), (18, 'Large', 16.95), (18, 'Giant', 26.00),
+(19, 'Small', 11.95), (19, 'Large', 16.95), (19, 'Giant', 26.00),
+(20, 'Small', 11.95), (20, 'Large', 16.95), (20, 'Giant', 27.00),
+(21, 'Small', 12.25), (21, 'Large', 16.95), (21, 'Giant', 26.20),
+(22, 'Small', 12.25), (22, 'Large', 16.95), (22, 'Giant', 26.20),
+(23, 'Small', 10.95), (23, 'Large', 15.50), (23, 'Giant', 24.50),
+(24, 'Small', 10.75), (24, 'Large', 15.50), (24, 'Giant', 24.90),
+(25, 'Small', 10.95), (25, 'Large', 14.25), (25, 'Giant', 23.95),
+(26, 'Small', 10.95), (26, 'Large', 15.95), (26, 'Giant', 26.00),
+(27, 'Small', 10.95), (27, 'Large', 15.95), (27, 'Giant', 24.50),
+(28, 'Small', 10.95), (28, 'Large', 14.50), (28, 'Giant', 23.90),
+(29, 'Small', 10.95), (29, 'Large', 14.50), (29, 'Giant', 23.90),
+(30, 'Small', 10.95), (30, 'Large', 13.95), (30, 'Giant', 23.90),
+(31, 'Large', 14.50), (31, 'Giant', 25.00);
+
+-- Insert sample data into Toppings
+INSERT INTO Toppings (toppingName, price) VALUES
+('Extra Cheese', 1.50),
+('Pepperoni', 2.00),
+('Mushrooms', 1.75),
+('Onions', 1.25),
+('Green Peppers', 1.25),
+('Olives', 1.50),
+('Bacon', 2.50);
+
+-- Sort categories
+INSERT INTO Categories (itemCategory, categoryOrder) VALUES
+('Pizza', 1),
+('Strombolis', 2),
+('Sandwiches', 3),
+('Burgers', 4),
+('Wraps', 5),
+('Quesadillas', 6),
+('Wings', 7),
+('Seafood', 8),
+('Sides', 9),
+('Salads', 10),
+('Pasta', 11),
+('Fiesta Specials', 12),
+('Special Platters', 13),
+('Dinner Platters', 14),
+('Cold Platters', 15),
+('Greek', 16),
+('Breakfast', 17),
+('Drinks', 18),
+('Steaks', 19),
+('Chicken Steaks', 20),
+('Chicken', 21),
+('Hoagies', 22), 
+('Grinders', 23),
+('Kids', 24),
+('Dessert', 25);

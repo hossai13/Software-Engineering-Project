@@ -22,7 +22,7 @@ app.secret_key = 'your secret key'
 # MySQL database configuration
 app.config['MYSQL_HOST'] = 'localhost'  
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'root'
+app.config['MYSQL_PASSWORD'] = '2113284'
 app.config['MYSQL_DB'] = 'PizzaInfo'
 
 # File upload configuration
@@ -122,83 +122,252 @@ def review_photo(review_id):
     else:
         return Response(open('static/placeholder.jpg', 'rb').read(), mimetype='image/jpeg')
 
+@app.route('/api/item_sizes/<int:item_id>', methods=['GET'])
+def get_item_sizes(item_id):
+    try:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('SELECT size, price FROM PizzaSizes WHERE itemID = %s', (item_id,))
+        sizes = cursor.fetchall()
+        cursor.close()
+
+        for size in sizes:
+            size['price'] = float(size['price'])
+
+        return jsonify(sizes)
+    except Exception as e:
+        print(f"Error fetching sizes: {e}")
+        return jsonify({"error": "Failed to fetch sizes."}), 500
+
+@app.route('/api/item_toppings/<int:item_id>', methods=['GET'])
+def get_item_toppings(item_id):
+    try:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('SELECT itemCategory FROM Menu WHERE itemID = %s', (item_id,))
+        item = cursor.fetchone()
+
+        if not item:
+            return jsonify({"error": "Item not found."}), 404
+
+        if item['itemCategory'] != 'Pizza':
+            return jsonify({"error": "Toppings are only available for Pizza items."}), 400
+
+        cursor.execute('SELECT toppingName, price FROM Toppings')
+        toppings = cursor.fetchall()
+        cursor.close()
+
+        if not toppings:
+            return jsonify({"error": "No toppings found."}), 404
+
+        for topping in toppings:
+            topping['price'] = float(topping['price'])
+
+        return jsonify(toppings)
+    except Exception as e:
+        print(f"Error fetching toppings for item ID {item_id}: {e}")
+        return jsonify({"error": "Failed to fetch toppings due to server error."}), 500
+    
+@app.route('/api/cart', methods=['GET', 'POST', 'PATCH', 'DELETE'])
+def cart_api():
+    if 'cart' not in session:
+        session['cart'] = {'items': [], 'total': 0.0}
+
+    cart = session['cart']
+
+    if request.method == 'GET':
+        return jsonify(cart)
+
+    elif request.method == 'POST':
+        data = request.json
+        item_id = data.get('id')
+        item_name = data.get('name')
+        quantity = data.get('quantity', 1)
+        price = data.get('price')
+        size = data.get('size', None)
+        category = data.get('category', None)
+        toppings = data.get('toppings', [])
+
+        if not item_id or not item_name or price is None:
+            return jsonify({'error': 'Invalid item data'}), 400
+
+        topping_total = sum([topping['price'] for topping in toppings])
+        total_price = (price + topping_total) * quantity
+
+        existing_item = next((item for item in cart['items']
+                            if item['id'] == item_id and item['size'] == size and item['toppings'] == toppings), None)
+
+        if existing_item:
+            existing_item['quantity'] += quantity
+            existing_item['total_price'] = existing_item['quantity'] * (price + topping_total)
+        else:
+            cart['items'].append({
+                'id': item_id,
+                'name': item_name,
+                'quantity': quantity,
+                'price_per_unit': price,
+                'size': size,
+                'category': category,
+                'toppings': toppings,
+                'total_price': total_price
+            })
+
+        cart['total'] = sum(item['total_price'] for item in cart['items'])
+        session.modified = True
+        return jsonify(cart)
+
+    elif request.method == 'PATCH':
+        data = request.json
+        item_id = data.get('id')
+        quantity = data.get('quantity')
+
+        if not item_id or quantity is None:
+            return jsonify({'error': 'Invalid item data'}), 400
+
+        for item in cart['items']:
+            if item['id'] == item_id:
+                item['quantity'] = quantity
+                item['total_price'] = item['quantity'] * (item['price_per_unit'] + sum(topping['price'] for topping in item['toppings']))
+                break
+        else:
+            return jsonify({'error': 'Item not found in cart'}), 404
+
+        cart['total'] = sum(item['total_price'] for item in cart['items'])
+        session.modified = True
+        return jsonify(cart)
+
+    elif request.method == 'DELETE':
+        data = request.json
+        item_id = data.get('id')
+
+        if not item_id:
+            return jsonify({'error': 'Invalid item data'}), 400
+
+        cart['items'] = [item for item in cart['items'] if item['id'] != item_id]
+
+
+        cart['total'] = sum(item['total_price'] for item in cart['items'])
+        session.modified = True
+        return jsonify(cart)
+
+    return jsonify({'error': 'Method not allowed'}), 405
+
 # Route for the menu page
 @app.route('/menu', methods=['GET', 'POST'])
 def menu():
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT DISTINCT itemName, itemCategory, itemPrice FROM Menu ORDER BY itemName")
-    all_menu_items = cursor.fetchall()
-    
-    cursor.execute("SELECT DISTINCT itemName, itemPrice FROM Menu WHERE itemCategory = 'Pizza' ORDER BY itemName")
-    menu_items = cursor.fetchall()
-    
-    cursor.execute("SELECT DISTINCT itemName, itemPrice FROM Menu WHERE itemCategory = 'Strombolis'")
-    strombolis_items = cursor.fetchall()
-    
-    cursor.execute("SELECT DISTINCT itemName, itemPrice FROM Menu WHERE itemCategory = 'Sandwiches'")
-    sandwiches_items = cursor.fetchall()
-    
-    cursor.execute("SELECT DISTINCT itemName, itemPrice FROM Menu WHERE itemCategory = 'Burgers'")
-    burgers_items = cursor.fetchall()
-    
-    if is_admin():
-    # this is for deleting the menu items
-        if request.method == 'POST' and 'delete_menu' in request.form:
-            menu_id = request.form['delete_menu']
-            cursor.execute('DELETE FROM menu WHERE itemName = %s', (menu_id,))
-            mysql.connection.commit()
+    try:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         
-    #this is for adding a menu item
-        if request.method == 'POST' and 'addName' in request.form and 'addPrice' in request.form and 'addCategory' in request.form:
-            item_name = request.form['addName']
-            item_price = request.form['addPrice']
-            item_category = request.form['addCategory']
-            cursor.execute('INSERT INTO menu (itemName, itemPrice, itemCategory) VALUES (%s, %s, %s)', (item_name, item_price, item_category))
-            mysql.connection.commit()
-            return redirect(url_for('menu'))
-    #this is for updating the menu item
-        if request.method == 'POST' and 'editName' in request.form and 'updatePrice' in request.form:
-            item_name = request.form['editName']
-            item_price = request.form['updatePrice']
-            cursor.execute('UPDATE Menu SET itemPrice = %s WHERE itemName = %s', (item_price, item_name))
-            mysql.connection.commit()
-            return redirect(url_for('menu'))
-    #this is for putting a special on the menu item
-        if request.method == 'POST' and 'specialName' in request.form and 'specialPercent' in request.form:
-            special_name = request.form['specialName']
-            try:
-                special_percent = int(request.form['specialPercent'])
-                if special_percent < 0 or special_percent > 100:
-                    return "Special percent must be between 0 and 100"
-                special_percent = 1 - (special_percent / 100)
-            except ValueError:
-                return "Special percent must be an integer"
-            
-            try:
-                cursor.execute('UPDATE Menu SET itemPrice = itemPrice * %s WHERE itemName = %s', (special_percent, special_name))
+        # Fetch all menu items
+        cursor.execute("SELECT DISTINCT itemName, itemCategory, itemPrice FROM Menu ORDER BY itemName")
+        all_menu_items = cursor.fetchall()
+        
+        # Fetch categories from the Categories table
+        cursor.execute("SELECT itemCategory FROM Categories ORDER BY categoryOrder")
+        categories = cursor.fetchall()
+        
+        # Fetch all menu items grouped by category
+        menu_items_by_category = {}
+        for category in categories:
+            cursor.execute("""
+                SELECT DISTINCT
+                    m.itemID, m.itemName, m.itemCategory,
+                    COALESCE(MIN(ps.price), m.itemPrice) AS defaultPrice,
+                    CASE
+                        WHEN MIN(ps.price) IS NOT NULL THEN TRUE
+                        ELSE FALSE
+                    END AS hasSizes
+                FROM
+                    Menu m
+                LEFT JOIN
+                    PizzaSizes ps ON m.itemID = ps.itemID
+                WHERE
+                    m.itemCategory = %s
+                GROUP BY
+                    m.itemID, m.itemName, m.itemCategory, m.itemPrice
+                ORDER BY
+                    m.itemName;
+            """, (category['itemCategory'],))
+            menu_items_by_category[category['itemCategory']] = cursor.fetchall()
+        
+        # Close the cursor
+        cursor.close()
+
+        # Admin-specific functionality
+        if request.method == 'POST' and is_admin():
+            # Delete menu item
+            if 'delete_menu' in request.form:
+                menu_id = request.form['delete_menu']
+                cursor = mysql.connection.cursor()
+                cursor.execute('DELETE FROM Menu WHERE itemID = %s', (menu_id,))
                 mysql.connection.commit()
-            except Exception as e:
-                cursor.rollback()
-                print(f"Database Error: {e}")
-                return "Database Error"
-            return redirect(url_for('menu'))
-            
-            
-    if is_admin():
-        return render_template('menu.html', 
-                               all_menu_items=all_menu_items,
-                               menu_items=menu_items,
-                               strombolis_items=strombolis_items,
-                               sandwiches_items=sandwiches_items,
-                               burgers_items=burgers_items,
-                               is_admin=is_admin())
-    else:
-        return render_template('menu.html',
-                               all_menu_items=all_menu_items,
-                               menu_items=menu_items,
-                               strombolis_items=strombolis_items,
-                               sandwiches_items=sandwiches_items,
-                               burgers_items=burgers_items)  
+                cursor.close()
+                return redirect(url_for('menu'))
+
+            # Add a new menu item
+            if 'addName' in request.form and 'addPrice' in request.form and 'addCategory' in request.form:
+                item_name = request.form['addName']
+                item_price = request.form['addPrice']
+                item_category = request.form['addCategory']
+                cursor = mysql.connection.cursor()
+                cursor.execute('INSERT INTO Menu (itemName, itemPrice, itemCategory) VALUES (%s, %s, %s)', 
+                               (item_name, item_price, item_category))
+                mysql.connection.commit()
+                cursor.close()
+                return redirect(url_for('menu'))
+
+            # Update an existing menu item
+            if 'editName' in request.form and 'updatePrice' in request.form:
+                item_name = request.form['editName']
+                item_price = request.form['updatePrice']
+                cursor = mysql.connection.cursor()
+                cursor.execute('UPDATE Menu SET itemPrice = %s WHERE itemName = %s', (item_price, item_name))
+                mysql.connection.commit()
+                cursor.close()
+                return redirect(url_for('menu'))
+
+            # Apply a special discount to a menu item
+            if 'specialName' in request.form and 'specialPercent' in request.form:
+                special_name = request.form['specialName']
+                try:
+                    special_percent = int(request.form['specialPercent'])
+                    if special_percent < 0 or special_percent > 100:
+                        return "Special percent must be between 0 and 100"
+                    discount_factor = 1 - (special_percent / 100)
+                except ValueError:
+                    return "Special percent must be an integer"
+                
+                try:
+                    cursor = mysql.connection.cursor()
+                    cursor.execute('UPDATE Menu SET itemPrice = itemPrice * %s WHERE itemName = %s', 
+                                   (discount_factor, special_name))
+                    mysql.connection.commit()
+                    cursor.close()
+                except Exception as e:
+                    mysql.connection.rollback()  # Rollback transaction on error
+                    print(f"Database Error: {e}")
+                    return "Database Error"
+                return redirect(url_for('menu'))
+
+        # Render the menu page with all items and categories
+        return render_template(
+            'menu.html',
+            all_menu_items=all_menu_items,
+            menu_items_by_category=menu_items_by_category,
+            is_admin=is_admin()
+        )
+    except Exception as e:
+        print(f"Error in /menu route: {e}")
+        return "Error loading the menu." 
+
+@app.route('/cart')
+def cart():
+    if 'cart' not in session or not isinstance(session['cart'], dict):
+        session['cart'] = {'items': [], 'total': 0.0}
+
+    cart_data = session['cart']
+    items = cart_data.get('items', [])
+    total = cart_data.get('total', 0.0)
+
+    return render_template('checkout.html', items=items, total=total)
 
 # Registration route
 @app.route('/register', methods=['GET', 'POST'])
