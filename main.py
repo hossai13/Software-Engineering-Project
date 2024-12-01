@@ -397,11 +397,15 @@ def place_order():
         order_items = []
         for item in cart['items']:
             item_id = item['id']
-            size_id = item['size']  
+            # size_id = item['size']  
             quantity = item['quantity']
             price_per_unit = item['price_per_unit']
             toppings = item['toppings']
             date_ordered = datetime.now().strftime('%Y-%m-%d')  
+            if item_id == 1:
+                size_id = 1
+            else:
+                size_id = None
 
             topping_total = sum(topping['price'] for topping in toppings)
             total_price = (price_per_unit + topping_total) * quantity
@@ -424,6 +428,7 @@ def place_order():
         conn.commit()
         session.pop('cart', None)  
         total_order_price = cart['total']
+        update_points(total_order_price)
         return render_template('status.html', order_items=order_items, total_order_price=total_order_price)
 
     except Exception as e:
@@ -463,6 +468,42 @@ def order_history():
 
     cursor.close()
     return render_template('status.html', orders=order_list)
+
+@app.route('/rewards', methods=['GET'])
+def rewards():
+    if 'loggedin' in session:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('SELECT Points FROM UserInfo WHERE LoginID = %s', (session['id'],))
+        points = cursor.fetchone()
+        cursor.close()
+    return render_template('rewards.html', points=points)
+
+@app.route('/update_points', methods=['GET','POST'])
+# Input a negative number to subtract points aka redeem
+def update_points(amount):
+    if 'loggedin' in session:
+        points = amount * 100
+        if points > 0:
+            percent = points * .10 # 10%
+            points = points + percent
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute('UPDATE UserInfo SET Points=Points + %s WHERE LoginID = %s', (points, session['id'],))
+            mysql.connection.commit()
+            cursor.close()
+            return jsonify({'status': 'success'}) 
+        else:
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute('SELECT Points FROM UserInfo WHERE LoginID = %s', (session['id'],))
+            userPoints = cursor.fetchone()
+            if (userPoints['Points'] + points) >= 0:
+                cursor.execute('UPDATE UserInfo SET Points=Points + %s WHERE LoginID = %s', (points, session['id'],))
+                mysql.connection.commit()
+                cursor.close()
+                return jsonify({'status': 'success'})
+            else:
+                return jsonify({'status': 'failed - not enough points'})   
+
+
 
 # Registration route
 @app.route('/register', methods=['GET', 'POST'])
