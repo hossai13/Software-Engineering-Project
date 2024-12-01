@@ -16,6 +16,7 @@
             <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
             {% if 'loggedin' in session %}
                 <li><a href="{{ url_for('profile') }}">PROFILE</a></li>
+                <li><a href="{{ url_for('rewards') }}">REWARDS</a></li>
                 <li><a href="{{ url_for('logout') }}">LOGOUT</a></li>
             {% else %}
                 <li><a href="{{ url_for('register') }}">REGISTER</a></li>
@@ -38,6 +39,7 @@
                     </ul>
                     <p>Quantity: {{ item.quantity }}</p>
                     <p>Total: ${{ item.total_price }}</p>
+                    <p>Total: {{item.total_points }}</p>
                     <button class="edit-button">Edit</button>
                     <button class="remove-button">Remove</button>
                 </div>
@@ -50,7 +52,31 @@
             <form action="{{ url_for('place_order') }}" method="POST">
                 <button type="submit" class="place-order-button">Place Order</button>
             </form>
+            <button type="submit" class="clear-cart-button" onclick="clearCart()">Clear Cart</button>
         </section>
     </main>
+    <script>
+        function clearCart() {
+    fetch('/clear_cart', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Update the cart UI to reflect the cleared cart
+            updateCartUI({ items: [], total: 0.0 });
+        } else {
+            console.error('Failed to clear cart');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+    </script>
 </body>
 </html>

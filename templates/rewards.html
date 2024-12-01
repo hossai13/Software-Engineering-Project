@@ -18,6 +18,7 @@
                 <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
                 {% if 'loggedin' in session %}
                     <li><a href="{{ url_for('profile') }}">PROFILE</a></li>
+                    <li><a href="{{ url_for('rewards') }}">REWARDS</a></li>
                     <li><a href="{{ url_for('logout') }}">LOGOUT</a></li>
                 {% else %}
                     <li><a href="{{ url_for('register') }}">REGISTER</a></li>
@@ -27,7 +28,7 @@
                     <li><button id="admin-tools-btn" class="nav-btn">ADMIN TOOLS</button></li>
                 {% endif %} 
                 <li id="cart-icon">
-                    <a href="{{ url_for('menu') }}"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
+                    <a href="{{ url_for('cart') }}"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
                 </li>
             </ul>
         </nav>
@@ -144,13 +145,15 @@
             
             <section class="menu-section">
                 <h2 class="promo">REDEEM POINTS FOR REWARDS</h2>
+                <h1>Your User Points: {{ points['Points'] }}</h1>
                 <div class="featured-items">
                     <div class="item-card" 
                          data-item-id="23"
                          data-item-name="Pepperoni Pizza" 
                          data-item-category="Pizza" 
-                         data-item-price=None
+                         data-item-price="0"
                          data-item-points="10000"
+                         data-item-size="1"
                          data-item-img="{{ url_for('static', filename='Images_Videos/pizza.jpeg') }}">
                         <img src="{{ url_for('static', filename='Images_Videos/pizza.jpeg') }}" alt="Pepperoni Pizza">
                         <h3>Pepperoni Pizza</h3>
@@ -164,7 +167,8 @@
                          data-item-name="Plain Stromboli" 
                          data-item-category="Strombolis" 
                          data-item-price="0"
-                         data-item-points="8000" 
+                         data-item-points="8000"
+                         data-item-size="1" 
                          data-item-img="{{ url_for('static', filename='Images_Videos/stromboli.png') }}">
                         <img src="{{ url_for('static', filename='Images_Videos/stromboli.png') }}" alt="Stromboli">
                         <h3>Plain Stromboli</h3>
@@ -177,7 +181,9 @@
                          data-item-id="3"
                          data-item-name="Burger" 
                          data-item-category="Burger" 
-                         data-item-price="12500" 
+                         data-item-price="0"
+                         data-item-points="12500"
+                         data-item-size="1"  
                          data-item-img="{{ url_for('static', filename='Images_Videos/burger.jpg') }}">
                         <img src="{{ url_for('static', filename='Images_Videos/burger.jpg') }}" alt="Burger">
                         <h3>Burger</h3>

@@ -19,13 +19,14 @@
             <li><a href="{{ url_for('menu') }}">Order Now</a></li>
             {% if 'loggedin' in session %}
                 <li><a href="{{ url_for('profile') }}">Profile</a></li>
+                <li><a href="{{ url_for('rewards') }}">REWARDS</a></li>
                 <li><a href="{{ url_for('logout') }}">Logout</a></li>
             {% else %}
                 <li><a href="{{ url_for('register') }}">Register</a></li>
                 <li><a href="{{ url_for('login') }}">Login</a></li>
             {% endif %}
             <li id="cart-icon">
-                <a href="{{ url_for('menu') }}"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
+                <a href="{{ url_for('cart') }}"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
             </li>
         </ul>
     </nav>

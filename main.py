@@ -23,7 +23,7 @@ app.secret_key = 'your secret key'
 # MySQL database configuration
 app.config['MYSQL_HOST'] = 'localhost'  
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'root1234'
 app.config['MYSQL_DB'] = 'PizzaInfo'
 
 # File upload configuration
@@ -406,6 +406,7 @@ def place_order():
             # size_id = item['size']  
             quantity = item['quantity']
             price_per_unit = item['price_per_unit']
+            points = item.get('points', 0)
             toppings = item['toppings']
             date_ordered = datetime.now().strftime('%Y-%m-%d')  
             if item_id == 1:
@@ -415,6 +416,15 @@ def place_order():
 
             topping_total = sum(topping['price'] for topping in toppings)
             total_price = (price_per_unit + topping_total) * quantity
+            total_points = points * quantity
+
+            #Subtract points
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute('SELECT Points FROM UserInfo WHERE LoginID = %s', (session['id'],))
+            userPoints = cursor.fetchone()
+            if (userPoints['Points'] - total_points) >= 0:
+                cursor.execute('UPDATE UserInfo SET Points=Points - %s WHERE LoginID = %s', (total_points, session['id'],))
+                mysql.connection.commit()
 
             cursor.execute('''
                 INSERT INTO OrderHistory (LoginID, itemID, sizeID, date_ordered, quantity, price)
@@ -475,6 +485,12 @@ def order_history():
     cursor.close()
     return render_template('status.html', orders=order_list)
 
+@app.route('/clear_cart', methods=['POST'])
+def clear_cart():
+    session.pop('cart', None)
+    session.modified = True
+    return jsonify({'status': 'success'})
+
 @app.route('/rewards', methods=['GET'])
 def rewards():
     if 'loggedin' in session:
@@ -509,8 +525,58 @@ def update_points(amount):
             else:
                 return jsonify({'status': 'failed - not enough points'})   
 
+@app.route('/redeem_rewards', methods=['POST'])
+def redeem_rewards():
+    if 'cart' not in session or not isinstance(session['cart'], dict):
+        session['cart'] = {'items': [], 'total': 0.0}
+    
+    cart_data = session['cart']
+    item = request.get_json()
 
+    # Extract item details from the request
+    item_id = item.get('id')
+    item_name = item.get('name')
+    item_price = item.get('price', 0.0)
+    item_points = item.get('points', 0)
+    item_quantity = item.get('quantity', 1)
+    item_category = item.get('category')
+    item_toppings = item.get('toppings', [])
+    item_size = item.get('size')
+    item_total_price = item.get('total_price', item_price * item_quantity)
+    item_total_points = item.get('total_points', item_points * item_quantity)
 
+    #add to cart
+    # Check if the item is already in the cart
+    existing_item = next((i for i in cart_data['items'] if i['id'] == item_id), None)
+
+    if existing_item:
+        # Update the quantity and total price/points of the existing item
+        existing_item['quantity'] += item_quantity
+        existing_item['total_price'] += item_total_price
+        existing_item['total_points'] += item_total_points
+    else:
+        # Add the new item to the cart
+        new_item = {
+            'id': item_id,
+            'name': item_name,
+            'price_per_unit': item_price,
+            'points': item_points,
+            'quantity': item_quantity,
+            'category': item_category,
+            'toppings': item_toppings,
+            'size': item_size,
+            'total_price': item_total_price,
+            'total_points': item_total_points
+        }
+        cart_data['items'].append(new_item)
+    # Update the total price in the cart
+    cart_data['total'] += item_total_price
+
+    # Update the session
+    session['cart'] = cart_data
+    session.modified = True
+
+    return jsonify({'status': 'success', 'cart': cart_data})
 # Registration route
 @app.route('/register', methods=['GET', 'POST'])
 def register():
