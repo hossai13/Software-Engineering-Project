@@ -1,6 +1,7 @@
 import math
 from io import BytesIO
-from flask import Flask, flash, jsonify, render_template, request, redirect, url_for, session, Response
+from flask import Flask, flash, jsonify, render_template, request, session, redirect, url_for, session, Response
+import mysql.connector 
 from flask_mysqldb import MySQL
 from datetime import datetime
 import os
@@ -22,7 +23,7 @@ app.secret_key = 'your secret key'
 # MySQL database configuration
 app.config['MYSQL_HOST'] = 'localhost'  
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = '2113284'
+app.config['MYSQL_PASSWORD'] = 'root1234'
 app.config['MYSQL_DB'] = 'PizzaInfo'
 
 # File upload configuration
@@ -165,7 +166,7 @@ def get_item_toppings(item_id):
     except Exception as e:
         print(f"Error fetching toppings for item ID {item_id}: {e}")
         return jsonify({"error": "Failed to fetch toppings due to server error."}), 500
-    
+
 @app.route('/api/cart', methods=['GET', 'POST', 'PATCH', 'DELETE'])
 def cart_api():
     if 'cart' not in session:
@@ -358,6 +359,7 @@ def menu():
         print(f"Error in /menu route: {e}")
         return "Error loading the menu." 
 
+# Route for cart
 @app.route('/cart')
 def cart():
     if 'cart' not in session or not isinstance(session['cart'], dict):
@@ -367,7 +369,100 @@ def cart():
     items = cart_data.get('items', [])
     total = cart_data.get('total', 0.0)
 
+    # Check if the cart is empty and provide a message or redirect
+    if not items:
+        return render_template('checkout.html', message="Your cart is empty.", total=total)
+
     return render_template('checkout.html', items=items, total=total)
+
+@app.route('/place-order', methods=['POST'])
+def place_order():
+    if 'cart' not in session or not session['cart']['items']:
+        print("Cart is empty!")
+        return jsonify({'error': 'Cart is empty'}), 400
+
+    cart = session['cart']
+    user_id = session.get('id')  
+
+    if not user_id:
+        print("User not logged in!")
+        return jsonify({'error': 'User not logged in'}), 400
+
+    try:
+        
+        conn = mysql.connection
+        cursor = conn.cursor()
+
+       
+        order_items = []
+        for item in cart['items']:
+            item_id = item['id']
+            size_id = item['size']  
+            quantity = item['quantity']
+            price_per_unit = item['price_per_unit']
+            toppings = item['toppings']
+            date_ordered = datetime.now().strftime('%Y-%m-%d')  
+
+            topping_total = sum(topping['price'] for topping in toppings)
+            total_price = (price_per_unit + topping_total) * quantity
+
+            cursor.execute('''
+                INSERT INTO OrderHistory (LoginID, itemID, sizeID, date_ordered, quantity, price)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            ''', (user_id, item_id, size_id if size_id else None, date_ordered, quantity, total_price))
+
+    
+            order_items.append({
+                'item_name': item['name'],
+                'size': item['size'],
+                'quantity': item['quantity'],
+                'price_per_unit': item['price_per_unit'],
+                'total_price': total_price,
+                'toppings': item['toppings']
+            })
+
+        conn.commit()
+        session.pop('cart', None)  
+        total_order_price = cart['total']
+        return render_template('status.html', order_items=order_items, total_order_price=total_order_price)
+
+    except Exception as e:
+        print(f"Error: {e}")
+        conn.rollback()  
+        return jsonify({'error': f'Database error: {str(e)}'}), 500
+
+    finally:
+        cursor.close() 
+        conn.close()
+
+@app.route('/order-history')
+def order_history():
+    if 'id' not in session:
+        return redirect(url_for('login')) 
+
+    user_id = session['id']
+    cursor = mysql.connection.cursor()
+    cursor.execute('''
+        SELECT orderID, itemID, sizeID, date_ordered, quantity, price
+        FROM OrderHistory
+        WHERE LoginID = %s
+        ORDER BY date_ordered DESC
+    ''', (user_id,))
+
+    orders = cursor.fetchall()
+    order_list = []
+    for order in orders:
+        order_list.append({
+            'orderID': order[0],
+            'itemID': order[1],
+            'sizeID': order[2],
+            'date_ordered': order[3],
+            'quantity': order[4],
+            'price': order[5]
+        })
+
+    cursor.close()
+    return render_template('status.html', orders=order_list)
 
 # Registration route
 @app.route('/register', methods=['GET', 'POST'])

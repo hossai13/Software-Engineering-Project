@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/checkout.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/navbar.css') }}">
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('homepage') }}" id="FP-Logo">
+            <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
+        </a>
+        <ul class="navbar">
+            <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
+            {% if 'loggedin' in session %}
+                <li><a href="{{ url_for('profile') }}">PROFILE</a></li>
+                <li><a href="{{ url_for('logout') }}">LOGOUT</a></li>
+            {% else %}
+                <li><a href="{{ url_for('register') }}">REGISTER</a></li>
+                <li><a href="{{ url_for('login') }}">LOGIN</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    <body>
+        
+        <a href="{{ url_for('order_history') }}">View Your Order History</a>
+    
+    </body>
+    </html>

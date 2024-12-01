@@ -116,9 +116,9 @@
                             </div>
                         </div>
             
-                        {% if review[5] %}
+                        {% if review[6] %}
                             <div class="review-photo">
-                                <img src="{{ url_for('static', filename='uploads/' + review[5]) }}" alt="Review Photo" class="photo">
+                                <img src="{{ url_for('review_photo', review_id=review[0]) }}" alt="Review Photo" class="photo">
                             </div>
                         {% endif %}
             

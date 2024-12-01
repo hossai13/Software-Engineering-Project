@@ -69,6 +69,7 @@ CREATE TABLE IF NOT EXISTS OrderHistory (
     sizeID INT, -- NULL if not a Pizza
     date_ordered DATE NOT NULL,
     quantity INT DEFAULT 1,
+    price  DECIMAL(10, 2),
     FOREIGN KEY (LoginID) REFERENCES UserInfo(LoginID) ON DELETE CASCADE,
     FOREIGN KEY (itemID) REFERENCES Menu(itemID) ON DELETE CASCADE,
     FOREIGN KEY (sizeID) REFERENCES PizzaSizes(sizeID)
