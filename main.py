@@ -381,7 +381,7 @@ def cart():
 
     return render_template('checkout.html', items=items, total=total)
 
-    @app.route('/place-order', methods=['POST'])
+@app.route('/place-order', methods=['POST'])
 def place_order():
     if 'cart' not in session or not session['cart']['items']:
         print("Cart is empty!")
