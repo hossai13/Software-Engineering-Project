@@ -1,7 +1,7 @@
 import math
 from io import BytesIO
 from flask import Flask, flash, jsonify, render_template, request, session, redirect, url_for, session, Response
-import mysql.connector 
+import mysql.connector
 from flask_mysqldb import MySQL
 from datetime import datetime
 import os
@@ -23,7 +23,7 @@ app.secret_key = 'your secret key'
 # MySQL database configuration
 app.config['MYSQL_HOST'] = 'localhost'  
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'root1234'
+app.config['MYSQL_PASSWORD'] = 'root'
 app.config['MYSQL_DB'] = 'PizzaInfo'
 
 # File upload configuration
@@ -51,7 +51,14 @@ def homepage():
 def userhomepage():
     if 'loggedin' in session:
         current_date = datetime.now().strftime('%Y-%m-%d')
-    
+        #this is where an admin can delete reviews
+        if is_admin():
+            if request.method == 'POST':
+                if 'delete_review' in request.form:
+                    review_id = request.form['delete_review']
+                    delete_review(review_id)
+                    return redirect(url_for('userhomepage'))
+
         if request.method == 'POST':
             user_id = session.get('id')  
             if not isinstance(user_id, int):
@@ -166,7 +173,7 @@ def get_item_toppings(item_id):
     except Exception as e:
         print(f"Error fetching toppings for item ID {item_id}: {e}")
         return jsonify({"error": "Failed to fetch toppings due to server error."}), 500
-
+    
 @app.route('/api/cart', methods=['GET', 'POST', 'PATCH', 'DELETE'])
 def cart_api():
     if 'cart' not in session:
@@ -359,7 +366,6 @@ def menu():
         print(f"Error in /menu route: {e}")
         return "Error loading the menu." 
 
-# Route for cart
 @app.route('/cart')
 def cart():
     if 'cart' not in session or not isinstance(session['cart'], dict):
@@ -369,13 +375,13 @@ def cart():
     items = cart_data.get('items', [])
     total = cart_data.get('total', 0.0)
 
-    # Check if the cart is empty and provide a message or redirect
+   # Check if the cart is empty and provide a message or redirect
     if not items:
         return render_template('checkout.html', message="Your cart is empty.", total=total)
 
     return render_template('checkout.html', items=items, total=total)
 
-@app.route('/place-order', methods=['POST'])
+    @app.route('/place-order', methods=['POST'])
 def place_order():
     if 'cart' not in session or not session['cart']['items']:
         print("Cart is empty!")
@@ -663,6 +669,12 @@ def profile():
         return render_template('profile.html', account=account, msg=msg, is_admin=is_admin, accounts=accounts, current_profile_pic=current_profile_pic)
     else:
         return redirect(url_for('login'))
+
+def delete_review(review_id):
+    cursor = mysql.connection.cursor()
+    cursor.execute('DELETE FROM reviews WHERE review_id = %s', (review_id,))
+    mysql.connection.commit()
+    cursor.close()
 
 def is_admin():
     if 'isAdmin' in session:
