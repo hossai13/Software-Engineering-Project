@@ -1,16 +1,32 @@
+@font-face {
+    font-family: 'Mori';
+    src: url('/static/Fonts/PPMori-Regular.otf') format('opentype');
+}
+
 body {
-    font-family: 'Mori', sans-serif;
+    font-family: 'Mori';
     background-color: #f8f6f8;
     margin: 0;
     padding: 0;
 }
 
-.navbar {
-    display: flex;
-    justify-content: flex-end;
-    padding: 10px 20px;
+header {
     background-color: #333;
     color: white;
+    padding: 15px 20px;
+}
+
+header img {
+    width: 150px;
+    height: 100px;
+}
+
+#FP-Logo {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
 }
 
 .checkout-container {
@@ -18,30 +34,55 @@ body {
     grid-template-columns: 2fr 1fr;
     gap: 20px;
     max-width: 1200px;
-    margin: 0 auto;
-    margin-top: 5rem;
+    margin: 50px auto;
     padding: 20px;
     background-color: #fff;
+    border-radius: 10px;
 }
 
 section {
-    margin-top: 2rem;
+    background-color: #fff;
+    padding: 20px;
     border: 1px solid #ddd;
     border-radius: 10px;
-    padding: 20px;
-    background-color: #fff;
 }
 
-.details-section,
-.contact-section,
-.payment-section {
+.details-section, .contact-section, .payment-section {
     grid-column: 1;
 }
 
 .cart-summary {
     grid-column: 2;
-    background-color: #f9f9f9;
-    padding: 20px;
+}
+
+h2 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.cart-items {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 20px;
 }
 
 .cart-item {
@@ -52,28 +93,39 @@ section {
     border-bottom: 1px solid #ddd;
 }
 
-.cart-total p {
-    font-size: 1rem;
-    margin: 5px 0;
+.cart-item .item-details {
+    flex: 1;
 }
 
-button {
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+.cart-total {
     font-size: 1rem;
+    margin-bottom: 20px;
 }
 
 .place-order-button {
+    width: 100%;
     background-color: #333;
     color: white;
-    width: 100%;
     padding: 15px;
-    margin-top: 20px;
     font-size: 1.2rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-transform: uppercase;
 }
 
 .place-order-button:hover {
     background-color: #000;
+}
+
+.remove-button {
+    background: none;
+    color: #cf4d4d;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.remove-button:hover {
+    color: #a12b2b;
 }

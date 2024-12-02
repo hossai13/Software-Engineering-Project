@@ -5,78 +5,87 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/checkout.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/navbar.css') }}">
 </head>
 <body>
-    <nav>
-        <a href="{{ url_for('homepage') }}" id="FP-Logo">
-            <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
-        </a>
-        <ul class="navbar">
-            <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
-            {% if 'loggedin' in session %}
-                <li><a href="{{ url_for('profile') }}">PROFILE</a></li>
-                <li><a href="{{ url_for('rewards') }}">REWARDS</a></li>
-                <li><a href="{{ url_for('logout') }}">LOGOUT</a></li>
-            {% else %}
-                <li><a href="{{ url_for('register') }}">REGISTER</a></li>
-                <li><a href="{{ url_for('login') }}">LOGIN</a></li>
-            {% endif %}
-        </ul>
-    </nav>
+    <header>
+        <nav>
+            <a href="{{ url_for('homepage') }}" id="FP-Logo">
+                <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
+            </a>
+        </nav>
+    </header>
     <main class="checkout-container">
-
+        <section class="details-section">
+            <h2>DETAILS</h2>
+            <div class="details-item">
+                <p><strong>Pick Up - ASAP (15 - 30 min)</strong></p>
+                <p>4518 Baltimore Ave, Philadelphia, PA 19143</p>
+                <button class="edit-button">Edit</button>
+            </div>
+        </section>
+        <section class="contact-section">
+            <h2>CONTACT</h2>
+            <form>
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" placeholder="First name">
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" placeholder="Last name">
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" placeholder="Email address">
+                </div>
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="text" placeholder="Mobile phone number">
+                </div>
+            </form>
+        </section>
+        <section class="payment-section">
+            <h2>PAYMENT</h2>
+            <form>
+                <div class="form-group">
+                    <label>Card Number</label>
+                    <input type="text" placeholder="Card number">
+                </div>
+                <div class="form-group">
+                    <label>Expiry Date</label>
+                    <input type="text" placeholder="MM/YY">
+                </div>
+                <div class="form-group">
+                    <label>CVV</label>
+                    <input type="text" placeholder="CVV">
+                </div>
+                <div class="form-group">
+                    <label>ZIP Code</label>
+                    <input type="text" placeholder="ZIP Code">
+                </div>
+            </form>
+        </section>
         <section class="cart-summary">
             <h2>YOUR ITEMS</h2>
             <div class="cart-items">
                 {% for item in items %}
                 <div class="cart-item">
-                    <p><strong>{{ item.name }}</strong> ({{ item.size }})</p>
-                    <ul>
-                        {% for topping in item.toppings %}
-                        <li>{{ topping.name }} - ${{ topping.price }}</li>
-                        {% endfor %}
-                    </ul>
-                    <p>Quantity: {{ item.quantity }}</p>
-                    <p>Total: ${{ item.total_price }}</p>
-                    <p>Total: {{item.total_points }}</p>
-                    <button class="edit-button">Edit</button>
+                    <div class="item-details">
+                        <p><strong>{{ item.name }}</strong> ({{ item.size }})</p>
+                        <p>{{ item.quantity }}x - ${{ item.total_price }}</p>
+                    </div>
                     <button class="remove-button">Remove</button>
                 </div>
                 {% endfor %}
-                <div class="cart-total">
-                    <p>Subtotal: ${{ total }}</p>
-                    <p><strong>Total: ${{ total }}</strong></p>
-                </div>
             </div>
-            <form action="{{ url_for('place_order') }}" method="POST">
-                <button type="submit" class="place-order-button">Place Order</button>
-            </form>
-            <button type="submit" class="clear-cart-button" onclick="clearCart()">Clear Cart</button>
+            <div class="cart-total">
+                <p>Subtotal: ${{ total }}</p>
+                <p>Tax: $2.49</p>
+                <p>Tip: $0.00</p>
+                <p><strong>Total: ${{ total }}</strong></p>
+            </div>
+            <button class="place-order-button">Place Order</button>
         </section>
     </main>
-    <script>
-        function clearCart() {
-    fetch('/clear_cart', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            // Update the cart UI to reflect the cleared cart
-            updateCartUI({ items: [], total: 0.0 });
-        } else {
-            console.error('Failed to clear cart');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-}
-
-    </script>
 </body>
 </html>

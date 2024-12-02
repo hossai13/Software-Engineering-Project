@@ -11,9 +11,15 @@
     </head>
     <body>
         <nav>
+            {% if 'loggedin' in session%}
             <a href="{{ url_for('homepage') }}" id="FP-Logo">
                 <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
             </a>
+            {% else %}
+            <a href="{{ url_for('homepage') }}" id="FP-Logo">
+                <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
+            </a>
+            {% endif %}
             <ul class="navbar">
                 <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
                 {% if 'loggedin' in session %}
@@ -37,31 +43,31 @@
                 <button class="scroll-btn left">&lt;</button>
                 <div class="scroll-wrapper">
                     <ul class="menu-options">
-                        <li><button class="nav-btn" data-target="pizza-section">Pizza</button></li>
-                        <li><button class="nav-btn" data-target="stromboli-section">Strombolis</button></li>
-                        <li><button class="nav-btn" data-target="sandwich-section">Sandwiches</button></li>
-                        <li><button class="nav-btn" data-target="burger-section">Burgers</button></li>
-                        <li><button class="nav-btn" data-target="wrap-section">Wraps</button></li>
-                        <li><button class="nav-btn" data-target="quesadilla-section">Quesadillas</button></li>
-                        <li><button class="nav-btn" data-target="wing-section">Wing</button></li>
-                        <li><button class="nav-btn" data-target="seafood-section">Seafood</button></li>
-                        <li><button class="nav-btn" data-target="side-section">Sides</button></li>
-                        <li><button class="nav-btn" data-target="salad-section">Salads</button></li>
-                        <li><button class="nav-btn" data-target="pasta-section">Pasta</button></li>
-                        <li><button class="nav-btn" data-target="special-section">Fiesta Specials</button></li>
-                        <li><button class="nav-btn" data-target="specplatter-section">Special Platters</button></li>
-                        <li><button class="nav-btn" data-target="dinner-section">Dinner Platters</button></li>
-                        <li><button class="nav-btn" data-target="cold-section">Cold Platters</button></li>
-                        <li><button class="nav-btn" data-target="greek-section">Greek</button></li>
-                        <li><button class="nav-btn" data-target="breakfast-section">Breakfast</button></li>
-                        <li><button class="nav-btn" data-target="drink-section">Drinks</button></li>
-                        <li><button class="nav-btn" data-target="steak-section">Steak</button></li>
-                        <li><button class="nav-btn" data-target="chsteak-section">Chicken Steak</button></li>
-                        <li><button class="nav-btn" data-target="chicken-section">Chicken</button></li>
-                        <li><button class="nav-btn" data-target="hoagie-section">Hoagies</button></li>
-                        <li><button class="nav-btn" data-target="grinder-section">Grinders</button></li>
-                        <li><button class="nav-btn" data-target="kids-section">Kids Menu</button></li>
-                        <li><button class="nav-btn" data-target="dessert-section">Desserts</button></li>
+                        <li><button class="nav-btn" data-default="true">Pizza</button></li>
+                        <li><button class="nav-btn">Strombolis</button></li>
+                        <li><button class="nav-btn">Sandwiches</button></li>
+                        <li><button class="nav-btn">Burgers</button></li>
+                        <li><button class="nav-btn">Wraps</button></li>
+                        <li><button class="nav-btn">Quesadillas</button></li>
+                        <li><button class="nav-btn">Wings</button></li>
+                        <li><button class="nav-btn">Seafood</button></li>
+                        <li><button class="nav-btn">Sides</button></li>
+                        <li><button class="nav-btn">Salads</button></li>
+                        <li><button class="nav-btn">Pasta</button></li>
+                        <li><button class="nav-btn">Fiesta Specials</button></li>
+                        <li><button class="nav-btn">Special Platters</button></li>
+                        <li><button class="nav-btn">Dinner Platters</button></li>
+                        <li><button class="nav-btn">Cold Platters</button></li>
+                        <li><button class="nav-btn">Greek</button></li>
+                        <li><button class="nav-btn">Breakfast</button></li>
+                        <li><button class="nav-btn">Drinks</button></li>
+                        <li><button class="nav-btn">Steaks</button></li>
+                        <li><button class="nav-btn">Chicken Steaks</button></li>
+                        <li><button class="nav-btn">Chicken</button></li>
+                        <li><button class="nav-btn">Hoagies</button></li>
+                        <li><button class="nav-btn">Grinders</button></li>
+                        <li><button class="nav-btn">Kids</button></li>
+                        <li><button class="nav-btn">Dessert</button></li>
                     </ul>
                 </div>
                 <button class="scroll-btn right">&gt;</button>
@@ -214,7 +220,7 @@
             </div>
 
             {% for category, items in menu_items_by_category.items() %}
-            <section id="{{ category|lower }}-section" class="items-section">
+            <section id="{{ category|lower|replace(' ', '-') }}-section" class="items-section">
                 <h2 class="categories">{{ category }}</h2>
                 <div class="menu-items">
                     {% for item in items %}
@@ -249,7 +255,7 @@
                     <button id="delivery-button" class="delivery-button">Delivery or Pickup Available</button>
                 </div>
                 <div class="cart-items">
-
+                 <!-- Items will be added  -->
                 </div>
                 <div class="tip-section">
                     <p>Tip: <span id="tip-amount">$0.00</span></p>

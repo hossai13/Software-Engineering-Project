@@ -1,35 +1,86 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // Scroll buttons functionality
-    document.querySelectorAll('.scroll-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const scrollWrapper = document.querySelector('.scroll-wrapper');
-            const direction = e.target.classList.contains('left') ? -1 : 1;
-            const scrollAmount = 455;
+    const scrollWrapper = document.querySelector(".scroll-wrapper");
+    const scrollBtns = document.querySelectorAll(".scroll-btn");
+
+    const calculateScrollAmount = () => {
+        const containerWidth = scrollWrapper.clientWidth;
+        const itemWidth = scrollWrapper.querySelector(".nav-btn").offsetWidth;
+        return itemWidth * Math.floor(containerWidth / itemWidth); // Visible items width
+    };
+
+    const updateScrollButtons = () => {
+        const maxScroll = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
+        const scrollLeft = scrollWrapper.scrollLeft;
+
+        document.querySelector(".scroll-btn.left").disabled = scrollLeft <= 0;
+        document.querySelector(".scroll-btn.right").disabled = scrollLeft >= maxScroll;
+    };
+
+    scrollBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+            const direction = btn.classList.contains("left") ? -1 : 1;
+            const scrollAmount = calculateScrollAmount();
             scrollWrapper.scrollBy({
                 left: direction * scrollAmount,
-                behavior: 'smooth'
+                behavior: "smooth",
             });
+
+            setTimeout(updateScrollButtons, 300);
         });
     });
 
-    // Navigation buttons functionality
-    const menuNavButtons = document.querySelectorAll(".nav-btn");
-    const navBarHeight = 80;
+    updateScrollButtons();
 
-    menuNavButtons.forEach(button => {
+    window.addEventListener("resize", () => {
+        updateScrollButtons();
+    });
+
+    // Function for hiding categories
+    const navButtons = document.querySelectorAll(".nav-btn");
+    const categorySections = document.querySelectorAll(".items-section");
+
+    function hideAllCategories() {
+        categorySections.forEach(section => {
+            section.style.display = "none";
+        });
+    }
+
+    function normalizeCategoryName(name) {
+        return name.toLowerCase().replace(/\s+/g, '-');
+    }
+
+   function showCategory(category) {
+        const normalizedCategory = normalizeCategoryName(category);
+        const targetSection = document.querySelector(`#${normalizedCategory}-section`);
+        if (targetSection) {
+            targetSection.style.display = "block";
+        } else {
+            console.error(`Section not found for category: ${category}`);
+        }
+    }
+
+    function setActiveButton(button) {
+        navButtons.forEach(btn => btn.classList.remove("active"));
+        button.classList.add("active");
+    }
+
+    navButtons.forEach(button => {
         button.addEventListener("click", () => {
-            const targetId = button.getAttribute("data-target");
-            const targetSection = document.getElementById(targetId);
-
-            if (targetSection) {
-                const scrollPosition = targetSection.offsetTop - navBarHeight;
-                window.scrollTo({
-                    top: scrollPosition,
-                    behavior: "smooth"
-                });
-            }
+            const category = button.textContent.trim();
+            hideAllCategories();
+            showCategory(category);
+            setActiveButton(button);
         });
     });
+
+    hideAllCategories();
+
+    const defaultButton = document.querySelector('.nav-btn[data-default="true"]');
+    if (defaultButton) {
+        const defaultCategory = defaultButton.textContent.trim();
+        showCategory(defaultCategory);
+        setActiveButton(defaultButton);
+    }
 
     // Admin Tools Modal
     const adminToolsBtn = document.getElementById("admin-tools-btn");
@@ -224,10 +275,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (category === "Pizza" && itemData.hasSizes) {
             document.querySelector('.toppings-options').style.display = 'block';
             loadSizes(id, name, price);
-            loadToppings(id);
+            loadToppings(id); // Only load toppings for pizzas
         } else {
             document.querySelector('.toppings-options').style.display = 'none';
-
+            toppingsOptionsContainer.innerHTML = ''; // Clear any lingering toppings
             sizeOptionsContainer.innerHTML = `
                 <label>
                     <input type="radio" name="size" value="${category}" data-price="${price}" checked>
@@ -356,25 +407,41 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
         } else {
             cart.items.forEach(item => {
-                const toppingsDisplay = item.toppings.map(topping => topping.name).join(', ');
-                const sizeOrCategory = item.size ? `(${item.size})` : `(${item.category})`;
+                const toppingsDisplay = (item.toppings && Array.isArray(item.toppings) && item.toppings.length > 0) 
+                    ? item.toppings.map(topping => topping.name).join(', ') 
+                    : null;
+    
+                const sizeOrCategory = item.size ? `${item.size}` : `${item.category}`;
                 const cartItem = document.createElement("div");
                 cartItem.classList.add("cart-item");
+    
                 cartItem.innerHTML = `
-                    <p>${item.quantity}x ${item.name} ${sizeOrCategory}</p>
-                    ${toppingsDisplay ? `<small>Toppings: ${toppingsDisplay}</small>` : ''}
-                    <p>$${item.total_price.toFixed(2)}</p>
-                    <button class="remove-item" data-id="${item.id}">Remove</button>
+                    <div class="item-details">
+                        <div class="item-info">
+                            <span class="item-quantity">${item.quantity}x</span>
+                            <span class="item-name">${item.name}</span>
+                            <span class="item-size">(${sizeOrCategory})</span>
+                        </div>
+                        ${toppingsDisplay ? `<small class="item-toppings">+ ${toppingsDisplay}</small>` : ''}
+                    </div>
+                    <div class="item-actions">
+                        <small class="item-price">$${item.total_price.toFixed(2)}</small>
+                        <button class="remove-item" data-id="${item.id}">Remove</button>
+                    </div>
                 `;
-                cartItemsContainer.appendChild(cartItem);
+    
+                cartItemsContainer.append(cartItem);
     
                 cartItem.querySelector('.remove-item').addEventListener('click', () => {
                     removeFromCart(item.id);
                 });
             });
+    
+            cartItemsContainer.scrollTop = cartItemsContainer.scrollHeight;
         }
-
+    
         const subtotal = cart.total;
+        const totalCostDisplay = document.querySelector('.total-cost');
         totalCostDisplay.dataset.subtotal = subtotal; 
         totalCostDisplay.textContent = `TOTAL: $${subtotal.toFixed(2)}`;
     

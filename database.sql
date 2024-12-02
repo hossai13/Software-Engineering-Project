@@ -58,15 +58,15 @@ CREATE TABLE IF NOT EXISTS MenuSizes (
 CREATE TABLE IF NOT EXISTS Toppings (
     toppingID INT AUTO_INCREMENT PRIMARY KEY,
     toppingName VARCHAR(50) NOT NULL UNIQUE,
-    price DECIMAL(5, 2) NOT NULL -- Price for this topping
+    price DECIMAL(5, 2) NOT NULL 
 );
 
 -- Create the OrderHistory table to track orders
 CREATE TABLE IF NOT EXISTS OrderHistory (
     orderID INT AUTO_INCREMENT PRIMARY KEY,
     LoginID INT NOT NULL,
-    itemID INT NOT NULL, -- Pizza or other item
-    sizeID INT, -- NULL if not a Pizza
+    itemID INT NOT NULL,
+    sizeID INT,
     date_ordered DATE NOT NULL,
     quantity INT DEFAULT 1,
     price  DECIMAL(10, 2),
@@ -526,7 +526,7 @@ INSERT INTO PizzaSizes (itemID, size, price) VALUES
 (30, 'Small', 10.95), (30, 'Large', 13.95), (30, 'Giant', 23.90),
 (31, 'Large', 14.50), (31, 'Giant', 25.00);
 
--- Insert sample data into Toppings
+-- Insert into Toppings
 INSERT INTO Toppings (toppingName, price) VALUES
 ('Extra Cheese', 1.50),
 ('Pepperoni', 2.00),
