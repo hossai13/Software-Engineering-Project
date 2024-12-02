@@ -63,16 +63,17 @@ CREATE TABLE IF NOT EXISTS Toppings (
 
 -- Create the OrderHistory table to track orders
 CREATE TABLE IF NOT EXISTS OrderHistory (
-    orderID INT AUTO_INCREMENT PRIMARY KEY,
+    orderID INT NOT NULL, 
     LoginID INT NOT NULL,
-    itemID INT NOT NULL,
-    sizeID INT,
+    itemID INT NOT NULL, 
+    size VARCHAR(10) NOT NULL,  
     date_ordered DATE NOT NULL,
-    quantity INT DEFAULT 1,
-    price  DECIMAL(10, 2),
+    quantity INT DEFAULT 1,  
+    toppings VARCHAR(255),  
+    total_price DECIMAL(10, 2) NOT NULL, 
     FOREIGN KEY (LoginID) REFERENCES UserInfo(LoginID) ON DELETE CASCADE,
     FOREIGN KEY (itemID) REFERENCES Menu(itemID) ON DELETE CASCADE,
-    FOREIGN KEY (sizeID) REFERENCES PizzaSizes(sizeID)
+    PRIMARY KEY (orderID, itemID) 
 );
 
 -- Create the OrderToppings table to associate toppings with orders
