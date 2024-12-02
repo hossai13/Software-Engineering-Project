@@ -60,7 +60,7 @@
                             <button type="submit" name="delete_account" value="{{ account['LoginID'] }}" class="delete-btn">Delete</button>
                         </form>
                     </td>
-                    {% if is_owner %}
+                    {% if session['isOwner'] %}
                     <td>
                         {% if account['isAdmin'] %}
                             <form method="post" action="{{ url_for('admprofile') }}" style="display:inline;">

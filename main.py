@@ -640,6 +640,8 @@ def login():
                 msg = 'Logged in successfully!'
                 if account['isAdmin']:
                     session['isAdmin'] = True
+                if account['LoginID'] == 1:
+                    session['isOwner'] = True
                 return redirect(url_for('userhomepage'))
             else:
                 msg = 'Incorrect username/password!'
@@ -654,6 +656,7 @@ def logout():
     session.pop('id', None)
     session.pop('username', None)
     session.pop('isAdmin', None)
+    session.pop('isOwner', None)
     return redirect(url_for('login'))
 
 @app.route('/update-profile-pic', methods=['POST'])
