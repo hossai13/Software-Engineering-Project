@@ -30,15 +30,23 @@
         </ul>
     </nav>
     <main class="container">
-        {% if is_admin %}
         <div class="admin-sidebar">
-            <h3>Admin Controls</h3>
+            <h3>Profile Options</h3>
             <ul>
-                <li><a href="#" id="admin-panel-link">User Management</a></li>
+                <li><button class="sidebar-button" onclick="showSection('profile-container')">Profile</button></li>
+                <li><button class="sidebar-button" onclick="showSection('order-history-container')">Order History</button></li>
             </ul>
+
+            {% if is_admin %}
+            <h3>Admin Commands</h3>
+            <ul>
+                <li><button class="sidebar-button" onclick="showSection('admin-container')">User Management</button></li>
+            </ul>
+            {% endif %}
         </div>
-        {% endif %}
-        <div class="profile-container">
+
+        <!-- Profile Section -->
+        <div class="profile-container section" id="profile-container">
             <h1 class="profile-pic" onclick="openModal()">
                 <img id="profile-pic" src="{{ url_for('static', filename=current_profile_pic if current_profile_pic else 'Images_Videos/whitepizzausericon.png') }}" alt="Profile Picture">
                 <img id="profile-pic-hover" src="{{ url_for('static', filename='Images_Videos/editicon.png') }}" alt="Profile Picture Hover" class="hover-img">
@@ -89,15 +97,41 @@
                     <button type="submit">Change Password</button>
                 </form>
             </div>
-    
-            <button class="logout-button">
-                <a href="{{ url_for('logout') }}">Logout</a>
-            </button>
         </div>
-    
+
+        <!-- Order History Section -->
+        <div class="order-history-container section" id="order-history-container" style="display: none;">
+            <h2>Your Order History</h2>
+            <table class="order-history-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date Ordered</th>
+                        <th>Item Name</th>
+                        <th>Size</th>
+                        <th>Quantity</th>
+                        <th>Total Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in order_history %}
+                    <tr>
+                        <td>{{ order['orderID'] }}</td>
+                        <td>{{ order['date_ordered'] }}</td>
+                        <td>{{ order['itemName'] }}</td>
+                        <td>{{ order['size'] }}</td>
+                        <td>{{ order['quantity'] }}</td>
+                        <td>${{ order['total_price'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Admin Section -->
         {% if is_admin %}
-        <div class="admin-container" style="display: none;">
-            <h1>Admin Panel - User Management</h1>
+        <div class="admin-container section" id="admin-container" style="display: none;">
+            <h2>Admin Panel - User Management</h2>
             <p>Below is the list of all user accounts. You can delete any account from here.</p>
             <table class="user-table">
                 <thead>
@@ -125,12 +159,16 @@
                     {% endfor %}
                 </tbody>
             </table>
-            <button id="back-to-profile" class="back-btn">Back to Profile</button>
         </div>
         {% endif %}
     </main>
-    <script src="{{ url_for('static', filename='accmgmt.js') }}"></script>
-    <script src="{{ url_for('static', filename='cartani.js') }}"></script>
-    <script src="{{ url_for('static', filename='profpic.js') }}"></script>
+    <script>
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => {
+                section.style.display = section.id === sectionId ? 'block' : 'none';
+            });
+        }
+    </script>
 </body>
 </html>

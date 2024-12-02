@@ -21,9 +21,9 @@ def allowed_file(filename):
 app.secret_key = 'your secret key'
 
 # MySQL database configuration
-app.config['MYSQL_HOST'] = 'localhost'  
+app.config['MYSQL_HOST'] = 'Jubayads-MacBook-Pro.local'  
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'naliah'
+app.config['MYSQL_PASSWORD'] = 'Minecraft100'
 app.config['MYSQL_DB'] = 'PizzaInfo'
 
 # File upload configuration
@@ -400,7 +400,7 @@ def place_order():
         for item in items:
             item_id = item['id']
             quantity = item['quantity']
-            size = item.get('size', None)
+            size = item.get('size', 'Unknown')
             toppings = item.get('toppings', [])
             order_date = datetime.now().date()
 
@@ -431,10 +431,11 @@ def order_history():
     user_id = session['id']
     cursor = mysql.connection.cursor()
     cursor.execute('''
-        SELECT orderID, itemID, sizeID, date_ordered, quantity, price
-        FROM OrderHistory
-        WHERE LoginID = %s
-        ORDER BY date_ordered DESC
+        SELECT o.orderID, o.date_ordered, o.total_price, m.itemName, o.size, o.quantity
+        FROM OrderHistory o
+        LEFT JOIN Menu m ON o.itemID = m.itemID
+        WHERE o.LoginID = %s
+        ORDER BY o.date_ordered DESC
     ''', (user_id,))
 
     orders = cursor.fetchall()
@@ -442,11 +443,11 @@ def order_history():
     for order in orders:
         order_list.append({
             'orderID': order[0],
-            'itemID': order[1],
-            'sizeID': order[2],
-            'date_ordered': order[3],
-            'quantity': order[4],
-            'price': order[5]
+            'date_ordered': order[1],
+            'total_price': order[2],
+            'itemName': order[3],
+            'size': order[4],
+            'quantity': order[5]
         })
 
     cursor.close()
@@ -653,65 +654,94 @@ def update_profile_pic():
 # Route for Profile Management
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
-    msg = ''
-    if 'loggedin' in session:
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM UserInfo WHERE LoginID = %s', (session['id'],))
-        account = cursor.fetchone()
-        current_profile_pic = account.get('profile_pic', 'Images_Videos/whitepizzausericon.png')
-
-        # Update username
-        if 'UsernameChange' in request.form and 'PasswordChange' not in request.form:
-            username = request.form['UsernameChange']
-            cursor.execute('UPDATE UserInfo SET Username = %s WHERE LoginID = %s', (username, session['id']))
-            mysql.connection.commit()
-            msg = 'Username updated successfully!'
-
-        # Update password
-        if 'PasswordChange' in request.form and 'UsernameChange' not in request.form:
-            password = request.form['PasswordChange']
-            cursor.execute('UPDATE UserInfo SET Password = %s WHERE LoginID = %s', (password, session['id']))
-            mysql.connection.commit()
-            msg = 'Password updated successfully!'
-            
-        # Check if the logged-in user is an admin
-        is_admin = account['isAdmin']
-        is_owner = account['LoginID'] == 1
-        # If admin, handle user management
-        accounts = []
-        if is_admin:
-            # Handle account deletion if requested
-            if 'delete_account' in request.form:
-                user_id = request.form['delete_account']
-                cursor.execute('DELETE FROM UserInfo WHERE LoginID = %s', (user_id,))
-                mysql.connection.commit()
-                msg = 'Account deleted successfully!'
-            if is_owner:
-                print (is_owner)
-                if 'promote_user' in request.form:
-                    user_id = request.form['promote_user']
-                    cursor.execute('UPDATE UserInfo SET isAdmin = 1 WHERE LoginID = %s', (user_id,))
-                    mysql.connection.commit()
-                    msg = 'User promoted to admin!'
-                if 'demote_admin' in request.form:
-                    user_id = request.form['demote_admin']
-                    cursor.execute('UPDATE UserInfo SET isAdmin = 0 WHERE LoginID = %s', (user_id,))
-                    mysql.connection.commit()
-                    msg = 'Admin demoted to user!'
-                
-            # Fetch all user accounts
-            cursor.execute('SELECT * FROM UserInfo')
-            accounts = cursor.fetchall()
-        
-        return render_template('profile.html', account=account, msg=msg, is_admin=is_admin, accounts=accounts, current_profile_pic=current_profile_pic, is_owner=is_owner)
-    else:
+    if 'loggedin' not in session:
         return redirect(url_for('login'))
 
+    msg = ''
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+    # Fetch user details
+    cursor.execute('SELECT * FROM UserInfo WHERE LoginID = %s', (session['id'],))
+    account = cursor.fetchone()
+    current_profile_pic = account.get('profile_pic', 'Images_Videos/whitepizzausericon.png')
+
+    # Update username
+    if 'UsernameChange' in request.form and 'PasswordChange' not in request.form:
+        username = request.form['UsernameChange']
+        cursor.execute('UPDATE UserInfo SET Username = %s WHERE LoginID = %s', (username, session['id']))
+        mysql.connection.commit()
+        msg = 'Username updated successfully!'
+
+    # Update password
+    if 'PasswordChange' in request.form and 'UsernameChange' not in request.form:
+        password = request.form['PasswordChange']
+        cursor.execute('UPDATE UserInfo SET Password = %s WHERE LoginID = %s', (password, session['id']))
+        mysql.connection.commit()
+        msg = 'Password updated successfully!'
+
+    # Check if the logged-in user is an admin or owner
+    is_admin = account['isAdmin']
+    is_owner = account['LoginID'] == 1
+
+    # Fetch order history for the user
+    cursor.execute('''
+        SELECT o.orderID, o.date_ordered, o.total_price, m.itemName, ps.size, o.quantity
+        FROM OrderHistory o
+        LEFT JOIN Menu m ON o.itemID = m.itemID
+        LEFT JOIN PizzaSizes ps ON o.size = ps.sizeID
+        WHERE o.LoginID = %s
+        ORDER BY o.date_ordered DESC
+    ''', (session['id'],))
+    order_history = cursor.fetchall()
+
+    # Handle admin-specific tasks
+    accounts = []
+    if is_admin:
+        # Handle account deletion if requested
+        if 'delete_account' in request.form:
+            user_id = request.form['delete_account']
+            cursor.execute('DELETE FROM UserInfo WHERE LoginID = %s', (user_id,))
+            mysql.connection.commit()
+            msg = 'Account deleted successfully!'
+
+        # Handle user promotions and demotions
+        if is_owner:
+            if 'promote_user' in request.form:
+                user_id = request.form['promote_user']
+                cursor.execute('UPDATE UserInfo SET isAdmin = 1 WHERE LoginID = %s', (user_id,))
+                mysql.connection.commit()
+                msg = 'User promoted to admin!'
+            if 'demote_admin' in request.form:
+                user_id = request.form['demote_admin']
+                cursor.execute('UPDATE UserInfo SET isAdmin = 0 WHERE LoginID = %s', (user_id,))
+                mysql.connection.commit()
+                msg = 'Admin demoted to user!'
+
+        # Fetch all user accounts for admin view
+        cursor.execute('SELECT * FROM UserInfo')
+        accounts = cursor.fetchall()
+
+    cursor.close()
+
+    # Render the profile page
+    return render_template(
+        'profile.html',
+        account=account,
+        msg=msg,
+        is_admin=is_admin,
+        is_owner=is_owner,
+        current_profile_pic=current_profile_pic,
+        accounts=accounts,
+        order_history=order_history
+    )
+
+# Function to delete a review
 def delete_review(review_id):
     cursor = mysql.connection.cursor()
     cursor.execute('DELETE FROM reviews WHERE review_id = %s', (review_id,))
     mysql.connection.commit()
     cursor.close()
+
 
 def is_admin():
     if 'isAdmin' in session:
