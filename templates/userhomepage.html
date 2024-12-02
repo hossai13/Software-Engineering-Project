@@ -89,7 +89,7 @@
                 </div>
             </div>
         </div>
-
+        
         <div class="restaurant-review-container">
             <div class="restaurant-review-header">
                 <h2 class="title">RESTAURANT REVIEWS</h2>
@@ -198,6 +198,42 @@
                 </form>
             </div>
         </div>
+        {% if is_admin %}
+        <div class="admin-manage">
+            <h2>Admin Panel - Review Management</h2>
+            <p> Below is a list of all of the reviews. You can remove a review from here</p>
+            <table class="review-table">
+                <thead>
+                    <tr>
+                        <th>Review ID</th>
+                        <th>Username</th>
+                        <th>Rating</th>
+                        <th>Header</th>
+                        <th>Review</th>
+                        <th>Date Made</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for review in all_reviews %}
+                    <tr>
+                        <td>{{ review[0] }}</td>
+                        <td>{{ review[1] }}</td>
+                        <td>{{ review[2] }}</td>
+                        <td>{{ review[3] }}</td>
+                        <td>{{ review[4] }}</td>
+                        <td>{{ review[5] }}</td>
+                        <td>
+                            <form method="post" action="{{ url_for('userhomepage') }}" style="display:inline;">
+                                <button type="submit" name="delete_review" value="{{ review[0] }}" class="delete-btn>">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
         <script src="{{ url_for('static', filename='reviews.js') }}"></script>
         <script src="{{ url_for('static', filename='slideshow.js') }}"></script>
         <script src="{{ url_for('static', filename='cartani.js') }}"></script>

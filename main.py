@@ -1,7 +1,6 @@
 import math
 from io import BytesIO
 from flask import Flask, flash, jsonify, render_template, request, session, redirect, url_for, session, Response
-import mysql.connector
 from flask_mysqldb import MySQL
 from datetime import datetime
 import os
@@ -23,7 +22,11 @@ app.secret_key = 'your secret key'
 # MySQL database configuration
 app.config['MYSQL_HOST'] = 'localhost'  
 app.config['MYSQL_USER'] = 'root'
+<<<<<<< Updated upstream
 app.config['MYSQL_PASSWORD'] = '2113284'
+=======
+app.config['MYSQL_PASSWORD'] = 'root'
+>>>>>>> Stashed changes
 app.config['MYSQL_DB'] = 'PizzaInfo'
 
 # File upload configuration
@@ -58,7 +61,7 @@ def userhomepage():
                     review_id = request.form['delete_review']
                     delete_review(review_id)
                     return redirect(url_for('userhomepage'))
-
+                               
         if request.method == 'POST':
             user_id = session.get('id')  
             if not isinstance(user_id, int):
@@ -112,9 +115,7 @@ def userhomepage():
         
         reviews = cursor.fetchall()
         cursor.close()
-
-        return render_template('userhomepage.html', username=session['username'], user_id=session['id'], 
-                               current_date=current_date, reviews=reviews, view_my_reviews=view_my_reviews)
+        return render_template('userhomepage.html', username=session['username'], user_id=session['id'], current_date=current_date, reviews=reviews, view_my_reviews=view_my_reviews)
     else:
         return redirect(url_for('login'))
     
@@ -706,7 +707,7 @@ def profile():
             
         # Check if the logged-in user is an admin
         is_admin = account['isAdmin']
-        
+        is_owner = account['LoginID'] == 1
         # If admin, handle user management
         accounts = []
         if is_admin:
@@ -716,7 +717,8 @@ def profile():
                 cursor.execute('DELETE FROM UserInfo WHERE LoginID = %s', (user_id,))
                 mysql.connection.commit()
                 msg = 'Account deleted successfully!'
-            if is_owner():
+            if is_owner:
+                print (is_owner)
                 if 'promote_user' in request.form:
                     user_id = request.form['promote_user']
                     cursor.execute('UPDATE UserInfo SET isAdmin = 1 WHERE LoginID = %s', (user_id,))
@@ -732,7 +734,7 @@ def profile():
             cursor.execute('SELECT * FROM UserInfo')
             accounts = cursor.fetchall()
         
-        return render_template('profile.html', account=account, msg=msg, is_admin=is_admin, accounts=accounts, current_profile_pic=current_profile_pic)
+        return render_template('profile.html', account=account, msg=msg, is_admin=is_admin, accounts=accounts, current_profile_pic=current_profile_pic, is_owner=is_owner)
     else:
         return redirect(url_for('login'))
 

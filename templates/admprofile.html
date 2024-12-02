@@ -67,7 +67,43 @@
 
         <a href="{{ url_for('profile') }}" class="back-btn">Back to Profile</a>
     </div>
-
+   {% if is_owner %}
+    <div class="owner container">
+        <table class="owner-table">
+            <thead>
+                <tr>
+                    <th>LoginID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Admin Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for account in accounts %}
+                <tr>
+                    <td>{{ account['LoginID'] }}</td>
+                    <td>{{ account['Username'] }}</td>
+                    <td>{{ account['Email'] }}</td>
+                    <td>{{ 'Yes' if account['isAdmin'] else 'No' }}</td>
+                    <td>
+                        {% if account['isAdmin'] %}
+                        <!--Demote Admin Button-->
+                        <form method="post" action="{{ url_for('admprofile') }}" style="display:inline;">
+                            <button type="submit" name="demote_admin" value="{{ account['LoginID'] }}" class="delete-btn">Demote Admin</button>
+                        </form>
+                        {% else %}
+                        <!--Promote User Button-->
+                        <form method="post" action="{{ url_for('admprofile') }}" style="display:inline;">
+                            <button type="submit" name="promote_user" value="{{ account['LoginID'] }}" class="delete-btn">Promote User</button>
+                        </form>
+                        {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
     <script src="{{ url_for('static', filename='cartani.js') }}"></script>
 </body> 
 </html>
