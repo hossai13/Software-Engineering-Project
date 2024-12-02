@@ -19,7 +19,6 @@
             <li><a href="{{ url_for('menu') }}">Order Now</a></li>
             {% if 'loggedin' in session %}
                 <li><a href="{{ url_for('profile') }}">Profile</a></li>
-                <li><a href="{{ url_for('rewards') }}">REWARDS</a></li>
                 <li><a href="{{ url_for('logout') }}">Logout</a></li>
             {% else %}
                 <li><a href="{{ url_for('register') }}">Register</a></li>
@@ -70,6 +69,10 @@
                 <tr>
                     <td class="header">Email:</td>
                     <td>{{ account['Email'] }}</td>
+                </tr>
+                <tr>
+                    <td class="header">Rewards Points:</td>
+                    <td>{{ account['Points'] }}</td>
                 </tr>
             </table>
     

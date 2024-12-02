@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/checkout.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/menu.css') }}">
 </head>
 <body>
     <header>
@@ -89,6 +90,57 @@
             </form>
         </section>
     </main>
+    <section class="menu-section">
+        <h1>Make purchases to obtain points! Use points to redeem rewards! Check your points <a href="{{ url_for('profile') }}">here</a>.</h1>
+        <div class="featured-items">
+            <div class="item-card" 
+                 data-item-id="23"
+                 data-item-name="Pepperoni Pizza" 
+                 data-item-category="Pizza" 
+                 data-item-price="0"
+                 data-item-points="10000"
+                 data-item-size="1"
+                 data-item-img="{{ url_for('static', filename='Images_Videos/pizza.jpeg') }}">
+                <img src="{{ url_for('static', filename='Images_Videos/pizza.jpeg') }}" alt="Pepperoni Pizza">
+                <h3>Pepperoni Pizza - Small Pie</h3>
+                <div class="price">
+                    <span>10000</span>
+                </div>
+                <button class="order-button">REDEEM NOW</button>
+            </div>
+            <div class="item-card" 
+                 data-item-id="2"
+                 data-item-name="Plain Stromboli" 
+                 data-item-category="Strombolis" 
+                 data-item-price="0"
+                 data-item-points="8000"
+                 data-item-size="1" 
+                 data-item-img="{{ url_for('static', filename='Images_Videos/stromboli.png') }}">
+                <img src="{{ url_for('static', filename='Images_Videos/stromboli.png') }}" alt="Stromboli">
+                <h3>Plain Stromboli</h3>
+                <div class="price">
+                    <span>8000</span>
+                </div>
+                <button class="order-button">REDEEM NOW</button>
+            </div>
+            <div class="item-card" 
+                 data-item-id="3"
+                 data-item-name="Burger" 
+                 data-item-category="Burger" 
+                 data-item-price="0"
+                 data-item-points="12500"
+                 data-item-size="1"  
+                 data-item-img="{{ url_for('static', filename='Images_Videos/burger.jpg') }}">
+                <img src="{{ url_for('static', filename='Images_Videos/burger.jpg') }}" alt="Burger">
+                <h3>Hamburger with Fries</h3>
+                <div class="price">
+                    <span>12500</span>
+                </div>
+                <button class="order-button">REDEEM NOW</button>
+            </div>
+        </div>
+    </section>
 </body>
 <script src="{{ url_for('static', filename='checkout.js') }}"></script>
+<script src="{{ url_for('static', filename='rewardsript.js') }}"></script>
 </html>
