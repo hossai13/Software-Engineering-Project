@@ -84,8 +84,11 @@
                 <p>Tip: $0.00</p>
                 <p><strong>Total: ${{ total }}</strong></p>
             </div>
-            <button class="place-order-button">Place Order</button>
+            <form action="{{ url_for('place_order') }}" method="POST">
+                <button type="submit" class="place-order-button">Place Order</button>
+            </form>
         </section>
     </main>
 </body>
+<script src="{{ url_for('static', filename='checkout.js') }}"></script>
 </html>

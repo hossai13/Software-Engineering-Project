@@ -1,5 +1,6 @@
 import math
 from io import BytesIO
+import time
 from flask import Flask, flash, jsonify, render_template, request, session, redirect, url_for, session, Response
 from flask_mysqldb import MySQL
 from datetime import datetime
@@ -22,7 +23,7 @@ app.secret_key = 'your secret key'
 # MySQL database configuration
 app.config['MYSQL_HOST'] = 'localhost'  
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'root1234'
 app.config['MYSQL_DB'] = 'PizzaInfo'
 
 # File upload configuration
@@ -379,79 +380,48 @@ def cart():
     return render_template('checkout.html', items=items, total=total)
 
 @app.route('/place-order', methods=['POST'])
+@app.route('/place-order', methods=['POST'])
 def place_order():
     if 'cart' not in session or not session['cart']['items']:
-        print("Cart is empty!")
-        return jsonify({'error': 'Cart is empty'}), 400
+        return jsonify({'error': 'Your cart is empty'}), 400
 
     cart = session['cart']
-    user_id = session.get('id')  
+    items = cart['items']
+    total = cart['total']
+    user_id = session.get('id')
 
     if not user_id:
-        print("User not logged in!")
-        return jsonify({'error': 'User not logged in'}), 400
+        return jsonify({'error': 'User not authenticated'}), 401
 
     try:
-        
-        conn = mysql.connection
-        cursor = conn.cursor()
+        cur = mysql.connection.cursor()
+        order_id = user_id * 1000000 + int(time.time())  
 
-       
-        order_items = []
-        for item in cart['items']:
+        for item in items:
             item_id = item['id']
-            # size_id = item['size']  
             quantity = item['quantity']
-            price_per_unit = item['price_per_unit']
-            points = item.get('points', 0)
-            toppings = item['toppings']
-            date_ordered = datetime.now().strftime('%Y-%m-%d')  
-            if item_id == 1:
-                size_id = 1
-            else:
-                size_id = None
+            size = item.get('size', None)
+            toppings = item.get('toppings', [])
+            order_date = datetime.now().date()
 
-            topping_total = sum(topping['price'] for topping in toppings)
-            total_price = (price_per_unit + topping_total) * quantity
-            total_points = points * quantity
+            toppings_str = ",".join([topping['name'] for topping in toppings]) if toppings else None
 
-            #Subtract points
-            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute('SELECT Points FROM UserInfo WHERE LoginID = %s', (session['id'],))
-            userPoints = cursor.fetchone()
-            if (userPoints['Points'] - total_points) >= 0:
-                cursor.execute('UPDATE UserInfo SET Points=Points - %s WHERE LoginID = %s', (total_points, session['id'],))
-                mysql.connection.commit()
+            cur.execute("""
+                INSERT INTO OrderHistory (orderID, LoginID, itemID, size, date_ordered, quantity, toppings, total_price)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (order_id, user_id, item_id, size, order_date, quantity, toppings_str, item['total_price']))
 
-            cursor.execute('''
-                INSERT INTO OrderHistory (LoginID, itemID, sizeID, date_ordered, quantity, price)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            ''', (user_id, item_id, size_id if size_id else None, date_ordered, quantity, total_price))
+        mysql.connection.commit() 
+        cur.close()
 
-    
-            order_items.append({
-                'item_name': item['name'],
-                'size': item['size'],
-                'quantity': item['quantity'],
-                'price_per_unit': item['price_per_unit'],
-                'total_price': total_price,
-                'toppings': item['toppings']
-            })
+        session.pop('cart', None)
 
-        conn.commit()
-        session.pop('cart', None)  
-        total_order_price = cart['total']
-        update_points(total_order_price)
-        return render_template('status.html', order_items=order_items, total_order_price=total_order_price)
-
+        return jsonify({
+            'message': 'Order placed successfully',
+            'total': total
+        })
     except Exception as e:
-        print(f"Error: {e}")
-        conn.rollback()  
-        return jsonify({'error': f'Database error: {str(e)}'}), 500
-
-    finally:
-        cursor.close() 
-        conn.close()
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/order-history')
 def order_history():
