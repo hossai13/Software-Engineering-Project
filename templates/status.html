@@ -24,8 +24,31 @@
         </ul>
     </nav>
     <body>
-        
-        <a href="{{ url_for('order_history') }}">View Your Order History</a>
-    
+        <h1>Order Confirmed</h1>
+        <h2>The party will arrive soon</h2>
+        <main>
+            {% if orders %}
+                <div id="order-details-container">
+                    <h2 class="order-ID-header">Order ID: {{ orders[0].order_id }}</h2>
+                    <p class="total-price-header">Total Price:</p> ${{ "%.2f"|format(total) }}</p>
+                    <p class="order-date-header">Order Date:</p> {{ orders[0].date_ordered }}</p>
+                    <ul>
+                        {% for order in orders %}
+                            <li>
+                                <h2 class="item-name">Item Name:</h2> {{ order.item_name }}<br>
+                                <h3 class="item-size">Size:</h3> {{ order.size or 'N/A' }}<br>
+                                <h3 class="total-quantity">Quantity:</h3> {{ order.quantity }}<br>
+                                <h3 class="total-price-">Toppings:</h3> {{ order.toppings or 'None' }}<br>
+                                <h2 class="total-price-header">Price:</h2> ${{ "%.2f"|format(order.total_price) }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% else %}
+                <p>No order details available.</p>
+            {% endif %}
+        </main>
+
+        <h2 class="view-order-history"><a href="{{ url_for('profile') }}">View Order History</a></h2>
     </body>
     </html>

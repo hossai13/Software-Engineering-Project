@@ -21,9 +21,9 @@ def allowed_file(filename):
 app.secret_key = 'your secret key'
 
 # MySQL database configuration
-app.config['MYSQL_HOST'] = 'Jubayads-MacBook-Pro.local'  
+app.config['MYSQL_HOST'] = 'localhost'  
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'Minecraft100'
+app.config['MYSQL_PASSWORD'] = 'root1234'
 app.config['MYSQL_DB'] = 'PizzaInfo'
 
 # File upload configuration
@@ -380,7 +380,6 @@ def cart():
     return render_template('checkout.html', items=items, total=total)
 
 @app.route('/place-order', methods=['POST'])
-@app.route('/place-order', methods=['POST'])
 def place_order():
     if 'cart' not in session or not session['cart']['items']:
         return jsonify({'error': 'Your cart is empty'}), 400
@@ -395,34 +394,50 @@ def place_order():
 
     try:
         cur = mysql.connection.cursor()
-        order_id = user_id * 1000000 + int(time.time())  
+
+        # Generate a custom orderID as a combination of user_id and timestamp
+        order_id = user_id * 1000000 + int(time.time())  # Ensure it’s an integer
+
+        # List to store order details for rendering the status.html
+        order_details = []
 
         for item in items:
             item_id = item['id']
+            item_name = item['name']  # Get the item name
             quantity = item['quantity']
-            size = item.get('size', 'Unknown')
+            size = item.get('size', None)
             toppings = item.get('toppings', [])
             order_date = datetime.now().date()
 
             toppings_str = ",".join([topping['name'] for topping in toppings]) if toppings else None
 
             cur.execute("""
-                INSERT INTO OrderHistory (orderID, LoginID, itemID, size, date_ordered, quantity, toppings, total_price)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            """, (order_id, user_id, item_id, size, order_date, quantity, toppings_str, item['total_price']))
+                INSERT INTO OrderHistory (orderID, LoginID, itemID, item_name, size, date_ordered, quantity, toppings, total_price)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (order_id, user_id, item_id, item_name, size, order_date, quantity, toppings_str, item['total_price']))
 
-        mysql.connection.commit() 
+            # Add item details to order_details list
+            order_details.append({
+                'order_id': order_id,
+                'item_name': item_name,
+                'size': size,
+                'date_ordered': order_date,
+                'quantity': quantity,
+                'toppings': toppings_str,
+                'total_price': item['total_price']
+            })
+
+        mysql.connection.commit()  # Commit the transaction
         cur.close()
 
         session.pop('cart', None)
 
-        return jsonify({
-            'message': 'Order placed successfully',
-            'total': total
-        })
+        # Render the status.html page with the order details
+        return render_template('status.html', orders=order_details, total=total)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/order-history', methods=['GET'])
 @app.route('/order-history')
 def order_history():
     if 'id' not in session:
@@ -451,7 +466,6 @@ def order_history():
         })
 
     cursor.close()
-    return render_template('status.html', orders=order_list)
 
 @app.route('/clear_cart', methods=['POST'])
 def clear_cart():
