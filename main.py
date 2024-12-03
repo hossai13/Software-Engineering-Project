@@ -409,6 +409,8 @@ def place_order():
             toppings = item.get('toppings', [])
             order_date = datetime.now().date()
 
+            reduce_stock(item_id, quantity)
+
             toppings_str = ",".join([topping['name'] for topping in toppings]) if toppings else None
 
             cur.execute("""
@@ -428,6 +430,7 @@ def place_order():
             })
 
         mysql.connection.commit()  # Commit the transaction
+        update_points(total) # Increase user points
         cur.close()
 
         session.pop('cart', None)
@@ -438,7 +441,6 @@ def place_order():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/order-history', methods=['GET'])
-@app.route('/order-history')
 def order_history():
     if 'id' not in session:
         return redirect(url_for('login')) 
@@ -527,7 +529,8 @@ def redeem_rewards():
     item_total_price = item.get('total_price', item_price * item_quantity)
     item_total_points = item.get('total_points', item_points * item_quantity)
 
-    #add to cart
+    # Use Points
+    update_points((item_points/100) * -1)
     # Check if the item is already in the cart
     existing_item = next((i for i in cart_data['items'] if i['id'] == item_id), None)
 
@@ -559,6 +562,32 @@ def redeem_rewards():
     session.modified = True
 
     return jsonify({'status': 'success', 'cart': cart_data})
+
+#Inventory commands
+def fill_inventory():
+    # Fills SQL inventory table
+    # ONLY RUN ONCE, THEN COMMENT STATEMENT OUT
+    # Placed in logout for ease. Login, then logout and your table should be filled.
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    for i in range(1, 391): 
+        cursor.execute('INSERT INTO inventory (itemID, quantity) VALUES (%s, 99)', (i,))
+    mysql.connection.commit()
+    cursor.close()
+
+def refill_stock():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    for i in range(1, 391): 
+        cursor.execute('UPDATE inventory SET quantity=99 WHERE inventoryID = %s', (i,))
+    mysql.connection.commit()
+    cursor.close()
+
+@app.route('/reduce_stock')
+def reduce_stock(itemID, quantity):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('UPDATE inventory SET quantity=quantity - %s WHERE itemID = %s', (quantity, itemID))
+    mysql.connection.commit()
+    cursor.close()
+
 # Registration route
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -637,6 +666,7 @@ def login():
 # Route for logout
 @app.route('/logout')
 def logout():
+    # fill_inventory()
     session.pop('loggedin', None)
     session.pop('id', None)
     session.pop('username', None)

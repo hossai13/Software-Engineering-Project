@@ -65,7 +65,8 @@ CREATE TABLE IF NOT EXISTS Toppings (
 CREATE TABLE IF NOT EXISTS OrderHistory (
     orderID INT NOT NULL, 
     LoginID INT NOT NULL,
-    itemID INT NOT NULL, 
+    itemID INT NOT NULL,
+    item_name VARCHAR(255), 
     size VARCHAR(10) NOT NULL,  
     date_ordered DATE NOT NULL,
     quantity INT DEFAULT 1,  
@@ -97,7 +98,7 @@ CREATE TABLE IF NOT EXISTS Categories (
 create table if not exists inventory (
     inventoryID int primary key AUTO_INCREMENT,
     itemID int,
-    quantity int,
+    quantity int default 0,
     FOREIGN KEY (itemID) references menu(itemID)
 );
 

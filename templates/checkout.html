@@ -68,6 +68,7 @@
         </section>
         <section class="cart-summary">
             <h2>YOUR ITEMS</h2>
+            <button onclick="clearCart()">Clear Cart</button>
             <div class="cart-items">
                 {% for item in items %}
                 <div class="cart-item">
@@ -99,7 +100,7 @@
                  data-item-category="Pizza" 
                  data-item-price="0"
                  data-item-points="10000"
-                 data-item-size="1"
+                 data-item-size="Points"
                  data-item-img="{{ url_for('static', filename='Images_Videos/pizza.jpeg') }}">
                 <img src="{{ url_for('static', filename='Images_Videos/pizza.jpeg') }}" alt="Pepperoni Pizza">
                 <h3>Pepperoni Pizza - Small Pie</h3>
@@ -114,7 +115,7 @@
                  data-item-category="Strombolis" 
                  data-item-price="0"
                  data-item-points="8000"
-                 data-item-size="1" 
+                 data-item-size="Points" 
                  data-item-img="{{ url_for('static', filename='Images_Videos/stromboli.png') }}">
                 <img src="{{ url_for('static', filename='Images_Videos/stromboli.png') }}" alt="Stromboli">
                 <h3>Plain Stromboli</h3>
@@ -129,7 +130,7 @@
                  data-item-category="Burger" 
                  data-item-price="0"
                  data-item-points="12500"
-                 data-item-size="1"  
+                 data-item-size="Points"  
                  data-item-img="{{ url_for('static', filename='Images_Videos/burger.jpg') }}">
                 <img src="{{ url_for('static', filename='Images_Videos/burger.jpg') }}" alt="Burger">
                 <h3>Hamburger with Fries</h3>
@@ -142,5 +143,5 @@
     </section>
 </body>
 <script src="{{ url_for('static', filename='checkout.js') }}"></script>
-<script src="{{ url_for('static', filename='rewardsript.js') }}"></script>
+<script src="{{ url_for('static', filename='rewardscript.js') }}"></script>
 </html>
