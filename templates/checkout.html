@@ -5,93 +5,165 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/checkout.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/menu.css') }}">
 </head>
 <body>
-    <header>
-        <nav>
-            <a href="{{ url_for('homepage') }}" id="FP-Logo">
-                <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
-            </a>
-        </nav>
-    </header>
     <main class="checkout-container">
+        <header>
+            <nav>
+                <h2>CHECKOUT</h2>
+                <div class="user-container">
+                    <a href="{{ url_for('homepage') }}">
+                        <h1>Fiesta Pizza</h1>
+                    </a>
+                    {% if 'loggedin' in session %}
+                        <h1 class="user">{{ session.get('username') }}</h1>
+                    {% else %}
+                    <a href="{{ url_for('login') }}">
+                        <h1 class="user">Log In</h1>
+                    </a>
+                    {% endif %}
+                </div>
+            </nav>
+        </header>
+        
         <section class="details-section">
             <h2>DETAILS</h2>
             <div class="details-item">
-                <p><strong>Pick Up - ASAP (15 - 30 min)</strong></p>
-                <p>4518 Baltimore Ave, Philadelphia, PA 19143</p>
+                {% if pickup_time == "Delivery" %}
+                    <p><strong>Delivery</strong></p>
+                    <p>{{ delivery_address }}</p>
+                {% else %}
+                    <p><strong>Pick Up - {{ pickup_time }}</strong></p>
+                    <p>4518 Baltimore Ave, Philadelphia, PA 19143</p>
+                {% endif %}
                 <button class="edit-button">Edit</button>
             </div>
         </section>
+
+        <div id="delivery-modal" class="modal">
+            <div class="modal-content-delivery">
+                <span class="close-btn">&times;</span>
+
+                <div class="toggle">
+                    <ul class="order-option">
+                        <li class="toggle-option active" id="toggle-delivery">Delivery</li>
+                        <li class="toggle-option" id="toggle-pickup">Pickup</li>
+                    </ul>
+                </div>
+
+                <div id="delivery-section" class="delivery-info">
+                    <label for="address-input">Enter your delivery address</label>
+                    <input type="text" id="address-input" placeholder="123 Main St, City, ZIP">
+                    <a href="#">Log in for saved address</a>
+                </div>
+
+                <div id="pickup-section" class="pickup-info hidden">
+                    <div class="pickup-location">
+                        <h3>Where</h3>
+                        <h4>Fiesta Pizza</h4>
+                        <p class="address">4518 Baltimore Ave, Philadelphia, PA 19143</p>
+                    </div>
+                    <div class="pickup-time">
+                        <h3>When</h3>
+                        <select id="pickup-schedule" class="time-select">
+                            <option value="ASAP">ASAP (15-30 min)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="instructions">
+                    <p><img src="{{ url_for('static', filename='Images_Videos/exclamation.png') }}" width="15px" height="15px">&nbsp;You can add special instructions at checkout.</p>
+                </div>
+                <button class="save-button">Save</button>
+            </div>
+        </div>
+
         <section class="contact-section">
             <h2>CONTACT</h2>
-            <form>
-                <div class="form-group">
-                    <label>First Name</label>
-                    <input type="text" placeholder="First name">
+            <form class="contact-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="first-name">First Name</label>
+                        <input type="text" id="first-name">
+                    </div>
+                    <div class="form-group">
+                        <label for="last-name">Last Name</label>
+                        <input type="text" id="last-name">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Last Name</label>
-                    <input type="text" placeholder="Last name">
-                </div>
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" placeholder="Email address">
-                </div>
-                <div class="form-group">
-                    <label>Mobile Number</label>
-                    <input type="text" placeholder="Mobile phone number">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="mobile">Mobile Number</label>
+                        <input type="text" id="mobile">
+                    </div>
                 </div>
             </form>
-        </section>
+        </section>    
+        
         <section class="payment-section">
-            <h2>PAYMENT</h2>
-            <form>
-                <div class="form-group">
-                    <label>Card Number</label>
-                    <input type="text" placeholder="Card number">
-                </div>
-                <div class="form-group">
-                    <label>Expiry Date</label>
-                    <input type="text" placeholder="MM/YY">
-                </div>
-                <div class="form-group">
-                    <label>CVV</label>
-                    <input type="text" placeholder="CVV">
-                </div>
-                <div class="form-group">
-                    <label>ZIP Code</label>
-                    <input type="text" placeholder="ZIP Code">
-                </div>
-            </form>
+            <h2>SECURE PAYMENT</h2>
+            <div class="payment-options">
+                <button id="card-option" class="payment-option disabled" disabled>Credit/Debit</button>
+                <button id="cash-option" class="payment-option active">Pay in Store</button>
+            </div>
+            <div id="card-payment" class="payment-details">
+                <p>Credit/Debit option is currently unavailable.</p>
+            </div>
+            <div id="cash-payment" class="payment-details active">
+                <p>You can pay when you pick up your order in the store.</p>
+            </div>
         </section>
-        <section class="cart-summary">
+
+        <aside class="cart-summary">
             <h2>YOUR ITEMS</h2>
-            <button onclick="clearCart()">Clear Cart</button>
-            <div class="cart-items">
+            <form action="/place-order" method="POST">
+                <input type="hidden" id="final-total" name="final_total" value="">
+                <button type="submit" class="place-order-button">Place Order</button>
+            </form>
+            <div id="cart-items" class="cart-items">
                 {% for item in items %}
-                <div class="cart-item">
+                <div class="cart-item" draggable="true" data-item-id="{{ item.id }}">
                     <div class="item-details">
                         <p><strong>{{ item.name }}</strong> ({{ item.size }})</p>
-                        <p>{{ item.quantity }}x - ${{ item.total_price }}</p>
+                        <p>
+                            <span class="item-quantity">{{ item.quantity }}x</span> 
+                            - ${{ item.total_price }}
+                        </p>
+                        {% if item.toppings %}
+                        <small class="item-toppings">
+                            + {{ item.toppings | map(attribute='name') | join(', ') }}
+                        </small>
+                        {% endif %}
                     </div>
-                    <button class="remove-button">Remove</button>
                 </div>
                 {% endfor %}
             </div>
             <div class="cart-total">
-                <p>Subtotal: ${{ total }}</p>
-                <p>Tax: $2.49</p>
-                <p>Tip: $0.00</p>
-                <p><strong>Total: ${{ total }}</strong></p>
+                <small>Drag to remove items</small>
+                <small>Subtotal <span id="subtotal">${{ total }}</span></small>
+                <small>Tax <span id="tax"></span></small>
+                <small>Tip <span id="tip-amount2">$0.00</span></small>
+                <div class="tip-section">
+                    <p>Tip <span id="tip-amount">$0.00</span></p>
+                    <div class="tip-bar">
+                        <button class="tip-option active" data-tip="0">NONE</button>
+                        <button class="tip-option" data-tip="5">5%</button>
+                        <button class="tip-option" data-tip="10">10%</button>
+                        <button class="tip-option" data-tip="15">15%</button>
+                        <button class="tip-option" data-tip="other">Other</button>
+                    </div>
+                </div>
+                <p>Total <span id="total">${{ total }}</span></p>
             </div>
-            <form action="{{ url_for('place_order') }}" method="POST">
-                <button type="submit" class="place-order-button">Place Order</button>
-            </form>
-        </section>
-    </main>
-    <section class="menu-section">
+        </aside>
+        
+        <footer></footer>
+        <!-- 
+        <section class="menu-section">
         <h1>Make purchases to obtain points! Use points to redeem rewards! Check your points <a href="{{ url_for('profile') }}">here</a>.</h1>
         <div class="featured-items">
             <div class="item-card" 
@@ -141,7 +213,9 @@
             </div>
         </div>
     </section>
+    </main>
+    -->
 </body>
 <script src="{{ url_for('static', filename='checkout.js') }}"></script>
-<script src="{{ url_for('static', filename='rewardscript.js') }}"></script>
+<script src="{{ url_for('static', filename='rewardsript.js') }}"></script>
 </html>

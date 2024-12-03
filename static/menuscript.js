@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const calculateScrollAmount = () => {
         const containerWidth = scrollWrapper.clientWidth;
         const itemWidth = scrollWrapper.querySelector(".nav-btn").offsetWidth;
-        return itemWidth * Math.floor(containerWidth / itemWidth); // Visible items width
+        return itemWidth * Math.floor(containerWidth / itemWidth);
     };
 
     const updateScrollButtons = () => {
@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return name.toLowerCase().replace(/\s+/g, '-');
     }
 
-   function showCategory(category) {
+    function showCategory(category) {
         const normalizedCategory = normalizeCategoryName(category);
         const targetSection = document.querySelector(`#${normalizedCategory}-section`);
         if (targetSection) {
@@ -265,7 +265,6 @@ document.addEventListener("DOMContentLoaded", () => {
         quantity = 1;
         quantityDisplay.textContent = quantity;
     
-        // Update modal image if provided
         const modalImage = document.getElementById("modal-image");
         if (modalImage && img) {
             modalImage.src = img;
@@ -275,10 +274,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (category === "Pizza" && itemData.hasSizes) {
             document.querySelector('.toppings-options').style.display = 'block';
             loadSizes(id, name, price);
-            loadToppings(id); // Only load toppings for pizzas
+            loadToppings(id); 
         } else {
             document.querySelector('.toppings-options').style.display = 'none';
-            toppingsOptionsContainer.innerHTML = ''; // Clear any lingering toppings
+            toppingsOptionsContainer.innerHTML = ''; 
             sizeOptionsContainer.innerHTML = `
                 <label>
                     <input type="radio" name="size" value="${category}" data-price="${price}" checked>
@@ -444,8 +443,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const totalCostDisplay = document.querySelector('.total-cost');
         totalCostDisplay.dataset.subtotal = subtotal; 
         totalCostDisplay.textContent = `TOTAL: $${subtotal.toFixed(2)}`;
-    
-        calculateTip();
     }
 
     function removeFromCart(itemId) {
@@ -477,9 +474,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const pickupSection = document.getElementById("pickup-section");
     const pickupSchedule = document.getElementById("pickup-schedule");
 
-    let selectedOption = "Delivery";
-    let selectedPickupTime = "ASAP";
-
     function populatePickupTimes() {
         const startHour = 9;
         const endHour = 21;
@@ -491,8 +485,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 time.setMinutes(minute);
 
                 const timeOption = document.createElement("option");
-                timeOption.value = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                timeOption.textContent = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                timeOption.value = time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+                timeOption.textContent = time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
                 pickupSchedule.appendChild(timeOption);
             }
@@ -505,7 +499,7 @@ document.addEventListener("DOMContentLoaded", () => {
         deliveryModal.style.display = "block";
     });
 
-    closeDeliveryModal.onclick = () => deliveryModal.style.display = "none";
+    closeDeliveryModal.onclick = () => (deliveryModal.style.display = "none");
 
     window.onclick = (event) => {
         if (event.target === deliveryModal) {
@@ -530,49 +524,59 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     saveButton.onclick = () => {
+        const deliveryButton = document.getElementById("delivery-button");
+        const deliveryAddressInput = document.getElementById("address-input");
+        const pickupSchedule = document.getElementById("pickup-schedule");
+        let selectedPickupTime = pickupSchedule.value;
+        let selectedOption = toggleDelivery.classList.contains("active") ? "Delivery" : "Pickup";
+    
         if (selectedOption === "Pickup") {
             selectedPickupTime = pickupSchedule.value;
             deliveryButton.textContent = `Pickup at ${selectedPickupTime}`;
-        } else {
-            deliveryButton.textContent = "Delivery";
+    
+            fetch("/set-pickup-time", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ pickup_time: selectedPickupTime }),
+            }).catch((error) => console.error("Error saving pickup time:", error));
+        } else if (selectedOption === "Delivery") {
+            const deliveryAddress = deliveryAddressInput.value.trim();
+    
+            if (deliveryAddress) {
+                deliveryButton.textContent = "Delivery";
+    
+                fetch("/set-pickup-time", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ pickup_time: "Delivery", address: deliveryAddress }),
+                }).catch((error) => console.error("Error saving delivery address:", error));
+            } else {
+                alert("Please enter a valid delivery address.");
+                return;
+            }
         }
         deliveryModal.style.display = "none";
     };
 
-    const tipOptions = document.querySelectorAll(".tip-option");
-    const tipAmountDisplay = document.getElementById("tip-amount");
-    const totalCostDisplay = document.querySelector(".total-cost");
-    
-    let subtotal = 0;
-    let selectedTip = 0;
+    const proceedToCheckoutButton = document.querySelector(".checkout-button");
+    const pickupTimeDisplay = document.getElementById("delivery-button");
 
-    function calculateTip() {
+    proceedToCheckoutButton.addEventListener("click", () => {
+        const pickupTimeText = pickupTimeDisplay.textContent.includes("Pickup at")
+            ? pickupTimeDisplay.textContent.replace("Pickup at ", "").trim()
+            : "ASAP (15-30 min)";
 
-        const cartSubtotal = parseFloat(totalCostDisplay.dataset.subtotal || 0);
-    
-        let tipAmount = 0;
-    
-        if (selectedTip === "other") {
-            const customTip = parseFloat(prompt("Enter custom tip amount:", "0")) || 0;
-            tipAmount = customTip;
-        } else {
-            tipAmount = (cartSubtotal * selectedTip) / 100;
-        }
-
-        tipAmountDisplay.textContent = `$${tipAmount.toFixed(2)}`;
-
-        const totalWithTip = cartSubtotal + tipAmount;
-        totalCostDisplay.textContent = `TOTAL: $${totalWithTip.toFixed(2)}`;
-    }
-
-    tipOptions.forEach(option => {
-        option.addEventListener("click", () => {
-            tipOptions.forEach(btn => btn.classList.remove("active")); 
-            option.classList.add("active");
-    
-            selectedTip = option.getAttribute("data-tip") === "other" ? "other" : parseInt(option.getAttribute("data-tip"));
-
-            calculateTip();
+        fetch("/set-pickup-time", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ pickup_time: pickupTimeText }),
+        }).then((response) => {
+            if (!response.ok) {
+                console.error("Failed to set pickup time");
+            }
+            window.location.href = "/cart";
         });
     });
 });

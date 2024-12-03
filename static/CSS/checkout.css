@@ -3,17 +3,47 @@
     src: url('/static/Fonts/PPMori-Regular.otf') format('opentype');
 }
 
+@font-face {
+    font-family: 'MoriB';
+    src: url('/static/Fonts/PPMori-SemiBold.otf') format('opentype');
+}
+
+
+@font-face {
+    font-family: 'Gum';
+    src: url('/static/Fonts/Bubblegum.ttf') format('truetype');
+}
+
+
 body {
     font-family: 'Mori';
-    background-color: #f8f6f8;
+    background-color: #faf9f8;
     margin: 0;
     padding: 0;
 }
 
-header {
-    background-color: #333;
-    color: white;
-    padding: 15px 20px;
+
+nav a {
+    text-decoration: none;
+}
+
+nav h2 {
+    color: #6c6969;
+    font-weight: 850;
+    font-size: 0.95rem;
+}
+
+nav h1 {
+    font-family: 'MoriB';
+    text-transform: uppercase;
+    color: black;
+    margin-top: -10px;
+    font-size: 1.35rem;
+    font-weight: 850;
+}
+
+.user {
+    font-size: 1.10rem;
 }
 
 header img {
@@ -21,68 +51,332 @@ header img {
     height: 100px;
 }
 
-#FP-Logo {
-    text-align: center;
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: white;
-    text-decoration: none;
-}
-
 .checkout-container {
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 20px;
     max-width: 1200px;
-    margin: 50px auto;
+    margin: 0 auto;
     padding: 20px;
-    background-color: #fff;
-    border-radius: 10px;
+    align-items: start;
 }
 
 section {
-    background-color: #fff;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
+    margin-right: 70px;
 }
 
 .details-section, .contact-section, .payment-section {
     grid-column: 1;
+    padding: 20px;
+    border-bottom: 2px solid #ddd;
 }
 
-.cart-summary {
-    grid-column: 2;
-}
-
-h2 {
-    font-size: 1.5rem;
-    margin-bottom: 20px;
+.edit-button {
+    background: #ebebed;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
     color: #333;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
+    cursor: pointer;
+    font-size: 0.9rem;
     font-weight: bold;
+}
+
+.modal {
+    display: none; 
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px); 
+    overflow: hidden;
+}
+
+.modal-content-delivery {
+    background-color: #ffffff;
+    margin: 10% auto;
+    padding: 20px;
+    border-radius: 20px;
+    width: 17%;
+    height: 45%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.close-btn {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: 5px;
+    right: 5px;
+    font-size: 1.25rem;
+    font-weight: 450;
+    cursor: pointer;
+    color: #ffffff;
+    background-color: #cf4d4d;
+    border-radius: 50%;
+    padding: 0.5rem;
+    width: 5px;
+    height: 5px;
+    overflow: hidden;
+}
+
+.toggle {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.toggle-option {
+    text-align: center;
+    background-color: transparent;
+    padding: 10px;
+    height: 15px;
+    color: black;
+    font-family: 'Gum';
+    border: none;
+    border-radius: 40px;
+    cursor: pointer;
+}
+
+.toggle-option.active {
+    background-color: #cf4d4d;
+    color: white;
+    border-radius: 40px;
+}
+
+.order-option {
+    display: flex;
+    margin-bottom: 10px;
+    list-style: none;
+    border: 2px solid black;
+    border-radius: 40px;
+    padding: 8px;
+    width: 100%;
+}
+
+.delivery-info label {
+    display: block;
+    font-size: 1rem;
     margin-bottom: 5px;
 }
 
-.form-group input {
-    width: 100%;
+.delivery-info input {
+    width: 90%;
     padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.pickup-location, .pickup-time {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    margin-left: 20px;
+}
+
+.pickup-location h3, .pickup-time h3 {
+    font-size: 1.5rem;
+    font-weight: 650;
+}
+
+.pickup-location h4, .pickup-time h4 {
+    font-weight: normal;
+    font-size: 1rem;
+    margin-bottom: -5px;
+}
+
+.address {
+    font-size: 0.75rem;
+    font-weight: 550;
+}
+
+.instructions {
+    background-color: #f3f8fc;
+    padding: 10px;
+    border-radius: 15px;
+    align-self: center;
+    margin-top: auto;
+    
+    transform: translateY(calc(100% - 20px));
+}
+
+.time-select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
     border: 1px solid #ddd;
     border-radius: 5px;
     font-size: 1rem;
 }
 
-.cart-items {
-    max-height: 300px;
-    overflow-y: auto;
+.save-button {
+    width: 80%;
+    background-color: #cf4d4d;
+    color: white;
+    padding: 10px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    align-self: center;
+    margin-top: auto;
+}
+
+.contact-section {
+    margin-bottom: 30px;
+    padding: 20px;
+}
+
+.hidden {
+    display: none;
+}
+
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.form-group label {
+    font-size: 0.9rem;
+    color: #333;
+    font-weight: bold;
+}
+
+.form-group input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    color: #333;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.form-group input:focus {
+    border-color: #555;
+    outline: none;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.payment-section {
+    padding: 20px;
+}
+
+.payment-section h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.payment-options {
+    display: flex;
+    justify-content: space-around;
     margin-bottom: 20px;
+    gap: 20px;
+}
+
+.payment-option {
+    flex: 1;
+    padding: 10px;
+    background-color: #f8f8f8;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: bold;
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+.payment-option.active {
+    border: 2px solid #d9534f;
+    color: #d9534f;
+    background-color: #fff;
+}
+
+.payment-option:hover {
+    background-color: #eee;
+}
+
+.payment-details {
+    display: none;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.payment-details.active {
+    display: flex;
+}
+
+.cart-summary {
+    position: fixed;
+    right: 25%;
+    width: 16%;
+    top: 0;
+    padding: 20px;
+    background-color: #f5f3f0; 
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 20px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #666 #f5f3f0;
+    scroll-behavior: smooth;
+}
+
+.cart-summary::-webkit-scrollbar {
+    width: 8px;
+}
+
+.cart-summary::-webkit-scrollbar-thumb {
+    background-color: #666;
+    border-radius: 4px;
+}
+
+.cart-summary::-webkit-scrollbar-track {
+    background-color: #f5f3f0;
+    border-radius: 4px;
+}
+
+.cart-total p {
+    font-size: 0.85rem;
+}
+
+h2 {
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.cart-items {
+    max-height: 500px;
+    overflow-y: auto;
 }
 
 .cart-item {
@@ -91,27 +385,93 @@ h2 {
     align-items: center;
     padding: 10px 0;
     border-bottom: 1px solid #ddd;
+    cursor: grab;
+    transition: transform 0.2s ease;
+}
+
+.cart-item.dragging {
+    opacity: 0.7;
+    transform: scale(0.95);
+    cursor: grabbing;
 }
 
 .cart-item .item-details {
     flex: 1;
 }
 
+.item-quantity {
+    background-color: #ffffff;
+    border-radius: 50%;
+    padding: 8px;
+    text-align: left;
+    flex: 0 0 auto;
+    margin-right: auto;
+    font-weight: bold;  
+    font-size: 0.95rem;
+    color: #666;   
+}
+
+.item-toppings {
+    font-size: 0.85rem;
+    color: #888;
+    margin-top: 5px;
+    margin-left: 20px;
+    text-align: left;
+}
+
 .cart-total {
     font-size: 1rem;
-    margin-bottom: 20px;
+    margin-bottom: auto;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+.cart-total small {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 0.90rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.cart-total small span {
+    color: #000;
+    font-weight: bold;
+}
+
+.cart-total p {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 50px;
+    font-size: 1.1rem;
+    color: #333;
+    font-weight: 600;
+    padding-top: 10px;
+}
+
+.cart-total p span {
+    color: #000;
+    font-weight: bold;
 }
 
 .place-order-button {
-    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    width: 90%;
+    height: 50px;
     background-color: #333;
     color: white;
-    padding: 15px;
     font-size: 1.2rem;
     border: none;
-    border-radius: 5px;
+    border-radius: 10px;
     cursor: pointer;
     text-transform: uppercase;
+    font-weight: 850;
+    margin-bottom: 20px;
 }
 
 .place-order-button:hover {
@@ -129,3 +489,75 @@ h2 {
 .remove-button:hover {
     color: #a12b2b;
 }
+
+.tip-section {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 0px;
+}
+
+.tip-section p {
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: left;
+}
+
+#tip-amount {
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: right;
+}
+
+.tip-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 10px;
+    border: 1.5px solid #ddd;
+    padding: 0px;
+    height: 35px;
+    width: 100%;
+    margin: auto;
+    border-radius: 30px;
+    overflow: hidden;
+}
+
+.tip-option {
+    background-color: transparent;
+    border: 1px solid #ddd;
+    padding: 15px;
+    width: 100%;
+    font-size: 0.85rem;
+    font-weight: 550;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.tip-option.active {
+    background-color: #444;
+    color: white;
+    border: 1px solid #555;
+}
+
+.tip-option:hover {
+    background-color: #e2e2e2;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #ffffff;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 1rem;
+    text-align: center;
+    z-index: 1000;
+}
+

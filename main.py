@@ -21,9 +21,9 @@ def allowed_file(filename):
 app.secret_key = 'your secret key'
 
 # MySQL database configuration
-app.config['MYSQL_HOST'] = 'Jubayads-MacBook-Pro.local'  
+app.config['MYSQL_HOST'] = 'localhost'  
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'Minecraft100'
+app.config['MYSQL_PASSWORD'] = '2113284'
 app.config['MYSQL_DB'] = 'PizzaInfo'
 
 # File upload configuration
@@ -293,8 +293,7 @@ def menu():
                     m.itemName;
             """, (category['itemCategory'],))
             menu_items_by_category[category['itemCategory']] = cursor.fetchall()
-        
-        # Close the cursor
+
         cursor.close()
 
         # Admin-specific functionality
@@ -348,12 +347,11 @@ def menu():
                     mysql.connection.commit()
                     cursor.close()
                 except Exception as e:
-                    mysql.connection.rollback()  # Rollback transaction on error
+                    mysql.connection.rollback()
                     print(f"Database Error: {e}")
                     return "Database Error"
                 return redirect(url_for('menu'))
 
-        # Render the menu page with all items and categories
         return render_template(
             'menu.html',
             all_menu_items=all_menu_items,
@@ -364,6 +362,22 @@ def menu():
         print(f"Error in /menu route: {e}")
         return "Error loading the menu." 
 
+# Route for pickup times
+@app.route('/set-pickup-time', methods=['POST'])
+def set_pickup_time():
+    data = request.json
+    
+    if data.get('pickup_time') == "Delivery":
+        session['delivery_address'] = data.get('address', "Unknown Address")
+        session['pickup_time'] = "Delivery"
+    else:
+        session['pickup_time'] = data.get('pickup_time', 'ASAP (15-30 min)')
+        session.pop('delivery_address', None)
+    
+    session.modified = True
+    return jsonify({"status": "success"}), 200
+
+# Route for checkout
 @app.route('/cart')
 def cart():
     if 'cart' not in session or not isinstance(session['cart'], dict):
@@ -371,13 +385,36 @@ def cart():
 
     cart_data = session['cart']
     items = cart_data.get('items', [])
-    total = cart_data.get('total', 0.0)
+    total = round(cart_data.get('total', 0.0), 2)
+    pickup_time = session.get('pickup_time', 'ASAP (15-30 min)')
+    delivery_address = session.get('delivery_address', None)
 
-   # Check if the cart is empty and provide a message or redirect
+    for item in items:
+        item['quantity'] = int(float(item['quantity']))
+        item['price_per_unit'] = "{:.2f}".format(float(item['price_per_unit']))
+        item['total_price'] = "{:.2f}".format(float(item['total_price']))
+        if item.get('toppings'):
+            item['toppings'] = [
+                {'name': topping['name'], 'price': "{:.2f}".format(topping['price'])}
+                for topping in item['toppings']
+            ]
+
     if not items:
-        return render_template('checkout.html', message="Your cart is empty.", total=total)
+        return render_template(
+            'checkout.html',
+            message="Your cart is empty.",
+            total=total,
+            pickup_time=pickup_time,
+            delivery_address=delivery_address
+        )
 
-    return render_template('checkout.html', items=items, total=total)
+    return render_template(
+        'checkout.html',
+        items=items,
+        total="{:.2f}".format(total),
+        pickup_time=pickup_time,
+        delivery_address=delivery_address
+    )
 
 @app.route('/place-order', methods=['POST'])
 def place_order():
@@ -395,15 +432,13 @@ def place_order():
     try:
         cur = mysql.connection.cursor()
 
-        # Generate a custom orderID as a combination of user_id and timestamp
-        order_id = user_id * 1000000 + int(time.time())  # Ensure it’s an integer
+        order_id = user_id * 1000000 + int(time.time())
 
-        # List to store order details for rendering the status.html
         order_details = []
 
         for item in items:
             item_id = item['id']
-            item_name = item['name']  # Get the item name
+            item_name = item['name']
             quantity = item['quantity']
             size = item.get('size', None)
             toppings = item.get('toppings', [])
@@ -418,7 +453,6 @@ def place_order():
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (order_id, user_id, item_id, item_name, size, order_date, quantity, toppings_str, item['total_price']))
 
-            # Add item details to order_details list
             order_details.append({
                 'order_id': order_id,
                 'item_name': item_name,
@@ -429,13 +463,12 @@ def place_order():
                 'total_price': item['total_price']
             })
 
-        mysql.connection.commit()  # Commit the transaction
-        update_points(total) # Increase user points
+        mysql.connection.commit()
+        update_points(total)
         cur.close()
 
         session.pop('cart', None)
 
-        # Render the status.html page with the order details
         return render_template('status.html', orders=order_details, total=total)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -468,12 +501,6 @@ def order_history():
         })
 
     cursor.close()
-
-@app.route('/clear_cart', methods=['POST'])
-def clear_cart():
-    session.pop('cart', None)
-    session.modified = True
-    return jsonify({'status': 'success'})
 
 @app.route('/rewards', methods=['GET'])
 def rewards():
@@ -517,7 +544,6 @@ def redeem_rewards():
     cart_data = session['cart']
     item = request.get_json()
 
-    # Extract item details from the request
     item_id = item.get('id')
     item_name = item.get('name')
     item_price = item.get('price', 0.0)
@@ -529,18 +555,14 @@ def redeem_rewards():
     item_total_price = item.get('total_price', item_price * item_quantity)
     item_total_points = item.get('total_points', item_points * item_quantity)
 
-    # Use Points
     update_points((item_points/100) * -1)
-    # Check if the item is already in the cart
     existing_item = next((i for i in cart_data['items'] if i['id'] == item_id), None)
 
     if existing_item:
-        # Update the quantity and total price/points of the existing item
         existing_item['quantity'] += item_quantity
         existing_item['total_price'] += item_total_price
         existing_item['total_points'] += item_total_points
     else:
-        # Add the new item to the cart
         new_item = {
             'id': item_id,
             'name': item_name,
@@ -554,10 +576,8 @@ def redeem_rewards():
             'total_points': item_total_points
         }
         cart_data['items'].append(new_item)
-    # Update the total price in the cart
     cart_data['total'] += item_total_price
 
-    # Update the session
     session['cart'] = cart_data
     session.modified = True
 
@@ -596,7 +616,6 @@ def order_confirmation(order_id):
     try:
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 
-        # Retrieve order details
         cursor.execute('''
             SELECT o.orderID AS order_id, o.date_ordered, o.total_price, m.itemName AS item_name, 
                    o.size, o.quantity, o.toppings
@@ -708,12 +727,10 @@ def update_profile_pic():
         data = request.get_json()
         new_profile_pic = data.get('profile_pic')
 
-        # Update the database with the new profile picture path
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('UPDATE UserInfo SET profile_pic = %s WHERE LoginID = %s', (new_profile_pic, session['id']))
         mysql.connection.commit()
 
-        # Check if the update was successful
         cursor.execute('SELECT profile_pic FROM UserInfo WHERE LoginID = %s', (session['id'],))
         result = cursor.fetchone()
         if result and result['profile_pic'] == new_profile_pic:

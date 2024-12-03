@@ -11,7 +11,7 @@
     </head>
     <body>
         <nav>
-            {% if 'loggedin' in session%}
+            {% if 'loggedin' in session %}
             <a href="{{ url_for('homepage') }}" id="FP-Logo">
                 <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
             </a>
@@ -24,6 +24,7 @@
                 <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
                 {% if 'loggedin' in session %}
                     <li><a href="{{ url_for('profile') }}">PROFILE</a></li>
+                    <li><a href="{{ url_for('rewards') }}">REWARDS</a></li>
                     <li><a href="{{ url_for('logout') }}">LOGOUT</a></li>
                 {% else %}
                     <li><a href="{{ url_for('register') }}">REGISTER</a></li>
@@ -256,17 +257,10 @@
                 <div class="cart-items">
                  <!-- Items will be added  -->
                 </div>
-                <div class="tip-section">
-                    <p>Tip: <span id="tip-amount">$0.00</span></p>
-                    <div class="tip-bar">
-                        <button class="tip-option" data-tip="0">0%</button>
-                        <button class="tip-option" data-tip="10">10%</button>
-                        <button class="tip-option" data-tip="15">15%</button>
-                        <button class="tip-option" data-tip="other">Other</button>
-                    </div>
+                <div class="checkout-section">
+                    <span class="total-cost">TOTAL: $0.00</span>
+                    <button class="checkout-button" onclick="window.location.href='/cart'">PROCEED TO CHECKOUT</button>
                 </div>
-                <span class="total-cost">TOTAL: $0.00</span>
-                <button class="checkout-button" onclick="window.location.href='/cart'">PROCEED TO CHECKOUT</button>
             </aside>
 
             <div id="delivery-modal" class="modal">
