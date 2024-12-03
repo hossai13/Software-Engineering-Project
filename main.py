@@ -21,9 +21,9 @@ def allowed_file(filename):
 app.secret_key = 'your secret key'
 
 # MySQL database configuration
-app.config['MYSQL_HOST'] = 'localhost'  
+app.config['MYSQL_HOST'] = 'Jubayads-MacBook-Pro.local'  
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'root1234'
+app.config['MYSQL_PASSWORD'] = 'Minecraft100'
 app.config['MYSQL_DB'] = 'PizzaInfo'
 
 # File upload configuration
@@ -587,6 +587,34 @@ def reduce_stock(itemID, quantity):
     cursor.execute('UPDATE inventory SET quantity=quantity - %s WHERE itemID = %s', (quantity, itemID))
     mysql.connection.commit()
     cursor.close()
+
+@app.route('/order-confirmation/<int:order_id>')
+def order_confirmation(order_id):
+    if 'loggedin' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+        # Retrieve order details
+        cursor.execute('''
+            SELECT o.orderID AS order_id, o.date_ordered, o.total_price, m.itemName AS item_name, 
+                   o.size, o.quantity, o.toppings
+            FROM OrderHistory o
+            LEFT JOIN Menu m ON o.itemID = m.itemID
+            WHERE o.orderID = %s AND o.LoginID = %s
+        ''', (order_id, session['id']))
+        orders = cursor.fetchall()
+
+        total = sum(order['total_price'] for order in orders)
+
+        return render_template('status.html', orders=orders, total=total)
+    except Exception as e:
+        print(f"Error loading order confirmation: {e}")
+        return "Error loading order confirmation", 500
+    finally:
+        cursor.close()
+
 
 # Registration route
 @app.route('/register', methods=['GET', 'POST'])

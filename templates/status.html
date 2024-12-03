@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout</title>
+    <title>Order Status</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/checkout.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/tracker.css') }}">
 </head>
 <body>
     <nav>
@@ -25,7 +26,20 @@
     </nav>
     <body>
         <h1>Order Confirmed</h1>
-        <h2>The party will arrive soon</h2>
+
+        <!-- Tracker Section -->
+    <div class="tracker">
+        <div class="tracker-bar">
+            <div class="tracker-fill" id="tracker-fill"></div>
+        </div>
+        <div class="tracker-labels">
+            <span>Order Placed</span>
+            <span>Being Prepared</span>
+            <span>Out for Delivery</span>
+            <span>Delivered</span>
+        </div>
+    </div>
+    
         <main>
             {% if orders %}
                 <div id="order-details-container">
@@ -50,5 +64,6 @@
         </main>
 
         <h2 class="view-order-history"><a href="{{ url_for('profile') }}">View Order History</a></h2>
+        <script src="{{ url_for('static', filename='JS/tracker.js') }}"></script>
     </body>
     </html>
