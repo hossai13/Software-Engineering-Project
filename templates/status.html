@@ -1,18 +1,24 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Status</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/checkout.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/navbar.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/tracker.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/status.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.5/lottie.min.js"></script>
 </head>
 <body>
     <nav>
+        {% if 'loggedin' in session %}
+        <a href="{{ url_for('homepage') }}" id="FP-Logo">
+            <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
+        </a>
+        {% else %}
         <a href="{{ url_for('userhomepage') }}" id="FP-Logo">
             <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
         </a>
+        {% endif %}
         <ul class="navbar">
             <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
             {% if 'loggedin' in session %}
@@ -22,65 +28,78 @@
                 <li><a href="{{ url_for('register') }}">REGISTER</a></li>
                 <li><a href="{{ url_for('login') }}">LOGIN</a></li>
             {% endif %}
+            <li id="cart-icon">
+                <a href="{{ url_for('cart') }}"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
+            </li>
         </ul>
     </nav>
-    <body>
-        <h1>Order Confirmed</h1>
-        <h2>The party will arrive soon</h2>
-        <!-- Tracker Section -->
-    <div class="tracker">
-        <div class="tracker-bar">
-            <div class="tracker-fill" id="tracker-fill"></div>
-        </div>
-        <div class="tracker-labels">
-            <span>Order Placed</span>
-            <span>Being Prepared</span>
-            <span>Out for Delivery</span>
-            <span>Delivered</span>
-        </div>
-    </div>
     <main>
-        {% if orders %}
-            <div id="order-details-container">
-                <h2 class="order-ID-header">Order ID: {{ orders[0].order_id }}</h2>
-                <p class="total-price-header">Total Price: ${{ "%.2f"|format(total) }}</p>
-                <p class="order-date-header">Order Date: {{ orders[0].date_ordered }}</p>
-                <ul>
-                    {% for order in orders %}
-                        <li>
-                            <h2 class="item-name">Item Name:</h2> {{ order.item_name }}<br>
-                            <h3 class="item-size">Size:</h3> {{ order.size or 'N/A' }}<br>
-                            <h3 class="total-quantity">Quantity:</h3> {{ order.quantity }}<br>
-                            <h3 class="total-toppings">Toppings:</h3> {{ order.toppings or 'None' }}<br>
-                            <h2 class="total-price-header">Price:</h2> ${{ "%.2f"|format(order.total_price) }}
-                            <button class="cancel-order-button" 
-                            {% if not can_cancel %} disabled {% endif %} onclick="openModal({{ order.order_id }})">
-                            {% if not can_cancel %} Cancellation period has passed {% else %} Cancel Order {% endif %}
-                            </button>
-                        </li>
-                    {% endfor %}
-                </ul>
+        <div class="tracker">
+            <div class="tracker-bar">
+                <div>Ordered</div>
+                <div>Being Prepared</div>
+                <div>Out for Delivery</div>
+                <div>Delivered</div>
             </div>
-        {% else %}
-            <p>No order details available.</p>
-        {% endif %}
+        </div>
+
+        <section class="order-status-header">
+            <h1 class="animation">Order Confirmed</h1>
+            <h2>The party will arrive soon!</h2>
+        </section>
+
+        <section id="order-details-container">
+            {% if orders %}
+                <h2>YOUR ITEMS</h2>
+                <div id="cart-items" class="cart-items">
+                    {% for order in orders %}
+                    <div class="cart-item" data-item-id="{{ order.order_id }}">
+                        <div class="item-details">
+                            <p><strong>{{ order.item_name }}</strong> ({{ order.size or 'N/A' }})</p>
+                            <p>
+                                <span class="item-quantity">{{ order.quantity }}x</span> 
+                                - ${{ "%.2f"|format(order.total_price) }}
+                            </p>
+                            {% if order.toppings %}
+                            <small class="item-toppings">
+                                + {{ order.toppings | join(', ') }}
+                            </small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="order-summary">
+                    <small>Subtotal: ${{ "%.2f"|format(subtotal) }}</small>
+                    <small>Tax: ${{ "%.2f"|format(tax) }}</small>
+                    <small>Tip: ${{ "%.2f"|format(tip) }}</small>
+                    <p class="total-price-header">Total Price: ${{ "%.2f"|format(total) }}</p>
+                    <p class="order-date-header">Order Date: {{ orders[0].date_ordered.strftime('%Y-%m-%d %H:%M') }}</p>
+                </div>
+                <button class="cancel-order-button"
+                    {% if not can_cancel %} disabled {% endif %}
+                    onclick="openModal({{ orders[0].order_id }})">
+                    {% if not can_cancel %} Cancellation period has passed {% else %} Cancel Order {% endif %}
+                </button>
+            {% else %}
+                <p>No order details available.</p>
+            {% endif %}
+        </section>
+        
+        <div id="cancelModal" class="modal">
+            <div class="modal-content">
+                <p>Are you sure you want to cancel this order?</p>
+                <form method="POST" action="/cancel-order">
+                    <input type="hidden" name="order_id" id="cancelOrderId">
+                    <button class="confirm-cancel-button" type="submit">Yes, Cancel Order</button>
+                    <button class="stop-cancel-button" type="button" onclick="closeModal()">No, Keep Order</button>
+                </form>
+            </div>
+        </div>
     </main>
-    
-    <div id="cancelModal" style="display: none;">
-        <p>Are you sure you want to cancel this order?</p>
-        <form method="POST" action="/cancel-order">
-            <input type="hidden" name="order_id" id="cancelOrderId">
-            <button class="confirm-cancel-button"type="submit">Yes, Cancel Order</button>
-            <button  class="stop-cancel-button" type="button" onclick="closeModal()">No, Keep Order</button>
-        </form>
-    </div>
-
-    <p>Can cancel: {{ can_cancel }}</p>
-
-    <h2 class="view-order-history"><a href="{{ url_for('profile') }}">View Order History</a></h2>
-    </body>
-    <script src="{{ url_for('static', filename='JS/tracker.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
+    <script src="{{ url_for('static', filename='cartani.js') }}"></script>
+    <script src="{{ url_for('static', filename='status.js') }}"></script>
     <script src="{{ url_for('static', filename='cancel.js') }}"></script>
-    </html>
-
-
+</body>
+</html>

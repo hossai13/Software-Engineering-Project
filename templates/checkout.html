@@ -108,15 +108,57 @@
             <h2>SECURE PAYMENT</h2>
             <div class="payment-options">
                 <button id="card-option" class="payment-option disabled" disabled>Credit/Debit</button>
-                <button id="cash-option" class="payment-option active">Pay in Store</button>
+                <button id="cash-option" class="payment-option active">Pay with Cash</button>
             </div>
             <div id="card-payment" class="payment-details">
                 <p>Credit/Debit option is currently unavailable.</p>
             </div>
             <div id="cash-payment" class="payment-details active">
-                <p>You can pay when you pick up your order in the store.</p>
+                <p>You can pay upfront.</p>
             </div>
         </section>
+
+        {% if 'loggedin' in session %}
+        <section class="rewards-section">
+            <h2>Redeem Your Rewards</h2>
+            <p>You have <strong>{{ points['Points'] }}</strong> reward points available!</p>
+            <div class="rewards-items">
+                <div class="reward-card" 
+                    data-item-id="23"
+                    data-item-name="Pepperoni Pizza" 
+                    data-item-points="12500"
+                    data-item-price="0"
+                    data-item-size="Large">
+                    <img src="/static/Images_Videos/pizza.jpeg" alt="Pepperoni Pizza">
+                    <h3>Pepperoni Pizza - Large</h3>
+                    <p class="reward-points">12,500 Points</p>
+                    <button class="redeem-button">Redeem Now</button>
+                </div>
+                <div class="reward-card"
+                    data-item-id="127"
+                    data-item-name="Plain Stromboli"
+                    data-item-points="8000"
+                    data-item-price="0"
+                    data-item-size="Strombolis">
+                    <img src="/static/Images_Videos/stromboli.png" alt="Plain Stromboli">
+                    <h3>Plain Stromboli</h3>
+                    <p class="reward-points">8,000 Points</p>
+                    <button class="redeem-button">Redeem Now</button>
+                </div>
+                <div class="reward-card"
+                    data-item-id="179"
+                    data-item-name="Hamburger Platter"
+                    data-item-points="125000"
+                    data-item-price="0"
+                    data-item-size="Burger">
+                    <img src="/static/Images_Videos/burger.jpg" alt="Burger">
+                    <h3>Hamburger Platter</h3>
+                    <p class="reward-points">10,000 Points</p>
+                    <button class="redeem-button">Redeem Now</button>
+                </div>
+            </div>
+        </section>
+        {% endif %}
 
         <aside class="cart-summary">
             <h2>YOUR ITEMS</h2>
@@ -143,7 +185,7 @@
                 {% endfor %}
             </div>
             <div class="cart-total">
-                <small>Drag to remove items</small>
+                <small><em>Drag to remove items</em></small>
                 <small>Subtotal <span id="subtotal">${{ total }}</span></small>
                 <small>Tax <span id="tax"></span></small>
                 <small>Tip <span id="tip-amount2">$0.00</span></small>
@@ -163,24 +205,7 @@
         
         <footer></footer>
         <!-- 
-        <section class="menu-section">
-        <h1>Make purchases to obtain points! Use points to redeem rewards! Check your points <a href="{{ url_for('profile') }}">here</a>.</h1>
-        <div class="featured-items">
-            <div class="item-card" 
-                 data-item-id="23"
-                 data-item-name="Pepperoni Pizza" 
-                 data-item-category="Pizza" 
-                 data-item-price="0"
-                 data-item-points="10000"
-                 data-item-size="Points"
-                 data-item-img="{{ url_for('static', filename='Images_Videos/pizza.jpeg') }}">
-                <img src="{{ url_for('static', filename='Images_Videos/pizza.jpeg') }}" alt="Pepperoni Pizza">
-                <h3>Pepperoni Pizza - Small Pie</h3>
-                <div class="price">
-                    <span>10000</span>
-                </div>
-                <button class="order-button">REDEEM NOW</button>
-            </div>
+
             <div class="item-card" 
                  data-item-id="2"
                  data-item-name="Plain Stromboli" 
@@ -217,5 +242,4 @@
     -->
 </body>
 <script src="{{ url_for('static', filename='checkout.js') }}"></script>
-<script src="{{ url_for('static', filename='rewardsript.js') }}"></script>
 </html>

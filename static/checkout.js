@@ -135,24 +135,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         deliveryModal.style.display = "none";
     };
-
-    function calculateTotal() {
-        const taxAmount = (subtotal * taxRate).toFixed(2);
-        const tipAmount = selectedTip.toFixed(2);
-        const total = (subtotal + parseFloat(taxAmount) + parseFloat(tipAmount)).toFixed(2);
-
-        taxElement.textContent = `$${taxAmount}`;
-        tipAmountElement.textContent = `$${tipAmount}`;
-        tipAmountElement2.textContent = `$${tipAmount}`;
-        totalElement.textContent = `$${total}`;
-        finalTotalInput.value = total;
+    function setTipOnServer(tipAmount) {
+        fetch("/set-tip", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ tip: tipAmount }),
+        }).catch((error) => console.error("Error setting tip:", error));
     }
-
+    
     tipOptions.forEach((option) => {
         option.addEventListener("click", () => {
             tipOptions.forEach((btn) => btn.classList.remove("active"));
             option.classList.add("active");
-
+    
             if (option.dataset.tip === "other") {
                 let customTip = prompt("Enter flat tip amount:", "0");
                 if (customTip !== null && customTip.trim() !== "") {
@@ -169,10 +164,23 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 selectedTip = (subtotal * parseFloat(option.dataset.tip) / 100);
             }
-
+    
             calculateTotal();
+            setTipOnServer(selectedTip); // Update the server
         });
     });
+
+    function calculateTotal() {
+        const taxAmount = (subtotal * taxRate).toFixed(2);
+        const tipAmount = selectedTip.toFixed(2);
+        const total = (subtotal + parseFloat(taxAmount) + parseFloat(tipAmount)).toFixed(2);
+
+        taxElement.textContent = `$${taxAmount}`;
+        tipAmountElement.textContent = `$${tipAmount}`;
+        tipAmountElement2.textContent = `$${tipAmount}`;
+        totalElement.textContent = `$${total}`;
+        finalTotalInput.value = total;
+    }
 
     calculateTotal();
 
@@ -223,5 +231,47 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.addEventListener("drop", (e) => {
         e.preventDefault();
+    });
+
+    const redeemButtons = document.querySelectorAll(".redeem-button");
+
+    redeemButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            const rewardCard = button.closest(".reward-card");
+            const itemId = rewardCard.dataset.itemId;
+            const itemName = rewardCard.dataset.itemName;
+            const itemPoints = parseInt(rewardCard.dataset.itemPoints);
+            const itemPrice = parseFloat(rewardCard.dataset.itemPrice);
+            const itemSize = rewardCard.dataset.itemSize;
+
+            fetch("/redeem_rewards", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    id: itemId,
+                    name: itemName,
+                    points: itemPoints,
+                    price: itemPrice,
+                    size: itemSize,
+                    quantity: 1,
+                    category: "Rewards"
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        alert(`You have successfully redeemed ${itemName}!`);
+                        location.reload();
+                    } else {
+                        alert(data.message || "Failed to redeem the reward.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error redeeming reward:", error);
+                    alert("An error occurred while redeeming the reward.");
+                });
+        });
     });
 });

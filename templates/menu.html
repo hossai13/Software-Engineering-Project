@@ -24,7 +24,6 @@
                 <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
                 {% if 'loggedin' in session %}
                     <li><a href="{{ url_for('profile') }}">PROFILE</a></li>
-                    <li><a href="{{ url_for('rewards') }}">REWARDS</a></li>
                     <li><a href="{{ url_for('logout') }}">LOGOUT</a></li>
                 {% else %}
                     <li><a href="{{ url_for('register') }}">REGISTER</a></li>
@@ -80,7 +79,6 @@
                     <section class="admin-section">
                         <h2 class="promo">ADMIN TOOLS</h2>
                 
-                        <!-- Add Item Form -->
                         <form class="admin-form" id="addItem-form" action="{{ url_for('menu') }}" method="POST">
                             <h3>Add Item</h3>
                             <label for="addName">Item Name</label>
@@ -95,7 +93,6 @@
                             <button type="submit">Add Item</button>
                         </form>
                 
-                        <!-- Edit Item Form -->
                         <form class="admin-form" id="editItem-form" action="{{ url_for('menu') }}" method="POST">
                             <h3>Edit Item</h3>
                             <label for="editName">Item to Edit</label>
@@ -107,7 +104,6 @@
                             <button type="submit">Edit Item</button>
                         </form>
 
-                        <!-- Specials Form -->
                         <form class="admin-form" id="specials-form" action="{{ url_for('menu') }}" method="POST">
                             <h3>Specials</h3>
                             <label for="specialName">Item for Special</label>
@@ -119,7 +115,6 @@
                             <button type="submit">Add Special</button>
                         </form>
                 
-                        <!-- Menu Table -->
                         <table class="menu-table">
                             <thead>
                                 <tr>
@@ -168,7 +163,7 @@
                         <button class="order-button">ORDER NOW</button>
                     </div>
                     <div class="item-card" 
-                         data-item-id="2"
+                         data-item-id="127"
                          data-item-name="Plain Stromboli" 
                          data-item-category="Strombolis" 
                          data-item-price="6.50" 
@@ -181,7 +176,7 @@
                         <button class="order-button">ORDER NOW</button>
                     </div>
                     <div class="item-card" 
-                         data-item-id="3"
+                         data-item-id="179"
                          data-item-name="Burger" 
                          data-item-category="Burger" 
                          data-item-price="11.99" 
@@ -232,13 +227,7 @@
                         data-has-sizes="{{ 'true' if item.hasSizes else 'false' }}">
                         <h3 class="menu-item-title">{{ item.itemName }}</h3>
                         <p class="menu-item-description">
-                            {% if item.itemName == "Plain Cheese Pizza" %}
-                            Classic New York-style slice.
-                            {% elif item.itemName == "White Pizza" %}
-                            A creamy and cheesy delight.
-                            {% else %}
-                            <!-- Add more descriptions as needed -->
-                            {% endif %}
+                        <!-- Add descriptions here -->
                         </p>
                         <div class="menu-item-price">
                             <span class="original-price">${{ item.defaultPrice }}</span>
@@ -255,7 +244,7 @@
                     <button id="delivery-button" class="delivery-button">Delivery or Pickup Available</button>
                 </div>
                 <div class="cart-items">
-                 <!-- Items will be added  -->
+                 <!-- Items will be added here -->
                 </div>
                 <div class="checkout-section">
                     <span class="total-cost">TOTAL: $0.00</span>

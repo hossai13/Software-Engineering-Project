@@ -29,3 +29,25 @@ function slideShow() {
   setTimeout(slideShow, 6000);
 
 }
+
+  const adminToolsButton = document.getElementById('admin-tools-btn');
+  const adminToolsModal = document.getElementById('admin-tools-modal');
+  const closeAdminToolsModal = adminToolsModal?.querySelector('.close');
+
+  if (adminToolsButton) {
+      adminToolsButton.addEventListener('click', () => {
+          adminToolsModal.style.display = 'block';
+      });
+  }
+
+  if (closeAdminToolsModal) {
+      closeAdminToolsModal.addEventListener('click', () => {
+          adminToolsModal.style.display = 'none';
+      });
+
+      window.addEventListener('click', (event) => {
+          if (event.target === adminToolsModal) {
+              adminToolsModal.style.display = 'none';
+          }
+      });
+  }

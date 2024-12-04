@@ -13,9 +13,15 @@
 </head>
 <body>
     <nav>
+        {% if 'loggedin' in session %}
+        <a href="{{ url_for('userhomepage') }}" id="FP-Logo">
+            <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
+        </a>
+        {% else %}
         <a href="{{ url_for('homepage') }}" id="FP-Logo">
             <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
         </a>
+        {% endif %}
         <ul class="navbar">
             <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
             {% if 'loggedin' in session %}
@@ -26,11 +32,10 @@
                 <li><a href="{{ url_for('login') }}">LOGIN</a></li>
             {% endif %}
             <li id="cart-icon">
-                <a href="{{ url_for('menu') }}"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
+                <a href="{{ url_for('cart') }}"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
             </li>
         </ul>
     </nav>
-    
     <div class="form-container">
         <div class="textContainer">
             <h1>

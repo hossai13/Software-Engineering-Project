@@ -23,7 +23,7 @@ app.secret_key = 'your secret key'
 # MySQL database configuration
 app.config['MYSQL_HOST'] = 'localhost'  
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'root'
+app.config['MYSQL_PASSWORD'] = '2113284'
 app.config['MYSQL_DB'] = 'PizzaInfo'
 
 # File upload configuration
@@ -36,15 +36,44 @@ mysql = MySQL(app)
 # Route for the homepage
 @app.route('/')
 def homepage():
-    rating_filter = request.args.get('rating') 
-    cursor = mysql.connection.cursor()
-    if rating_filter:
-        cursor.execute("SELECT header, review_text, username, rating, date_made, photo FROM reviews WHERE rating = %s ORDER BY date_made DESC", [rating_filter])
-    else:
-        cursor.execute("SELECT header, review_text, username, rating, date_made, photo FROM reviews ORDER BY RAND() LIMIT 5")
-    reviews = cursor.fetchall()
-    cursor.close()
-    return render_template('homepage.html', reviews=reviews, rating_filter=rating_filter)
+    try:
+        # Fetch the rating filter from the query parameters
+        rating_filter = request.args.get('rating')
+
+        # Convert rating_filter to an integer if it exists
+        if rating_filter:
+            try:
+                rating_filter = int(rating_filter)
+            except ValueError:
+                return "Invalid rating filter value.", 400
+
+        # Query the database for reviews
+        cursor = mysql.connection.cursor()
+        if rating_filter:
+            # Filter reviews by rating
+            cursor.execute("""
+                SELECT review_id, header, review_text, username, rating, date_made, photo
+                FROM reviews
+                WHERE rating = %s
+                ORDER BY date_made DESC
+            """, [rating_filter])
+        else:
+            # Fetch random reviews if no filter is provided
+            cursor.execute("""
+                SELECT review_id, header, review_text, username, rating, date_made, photo
+                FROM reviews
+                ORDER BY RAND()
+                LIMIT 5
+            """)
+        
+        reviews = cursor.fetchall()
+        cursor.close()
+
+        # Pass reviews to the template
+        return render_template('homepage.html', reviews=reviews)
+    except Exception as e:
+        print(f"Error in homepage route: {e}")
+        return "Error loading the homepage."
 
 # Route for the user homepage/restaurant reviews
 @app.route('/userhomepage', methods=['GET', 'POST'])
@@ -390,9 +419,18 @@ def cart():
     if 'cart' not in session or not isinstance(session['cart'], dict):
         session['cart'] = {'items': [], 'total': 0.0}
 
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('SELECT Points FROM UserInfo WHERE LoginID = %s', (session['id'],))
+    points = cursor.fetchone()
+
+    if not points:
+        points = {'Points': 0}
+
     cart_data = session['cart']
     items = cart_data.get('items', [])
     total = round(cart_data.get('total', 0.0), 2)
+    tip = session.get('tip', 0.0)
+    final_total = total + tip
     pickup_time = session.get('pickup_time', 'ASAP (15-30 min)')
     delivery_address = session.get('delivery_address', None)
 
@@ -411,6 +449,7 @@ def cart():
             'checkout.html',
             message="Your cart is empty.",
             total=total,
+            points=points,
             pickup_time=pickup_time,
             delivery_address=delivery_address
         )
@@ -419,9 +458,20 @@ def cart():
         'checkout.html',
         items=items,
         total="{:.2f}".format(total),
+        final_total="{:.2f}".format(final_total),
+        tip="{:.2f}".format(tip),
         pickup_time=pickup_time,
-        delivery_address=delivery_address
+        delivery_address=delivery_address, 
+        points = points
     )
+
+@app.route('/set-tip', methods=['POST'])
+def set_tip():
+    data = request.json
+    tip = float(data.get('tip', 0))
+    session['tip'] = tip
+    session.modified = True
+    return jsonify({'status': 'success', 'tip': tip})
 
 #Route for Order Placement
 @app.route('/place-order', methods=['POST'])
@@ -431,16 +481,21 @@ def place_order():
 
     cart = session['cart']
     items = cart['items']
-    total = cart['total']
+    subtotal = cart['total']
+    tip = float(session.get('tip', 0.0))
+    tax_rate = 0.08
+    tax = round(subtotal * tax_rate, 2)
+    final_total = round(subtotal + tax + tip, 2)
     user_id = session.get('id')
-    
+
     if not user_id:
         return jsonify({'error': 'User not authenticated'}), 401
-    
-    try:
-        cur = mysql.connection.cursor()
 
-        order_id = user_id * 1000000 + int(time.time())  
+    try:
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+        # Generate unique order ID
+        order_id = user_id * 1000000 + int(time.time())
         order_datetime = datetime.now()
         order_details = []
 
@@ -450,13 +505,12 @@ def place_order():
             quantity = item['quantity']
             size = item.get('size', None)
             toppings = item.get('toppings', [])
-
             toppings_str = ",".join([topping['name'] for topping in toppings]) if toppings else None
 
             cur.execute("""
-                INSERT INTO OrderHistory (orderID, LoginID, itemID, item_name, size, date_ordered, quantity, toppings, total_price)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (order_id, user_id, item_id, item_name, size, order_datetime, quantity, toppings_str, item['total_price']))
+                INSERT INTO OrderHistory (orderID, LoginID, itemID, item_name, size, date_ordered, quantity, toppings, total_price, final_total)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (order_id, user_id, item_id, item_name, size, order_datetime, quantity, toppings_str, item['total_price'], final_total))
 
             order_details.append({
                 'order_id': order_id,
@@ -464,25 +518,40 @@ def place_order():
                 'size': size,
                 'date_ordered': order_datetime,
                 'quantity': quantity,
-                'toppings': toppings_str,
+                'toppings': toppings_str.split(',') if toppings_str else [],
                 'total_price': item['total_price']
             })
+
+        # Calculate points earned
+        points_earned = int(subtotal * 10)  # Example: 10 points per dollar spent
+        cur.execute("SELECT Points FROM UserInfo WHERE LoginID = %s", (user_id,))
+        current_points = cur.fetchone()['Points']
+        new_points_total = current_points + points_earned
+
+        # Update points in the database
+        cur.execute("UPDATE UserInfo SET Points = %s WHERE LoginID = %s", (new_points_total, user_id))
+
         mysql.connection.commit()
         cur.close()
-        
+
+        # Store order details in the session for confirmation
         current_time = datetime.now()
         can_cancel = (current_time - order_datetime) <= timedelta(minutes=5)
         session['last_order'] = {
-            'total': total, 
-            'items': order_details, 
+            'subtotal': subtotal,
+            'tax': tax,
+            'tip': tip,
+            'total': final_total,
+            'items': order_details,
             'order_datetime': order_datetime,
             'can_cancel': can_cancel
         }
 
-        return render_template('status.html', orders=order_details, total=total, can_cancel=can_cancel)
+        return render_template('status.html', orders=order_details, subtotal=subtotal, tax=tax, tip=tip, total=final_total, points_earned=points_earned, can_cancel=can_cancel)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+    
 #Route for Order Cancellation
 @app.route('/cancel-order', methods=['POST'])
 def cancel_order():
@@ -521,7 +590,7 @@ def cancel_order():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
+# Route
 @app.route('/order-history', methods=['GET'])
 def order_history():
     if 'id' not in session:
@@ -558,79 +627,101 @@ def rewards():
         cursor.execute('SELECT Points FROM UserInfo WHERE LoginID = %s', (session['id'],))
         points = cursor.fetchone()
         cursor.close()
-    return render_template('rewards.html', points=points)
+    return render_template('profile.html', points=points)
 
-@app.route('/update_points', methods=['GET','POST'])
-# Input a negative number to subtract points aka redeem
-def update_points(amount):
-    if 'loggedin' in session:
-        points = amount * 100
-        if points > 0:
-            percent = points * .10 # 10%
-            points = points + percent
-            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute('UPDATE UserInfo SET Points=Points + %s WHERE LoginID = %s', (points, session['id'],))
-            mysql.connection.commit()
-            cursor.close()
-            return jsonify({'status': 'success'}) 
-        else:
-            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute('SELECT Points FROM UserInfo WHERE LoginID = %s', (session['id'],))
-            userPoints = cursor.fetchone()
-            if (userPoints['Points'] + points) >= 0:
-                cursor.execute('UPDATE UserInfo SET Points=Points + %s WHERE LoginID = %s', (points, session['id'],))
-                mysql.connection.commit()
-                cursor.close()
-                return jsonify({'status': 'success'})
-            else:
-                return jsonify({'status': 'failed - not enough points'})   
+@app.route('/update_points', methods=['POST'])
+def update_points():
+    if 'loggedin' not in session:
+        return jsonify({'status': 'failed', 'message': 'User not logged in'}), 401
+
+    try:
+        data = request.json
+        amount = data.get('amount', 0)
+
+        if amount == 0:
+            return jsonify({'status': 'failed', 'message': 'Amount cannot be zero'}), 400
+
+        user_id = session['id']
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+        cursor.execute('SELECT Points FROM UserInfo WHERE LoginID = %s', (user_id,))
+        user = cursor.fetchone()
+
+        if not user:
+            return jsonify({'status': 'failed', 'message': 'User not found'}), 404
+
+        current_points = user['Points']
+        points_to_add_or_subtract = int(amount * 100)
+
+        if points_to_add_or_subtract > 0:
+            reward_bonus = int(points_to_add_or_subtract * 0.10)
+            points_to_add_or_subtract += reward_bonus
+
+
+        if points_to_add_or_subtract < 0 and (current_points + points_to_add_or_subtract) < 0:
+            return jsonify({'status': 'failed', 'message': 'Not enough points to redeem'}), 400
+
+        new_points_total = current_points + points_to_add_or_subtract
+        cursor.execute('UPDATE UserInfo SET Points = %s WHERE LoginID = %s', (new_points_total, user_id))
+        mysql.connection.commit()
+        cursor.close()
+
+        return jsonify({'status': 'success', 'new_points': new_points_total})
+    except Exception as e:
+        print(f"Error updating points: {e}")
+        return jsonify({'status': 'failed', 'message': 'Server error occurred'}), 500
 
 @app.route('/redeem_rewards', methods=['POST'])
 def redeem_rewards():
-    if 'cart' not in session or not isinstance(session['cart'], dict):
-        session['cart'] = {'items': [], 'total': 0.0}
-    
-    cart_data = session['cart']
-    item = request.get_json()
+    if 'loggedin' not in session:
+        return jsonify({'status': 'failed', 'message': 'User not logged in'}), 401
 
-    item_id = item.get('id')
-    item_name = item.get('name')
-    item_price = item.get('price', 0.0)
-    item_points = item.get('points', 0)
-    item_quantity = item.get('quantity', 1)
-    item_category = item.get('category')
-    item_toppings = item.get('toppings', [])
-    item_size = item.get('size')
-    item_total_price = item.get('total_price', item_price * item_quantity)
-    item_total_points = item.get('total_points', item_points * item_quantity)
+    try:
+        data = request.json
+        user_id = session['id']
+        item_id = data.get('id')
+        item_name = data.get('name')
+        item_points = data.get('points')
+        item_price = data.get('price', 0.0)
+        item_size = data.get('size')
+        item_quantity = data.get('quantity', 1)
 
-    update_points((item_points/100) * -1)
-    existing_item = next((i for i in cart_data['items'] if i['id'] == item_id), None)
+        if not all([item_id, item_name, item_points]):
+            return jsonify({'status': 'failed', 'message': 'Invalid item data'}), 400
 
-    if existing_item:
-        existing_item['quantity'] += item_quantity
-        existing_item['total_price'] += item_total_price
-        existing_item['total_points'] += item_total_points
-    else:
-        new_item = {
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT Points FROM UserInfo WHERE LoginID = %s", (user_id,))
+        user = cursor.fetchone()
+
+        if not user or user['Points'] < item_points:
+            return jsonify({'status': 'failed', 'message': 'Not enough points to redeem this reward'}), 400
+
+        new_points = user['Points'] - item_points
+        cursor.execute("UPDATE UserInfo SET Points = %s WHERE LoginID = %s", (new_points, user_id))
+
+        if 'cart' not in session:
+            session['cart'] = {'items': [], 'total': 0.0}
+
+        cart = session['cart']
+        cart['items'].append({
             'id': item_id,
             'name': item_name,
             'price_per_unit': item_price,
-            'points': item_points,
             'quantity': item_quantity,
-            'category': item_category,
-            'toppings': item_toppings,
             'size': item_size,
-            'total_price': item_total_price,
-            'total_points': item_total_points
-        }
-        cart_data['items'].append(new_item)
-    cart_data['total'] += item_total_price
+            'category': 'Rewards',
+            'total_price': 0.0,
+        })
+        session.modified = True
 
-    session['cart'] = cart_data
-    session.modified = True
+        mysql.connection.commit()
+        cursor.close()
 
-    return jsonify({'status': 'success', 'cart': cart_data})
+        return jsonify({'status': 'success', 'cart': cart, 'new_points': new_points})
+    except Exception as e:
+        print(f"Error redeeming reward: {e}")
+        return jsonify({'status': 'failed', 'message': 'Server error occurred'}), 500
+
 
 #Inventory commands
 def fill_inventory():
@@ -674,9 +765,12 @@ def order_confirmation(order_id):
         ''', (order_id, session['id']))
         orders = cursor.fetchall()
 
+        cursor.execute('SELECT Username, Email, Address, Points, profile_pic FROM UserInfo WHERE LoginID = %s', (session['id'],))
+        user_info = cursor.fetchone()
+
         total = sum(order['total_price'] for order in orders)
 
-        return render_template('status.html', orders=orders, total=total)
+        return render_template('status.html', orders=orders, user_info=user_info, total=total)
     except Exception as e:
         print(f"Error loading order confirmation: {e}")
         return "Error loading order confirmation", 500
@@ -803,6 +897,9 @@ def profile():
     account = cursor.fetchone()
     current_profile_pic = account.get('profile_pic', 'Images_Videos/whitepizzausericon.png')
 
+    cursor.execute('SELECT Points FROM UserInfo WHERE LoginID = %s', (session['id'],))
+    points = cursor.fetchone()
+
     # Update username
     if 'UsernameChange' in request.form and 'PasswordChange' not in request.form:
         username = request.form['UsernameChange']
@@ -824,7 +921,7 @@ def profile():
 
     # Fetch order history for the user
     cursor.execute('''
-        SELECT o.orderID, o.date_ordered, o.total_price, m.itemName, ps.size, o.quantity
+        SELECT o.orderID, o.date_ordered, o.final_total AS total_price, m.itemName, ps.size AS pizza_size, o.quantity
         FROM OrderHistory o
         LEFT JOIN Menu m ON o.itemID = m.itemID
         LEFT JOIN PizzaSizes ps ON o.size = ps.sizeID
@@ -875,7 +972,8 @@ def profile():
         is_owner=is_owner,
         current_profile_pic=current_profile_pic,
         accounts=accounts,
-        order_history=order_history
+        order_history=order_history,
+        points = points,
     )
 
 # Function to delete a review

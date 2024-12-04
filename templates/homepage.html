@@ -4,22 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Homepage</title>
-    
-    <!-- Reference to CSS in static/CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/navbar.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/homepage.css') }}">
-    
-    <!-- Google fonts (external link) -->
-    <style>@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');</style>
-
-    <!-- Bodymovin (Lottie animation library) from CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.5/lottie.min.js"></script>
 </head>
 <body>
     <nav>
+        {% if 'loggedin' in session %}
+        <a href="{{ url_for('userhomepage') }}" id="FP-Logo">
+            <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
+        </a>
+        {% else %}
         <a href="{{ url_for('homepage') }}" id="FP-Logo">
             <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
         </a>
+        {% endif %}
         <ul class="navbar">
             <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
             {% if 'loggedin' in session %}
@@ -34,7 +33,6 @@
             </li>
         </ul>
     </nav>
-    
     <div class="home-page">
         <div class="video-container">
             <div class="video">
@@ -69,8 +67,6 @@
                 </div>
             </div>
 
-            
-        
             <div class="contact-container">
                 <h3 class="title">CONTACT US</h3>
                 <div class="contact-info">
@@ -90,48 +86,45 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <form method="GET" action="{{ url_for('homepage') }}" id="rating-filter-form">
-                <label for="rating-filter">Filter by rating:</label>
-                <select id="rating-filter" name="rating" onchange="this.form.submit()">
-                    <option value="">All Ratings</option>
-                    <option value="1" {% if rating_filter == '1' %}selected{% endif %}>1 Star</option>
-                    <option value="2" {% if rating_filter == '2' %}selected{% endif %}>2 Stars</option>
-                    <option value="3" {% if rating_filter == '3' %}selected{% endif %}>3 Stars</option>
-                    <option value="4" {% if rating_filter == '4' %}selected{% endif %}>4 Stars</option>
-                    <option value="5" {% if rating_filter == '5' %}selected{% endif %}>5 Stars</option>
-                </select>
-            </form>     
-
-            <div class="reviews-container">
-                {% for review in reviews %}
-                    <div class="review-display">
-                        <h3 class="review-header">{{ review[0] }}</h3> 
-            
-                        <div class="review-title-stars">
-                            <div class="star-rating-display">
-                                {% for _ in range(review[3]|int) %}
-                                    <img src="{{ url_for('static', filename='Images_Videos/icons8-star-50-3.png') }}" alt="Star">
-                                {% endfor %}
+            <div class="restaurant-review-container">
+                <div class="restaurant-review-header">
+                    <h2 class="title">RESTAURANT REVIEWS</h2>
+                    <h4>We value your feedback and are committed to improving your experience!</h4>
+                </div>
+                <div class="reviews-container">
+                    {% for review in reviews %}
+                        <div class="review-display">
+                            <h3 class="review-header">{{ review[1] }}</h3> <!-- Review Header -->
+                            
+                            <div class="review-title-stars">
+                                <div class="star-rating-display">
+                                    {% for i in range(1, 6) %}
+                                        {% if i <= review[4] %}
+                                            <img src="{{ url_for('static', filename='Images_Videos/icons8-star-50-3.png') }}" alt="Full Star">
+                                        {% else %}
+                                            <img src="{{ url_for('static', filename='Images_Videos/icons8-star-50-2.png') }}" alt="Empty Star">
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
                             </div>
+                            
+                            <p class="review-content">{{ review[2] }}</p>
+                            <p class="review-username">Reviewed by: {{ review[3] }}</p>
+                            <p class="review-date">Reviewed on: {{ review[5] }}</p>
+    
+                            {% if review[6] %}
+                                <div class="review-photo">
+                                    <img src="{{ url_for('review_photo', review_id=review[0]) }}" alt="Review Photo" class="photo">
+                                </div>
+                            {% endif %}
                         </div>
-            
-                        {% if review[6] %}
-                            <div class="review-photo">
-                                <img src="{{ url_for('review_photo', review_id=review[0]) }}" alt="Review Photo" class="photo">
-                            </div>
-                        {% endif %}
-            
-                        <p class="review-content">{{ review[1] }}</p>
-                        <p class="review-date">Reviewed on: {{ review[4] }}</p>
-                        <p class="review-username">{{ review[2] }}</p>
-                    </div>
-                {% endfor %}
+                    {% endfor %}
+                </div>
             </div>
-
-        </div>  
-    </div>
-    <script src="{{ url_for('static', filename='cartani.js') }}"></script>
-    <script src="{{ url_for('static', filename='slideshow.js') }}"></script>
-</body>
+        <script src="{{ url_for('static', filename='reviews.js') }}"></script>
+        <script src="{{ url_for('static', filename='slideshow.js') }}"></script>
+        <script src="{{ url_for('static', filename='cartani.js') }}"></script>
+    </body>
 </html>

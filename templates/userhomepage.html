@@ -4,37 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UserHomepage</title>
-    
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/navbar.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/homepage.css') }}">
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.5/lottie.min.js"></script>
 </head>
 <body>
     <nav>
+        {% if 'loggedin' in session %}
         <a href="{{ url_for('userhomepage') }}" id="FP-Logo">
             <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
         </a>
+        {% else %}
+        <a href="{{ url_for('homepage') }}" id="FP-Logo">
+            <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
+        </a>
+        {% endif %}
         <ul class="navbar">
             <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
             {% if 'loggedin' in session %}
-                <li>
-                    <a href="{{ url_for('profile') }}">
-                        <img src="{{ url_for('static', filename=current_profile_pic) }}" alt="Profile" class="profile-pic-nav">
-                    </a>
-                </li>
+                <li><a href="{{ url_for('profile') }}">PROFILE</a></li>
                 <li><a href="{{ url_for('logout') }}">LOGOUT</a></li>
-                <li><a href="{{ url_for('rewards') }}">REWARDS</a></li>
             {% else %}
                 <li><a href="{{ url_for('register') }}">REGISTER</a></li>
                 <li><a href="{{ url_for('login') }}">LOGIN</a></li>
             {% endif %}
+            {% if session['isAdmin'] %}
+                    <li><button id="admin-tools-btn" class="nav-btn">ADMIN TOOLS</button></li>
+                {% endif %} 
             <li id="cart-icon">
-                <a href="{{ url_for('menu') }}"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
+                <a href="{{ url_for('cart') }}"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
             </li>
         </ul>
     </nav>
-    
     <div class="home-page">
         <div class="video-container">
             <div class="video">
@@ -96,6 +97,13 @@
                 <h4>We value your feedback and are committed to improving your experience!</h4>
             </div>
             <button id="create-review-btn">CREATE A REVIEW</button>
+            <div class="user-reviews-filter">
+                <form method="GET" action="{{ url_for('userhomepage') }}">
+                    <button type="submit" name="my_reviews" value="true" class="reviews-btn">
+                        View My Reviews
+                    </button>
+                </form>
+            </div>
 
             <div class="star-rating-filter">
                 <form method="GET" action="{{ url_for('userhomepage') }}">
@@ -128,10 +136,10 @@
                             </div>
                         </div>
                         
-                        <p class="review-content">{{ review[3] }}</p>  <!-- Review Text (review_text column) -->
+                        <p class="review-content">{{ review[3] }}</p>
                         
-                        <p class="review-username">Reviewed by: {{ review[1] }}</p> <!-- Username (username column) -->
-                        <p class="review-date">Reviewed on: {{ review[5] }}</p> <!-- Date (date_made column) -->
+                        <p class="review-username">Reviewed by: {{ review[1] }}</p>
+                        <p class="review-date">Reviewed on: {{ review[5] }}</p>
         
                         {% if review[6] %}
                             <div class="review-photo">
@@ -143,14 +151,6 @@
             </div>
         </div>
 
-        <div class="user-reviews-filter">
-            <form method="GET" action="{{ url_for('userhomepage') }}">
-                <button type="submit" name="my_reviews" value="true">
-                    View My Reviews
-                </button>
-            </form>
-        </div>
-        
         <div id="review-modal" class="modal">
             <div class="modal-content-order">
                 <span class="close">&times;</span>
@@ -198,41 +198,46 @@
                 </form>
             </div>
         </div>
-        {% if is_admin %}
-        <div class="admin-manage">
-            <h2>Admin Panel - Review Management</h2>
-            <p> Below is a list of all of the reviews. You can remove a review from here</p>
-            <table class="review-table">
-                <thead>
-                    <tr>
-                        <th>Review ID</th>
-                        <th>Username</th>
-                        <th>Rating</th>
-                        <th>Header</th>
-                        <th>Review</th>
-                        <th>Date Made</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for review in reviews %}
-                    <tr>
-                        <td>{{ review[0] }}</td>
-                        <td>{{ review[1] }}</td>
-                        <td>{{ review[2] }}</td>
-                        <td>{{ review[4] }}</td>
-                        <td>{{ review[3] }}</td>
-                        <td>{{ review[5] }}</td>
-                        <td>
-                            <form action="{{ url_for('userhomepage') }}" method="POST">
-                                <input type="hidden" name="delete_review" value="{{ review[0] }}">
-                                <button type="submit">Delete</button>
-                            </form>
-                        </td>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        
+        {% if session['isAdmin'] %}
+        <div id="admin-tools-modal" class="modal">
+            <div class="modal-content-admin">
+                <span class="close">&times;</span>
+                <h2>Admin Panel - Review Management</h2>
+                <p>Below is a list of all reviews. You can remove them from here:</p>
+                <table class="review-table">
+                    <thead>
+                        <tr>
+                            <th>Review ID</th>
+                            <th>Username</th>
+                            <th>Rating</th>
+                            <th>Header</th>
+                            <th>Review</th>
+                            <th>Date Made</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for review in reviews %}
+                        <tr>
+                            <td>{{ review[0] }}</td>
+                            <td>{{ review[1] }}</td>
+                            <td>{{ review[2] }}</td>
+                            <td>{{ review[4] }}</td>
+                            <td>{{ review[3] }}</td>
+                            <td>{{ review[5] }}</td>
+                            <td>
+                                <form action="{{ url_for('userhomepage') }}" method="POST">
+                                    <input type="hidden" name="delete_review" value="{{ review[0] }}">
+                                    <button type="submit" class="delete-btn">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>        
         {% endif %}
         <script src="{{ url_for('static', filename='reviews.js') }}"></script>
         <script src="{{ url_for('static', filename='slideshow.js') }}"></script>

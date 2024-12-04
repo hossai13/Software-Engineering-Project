@@ -4,26 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile</title>
-    
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/navbar.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/profile.css') }}">
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.5/lottie.min.js"></script>
-    <script src="{{ url_for('static', filename='profpic.js') }}"></script>
 </head>
 <body>
     <nav>
+        {% if 'loggedin' in session %}
         <a href="{{ url_for('userhomepage') }}" id="FP-Logo">
             <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
         </a>
+        {% else %}
+        <a href="{{ url_for('homepage') }}" id="FP-Logo">
+            <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
+        </a>
+        {% endif %}
         <ul class="navbar">
-            <li><a href="{{ url_for('menu') }}">Order Now</a></li>
+            <li><a href="{{ url_for('menu') }}">ORDER NOW</a></li>
             {% if 'loggedin' in session %}
-                <li><a href="{{ url_for('profile') }}">Profile</a></li>
-                <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                <li><a href="{{ url_for('profile') }}">PROFILE</a></li>
+                <li><a href="{{ url_for('logout') }}">LOGOUT</a></li>
             {% else %}
-                <li><a href="{{ url_for('register') }}">Register</a></li>
-                <li><a href="{{ url_for('login') }}">Login</a></li>
+                <li><a href="{{ url_for('register') }}">REGISTER</a></li>
+                <li><a href="{{ url_for('login') }}">LOGIN</a></li>
             {% endif %}
             <li id="cart-icon">
                 <a href="{{ url_for('cart') }}"><div id="lottie-cart" style="width: 50px; height: 50px;"></div></a>
@@ -31,10 +34,10 @@
         </ul>
     </nav>
     <main class="container">
-        <div class="admin-sidebar">
+        <div class="sidebar">
             <h3>Profile Options</h3>
             <ul>
-                <li><button class="sidebar-button" onclick="showSection('profile-container')">Profile</button></li>
+                <li><button class="sidebar-button" onclick="showSection('profile-container')">Account Details</button></li>
                 <li><button class="sidebar-button" onclick="showSection('order-history-container')">Order History</button></li>
             </ul>
 
@@ -48,10 +51,10 @@
 
         <!-- Profile Section -->
         <div class="profile-container section" id="profile-container">
-            <h1 class="profile-pic" onclick="openModal()">
+            <div class="profile-pic" onclick="openModal()">
                 <img id="profile-pic" src="{{ url_for('static', filename=current_profile_pic if current_profile_pic else 'Images_Videos/whitepizzausericon.png') }}" alt="Profile Picture">
-                <img id="profile-pic-hover" src="{{ url_for('static', filename='Images_Videos/editicon.png') }}" alt="Profile Picture Hover" class="hover-img">
-            </h1>
+                <img id="profile-pic-hover" src="{{ url_for('static', filename='Images_Videos/edit.png') }}" alt="Profile Picture Hover" class="hover-img">
+            </div>
 
             <div id="pic-modal" class="modal">
                 <div class="modal-content">
@@ -81,7 +84,7 @@
                 </tr>
                 <tr>
                     <td class="header">Rewards Points:</td>
-                    <td>{{ account['Points'] }}</td>
+                    <td>{{ points['Points'] }}</td>
                 </tr>
             </table>
     
@@ -89,13 +92,13 @@
                 <form action="{{ url_for('profile') }}" method="POST" class="change-form">
                     <label for="name">Change Your Username:</label>
                     <input type="text" id="name" name="UsernameChange" placeholder="New Username">
-                    <button type="submit">Change Username</button>
+                    <button class="button" type="submit">Change Username</button>
                 </form>
     
                 <form action="{{ url_for('profile') }}" method="POST" class="change-form">
                     <label for="password">Change Your Password:</label>
                     <input type="password" id="password" name="PasswordChange" placeholder="New Password">
-                    <button type="submit">Change Password</button>
+                    <button class="button" type="submit">Change Password</button>
                 </form>
             </div>
         </div>
@@ -109,7 +112,6 @@
                         <th>Order ID</th>
                         <th>Date Ordered</th>
                         <th>Item Name</th>
-                        <th>Size</th>
                         <th>Quantity</th>
                         <th>Total Price</th>
                     </tr>
@@ -120,7 +122,6 @@
                         <td>{{ order['orderID'] }}</td>
                         <td>{{ order['date_ordered'] }}</td>
                         <td>{{ order['itemName'] }}</td>
-                        <td>{{ order['size'] }}</td>
                         <td>{{ order['quantity'] }}</td>
                         <td>${{ order['total_price'] }}</td>
                     </tr>
@@ -170,13 +171,7 @@
         </div>
         {% endif %}
     </main>
-    <script>
-        function showSection(sectionId) {
-            const sections = document.querySelectorAll('.section');
-            sections.forEach(section => {
-                section.style.display = section.id === sectionId ? 'block' : 'none';
-            });
-        }
-    </script>
+    <script src="{{ url_for('static', filename='profile.js') }}"></script>
+    <script src="{{ url_for('static', filename='cartani.js') }}"></script>
 </body>
 </html>
