@@ -304,7 +304,7 @@ def menu():
         cursor.close()
 
         # Admin-specific functionality
-        if request.method == 'POST' and is_admin():
+        if request.method == 'POST' and session.get('isAdmin'):
             # Delete menu item
             if 'delete_menu' in request.form:
                 menu_id = request.form['delete_menu']
@@ -363,7 +363,7 @@ def menu():
             'menu.html',
             all_menu_items=all_menu_items,
             menu_items_by_category=menu_items_by_category,
-            is_admin=is_admin()
+            is_admin= session.get('isAdmin')
         )
     except Exception as e:
         print(f"Error in /menu route: {e}")
