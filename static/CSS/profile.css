@@ -204,6 +204,17 @@ input:focus {
     cursor: pointer;
 }
 
+.toggle-btn{
+    display: flex;
+    justify-content: center;
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+}
+
 .modal {
     display: none;
     position: fixed;

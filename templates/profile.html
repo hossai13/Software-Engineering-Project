@@ -143,6 +143,9 @@
                         <th>Email</th>
                         <th>Admin Status</th>
                         <th>Actions</th>
+                        {% if is_owner %}
+                        <th>Admin Controls</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -152,6 +155,7 @@
                         <td>{{ account['Username'] }}</td>
                         <td>{{ account['Email'] }}</td>
                         <td>{{ 'Yes' if account['isAdmin'] else 'No' }}</td>
+                    
                         <td>
                             <form method="POST" action="{{ url_for('profile') }}" style="display:inline;">
                                 <button type="submit" name="delete_account" value="{{ account['LoginID'] }}" class="delete-btn">Delete</button>
