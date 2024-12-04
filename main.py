@@ -3,7 +3,7 @@ from io import BytesIO
 import time
 from flask import Flask, flash, jsonify, render_template, request, session, redirect, url_for, session, Response
 from flask_mysqldb import MySQL
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from werkzeug.utils import secure_filename
 import MySQLdb.cursors
@@ -416,6 +416,7 @@ def cart():
         delivery_address=delivery_address
     )
 
+#Route for Order Placement
 @app.route('/place-order', methods=['POST'])
 def place_order():
     if 'cart' not in session or not session['cart']['items']:
@@ -425,15 +426,15 @@ def place_order():
     items = cart['items']
     total = cart['total']
     user_id = session.get('id')
-
+    
     if not user_id:
         return jsonify({'error': 'User not authenticated'}), 401
-
+    
     try:
         cur = mysql.connection.cursor()
 
-        order_id = user_id * 1000000 + int(time.time())
-
+        order_id = user_id * 1000000 + int(time.time())  
+        order_datetime = datetime.now()
         order_details = []
 
         for item in items:
@@ -442,36 +443,77 @@ def place_order():
             quantity = item['quantity']
             size = item.get('size', None)
             toppings = item.get('toppings', [])
-            order_date = datetime.now().date()
-
-            reduce_stock(item_id, quantity)
 
             toppings_str = ",".join([topping['name'] for topping in toppings]) if toppings else None
 
             cur.execute("""
                 INSERT INTO OrderHistory (orderID, LoginID, itemID, item_name, size, date_ordered, quantity, toppings, total_price)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (order_id, user_id, item_id, item_name, size, order_date, quantity, toppings_str, item['total_price']))
+            """, (order_id, user_id, item_id, item_name, size, order_datetime, quantity, toppings_str, item['total_price']))
 
             order_details.append({
                 'order_id': order_id,
                 'item_name': item_name,
                 'size': size,
-                'date_ordered': order_date,
+                'date_ordered': order_datetime,
                 'quantity': quantity,
                 'toppings': toppings_str,
                 'total_price': item['total_price']
             })
-
         mysql.connection.commit()
-        update_points(total)
         cur.close()
+        
+        current_time = datetime.now()
+        can_cancel = (current_time - order_datetime) <= timedelta(minutes=5)
+        session['last_order'] = {
+            'total': total, 
+            'items': order_details, 
+            'order_datetime': order_datetime,
+            'can_cancel': can_cancel
+        }
 
-        session.pop('cart', None)
-
-        return render_template('status.html', orders=order_details, total=total)
+        return render_template('status.html', orders=order_details, total=total, can_cancel=can_cancel)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+#Route for Order Cancellation
+@app.route('/cancel-order', methods=['POST'])
+def cancel_order():
+    order_id = request.form.get('order_id')
+    user_id = session.get('id')
+
+    if not user_id:
+        return jsonify({'error': 'User not authenticated'}), 401
+
+    try:
+        cur = mysql.connection.cursor()
+
+        cur.execute("""
+            SELECT orderID, date_ordered FROM OrderHistory
+            WHERE orderID = %s AND LoginID = %s
+        """, (order_id, user_id))
+
+        order = cur.fetchone()
+
+        if not order:
+            return jsonify({'error': 'Order not found'}), 404
+
+        order_datetime = order[1]  
+        current_datetime = datetime.now()
+        if current_datetime - order_datetime > timedelta(minutes=5):
+            return jsonify({'error': 'Order cancellation period has passed'}), 400
+
+        cur.execute("""
+            DELETE FROM OrderHistory WHERE orderID = %s AND LoginID = %s
+        """, (order_id, user_id))
+
+        mysql.connection.commit()
+        cur.close()
+
+        return redirect(url_for('userhomepage'))
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 @app.route('/order-history', methods=['GET'])
 def order_history():

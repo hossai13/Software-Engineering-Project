@@ -10,7 +10,7 @@
 </head>
 <body>
     <nav>
-        <a href="{{ url_for('homepage') }}" id="FP-Logo">
+        <a href="{{ url_for('userhomepage') }}" id="FP-Logo">
             <h1>FIESTA&nbsp;<img src="{{ url_for('static', filename='Images_Videos/fiesta pizza-logo.png') }}" alt="logo">&nbsp;PIZZA</h1>
         </a>
         <ul class="navbar">
@@ -26,7 +26,7 @@
     </nav>
     <body>
         <h1>Order Confirmed</h1>
-
+        <h2>The party will arrive soon</h2>
         <!-- Tracker Section -->
     <div class="tracker">
         <div class="tracker-bar">
@@ -39,31 +39,48 @@
             <span>Delivered</span>
         </div>
     </div>
+    <main>
+        {% if orders %}
+            <div id="order-details-container">
+                <h2 class="order-ID-header">Order ID: {{ orders[0].order_id }}</h2>
+                <p class="total-price-header">Total Price: ${{ "%.2f"|format(total) }}</p>
+                <p class="order-date-header">Order Date: {{ orders[0].date_ordered }}</p>
+                <ul>
+                    {% for order in orders %}
+                        <li>
+                            <h2 class="item-name">Item Name:</h2> {{ order.item_name }}<br>
+                            <h3 class="item-size">Size:</h3> {{ order.size or 'N/A' }}<br>
+                            <h3 class="total-quantity">Quantity:</h3> {{ order.quantity }}<br>
+                            <h3 class="total-toppings">Toppings:</h3> {{ order.toppings or 'None' }}<br>
+                            <h2 class="total-price-header">Price:</h2> ${{ "%.2f"|format(order.total_price) }}
+                            <button class="cancel-order-button" 
+                            {% if not can_cancel %} disabled {% endif %} onclick="openModal({{ order.order_id }})">
+                            {% if not can_cancel %} Cancellation period has passed {% else %} Cancel Order {% endif %}
+                            </button>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% else %}
+            <p>No order details available.</p>
+        {% endif %}
+    </main>
     
-        <main>
-            {% if orders %}
-                <div id="order-details-container">
-                    <h2 class="order-ID-header">Order ID: {{ orders[0].order_id }}</h2>
-                    <p class="total-price-header">Total Price:</p> ${{ "%.2f"|format(total) }}</p>
-                    <p class="order-date-header">Order Date:</p> {{ orders[0].date_ordered }}</p>
-                    <ul>
-                        {% for order in orders %}
-                            <li>
-                                <h2 class="item-name">Item Name:</h2> {{ order.item_name }}<br>
-                                <h3 class="item-size">Size:</h3> {{ order.size or 'N/A' }}<br>
-                                <h3 class="total-quantity">Quantity:</h3> {{ order.quantity }}<br>
-                                <h3 class="total-price-">Toppings:</h3> {{ order.toppings or 'None' }}<br>
-                                <h2 class="total-price-header">Price:</h2> ${{ "%.2f"|format(order.total_price) }}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            {% else %}
-                <p>No order details available.</p>
-            {% endif %}
-        </main>
+    <div id="cancelModal" style="display: none;">
+        <p>Are you sure you want to cancel this order?</p>
+        <form method="POST" action="/cancel-order">
+            <input type="hidden" name="order_id" id="cancelOrderId">
+            <button class="confirm-cancel-button"type="submit">Yes, Cancel Order</button>
+            <button  class="stop-cancel-button" type="button" onclick="closeModal()">No, Keep Order</button>
+        </form>
+    </div>
 
-        <h2 class="view-order-history"><a href="{{ url_for('profile') }}">View Order History</a></h2>
-        <script src="{{ url_for('static', filename='JS/tracker.js') }}"></script>
+    <p>Can cancel: {{ can_cancel }}</p>
+
+    <h2 class="view-order-history"><a href="{{ url_for('profile') }}">View Order History</a></h2>
     </body>
+    <script src="{{ url_for('static', filename='JS/tracker.js') }}"></script>
+    <script src="{{ url_for('static', filename='cancel.js') }}"></script>
     </html>
+
+

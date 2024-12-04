@@ -63,18 +63,18 @@ CREATE TABLE IF NOT EXISTS Toppings (
 
 -- Create the OrderHistory table to track orders
 CREATE TABLE IF NOT EXISTS OrderHistory (
-    orderID INT NOT NULL, 
+    orderID INT NOT NULL,  
     LoginID INT NOT NULL,
-    itemID INT NOT NULL,
-    item_name VARCHAR(255), 
-    size VARCHAR(10) NOT NULL,  
-    date_ordered DATE NOT NULL,
-    quantity INT DEFAULT 1,  
-    toppings VARCHAR(255),  
+    itemID INT NOT NULL, 
+    size VARCHAR(50) NOT NULL,
+    item_name VARCHAR(255) NOT NULL,
+    date_ordered DATETIME NOT NULL,
+    quantity INT DEFAULT 1, 
+    toppings VARCHAR(255), 
     total_price DECIMAL(10, 2) NOT NULL, 
     FOREIGN KEY (LoginID) REFERENCES UserInfo(LoginID) ON DELETE CASCADE,
     FOREIGN KEY (itemID) REFERENCES Menu(itemID) ON DELETE CASCADE,
-    PRIMARY KEY (orderID, itemID) 
+    PRIMARY KEY (orderID, itemID)  -- Composite primary key (orderID, itemID)
 );
 
 -- Create the OrderToppings table to associate toppings with orders
