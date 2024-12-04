@@ -156,6 +156,13 @@
                                 <button type="submit" name="delete_account" value="{{ account['LoginID'] }}" class="delete-btn">Delete</button>
                             </form>
                         </td>
+                        {% if is_owner %}
+                        <td>
+                            <form method="POST" action="{{ url_for('profile') }}" style="display:inline;">
+                                <button type="submit" name="toggle_admin" value="{{ account['LoginID'] }}" class="toggle-btn">{{ 'Remove Admin' if account['isAdmin'] else 'Make Admin' }}</button>
+                            </form>
+                        </td>
+                        {% endif %}
                     </tr>
                     {% endfor %}
                 </tbody>

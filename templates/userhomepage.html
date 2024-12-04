@@ -198,7 +198,7 @@
                 </form>
             </div>
         </div>
-        {% if session[isAdmin] %}
+        {% if is_admin %}
         <div class="admin-manage">
             <h2>Admin Panel - Review Management</h2>
             <p> Below is a list of all of the reviews. You can remove a review from here</p>
@@ -217,18 +217,18 @@
                 <tbody>
                     {% for review in reviews %}
                     <tr>
-                        <td>{{ review['review_id'] }}</td>
-                        <td>{{ review['username'] }}</td>
-                        <td>{{ review['rating'] }}</td>
-                        <td>{{ review['header'] }}</td>
-                        <td>{{ review['review_text'] }}</td>
-                        <td>{{ review[date_made] }}</td>
+                        <td>{{ review[0] }}</td>
+                        <td>{{ review[1] }}</td>
+                        <td>{{ review[2] }}</td>
+                        <td>{{ review[4] }}</td>
+                        <td>{{ review[3] }}</td>
+                        <td>{{ review[5] }}</td>
                         <td>
-                            <form method="post" action="{{ url_for('userhomepage') }}" style="display:inline;">
-                                <button type="submit" name="delete_review" value="{{ review[0] }}" class="delete-btn>">Delete</button>
+                            <form action="{{ url_for('userhomepage') }}" method="POST">
+                                <input type="hidden" name="delete_review" value="{{ review[0] }}">
+                                <button type="submit">Delete</button>
                             </form>
                         </td>
-                    </tr>
                     {% endfor %}
                 </tbody>
             </table>

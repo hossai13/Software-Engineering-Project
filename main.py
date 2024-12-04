@@ -23,7 +23,7 @@ app.secret_key = 'your secret key'
 # MySQL database configuration
 app.config['MYSQL_HOST'] = 'localhost'  
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = '2113284'
+app.config['MYSQL_PASSWORD'] = 'root'
 app.config['MYSQL_DB'] = 'PizzaInfo'
 
 # File upload configuration
@@ -52,7 +52,8 @@ def userhomepage():
     if 'loggedin' in session:
         current_date = datetime.now().strftime('%Y-%m-%d')
         #this is where an admin can delete reviews
-        if is_admin():
+        is_admin = session.get('isAdmin')
+        if is_admin:
             if request.method == 'POST':
                 if 'delete_review' in request.form:
                     review_id = request.form['delete_review']
@@ -112,7 +113,13 @@ def userhomepage():
         
         reviews = cursor.fetchall()
         cursor.close()
-        return render_template('userhomepage.html', username=session['username'], user_id=session['id'], current_date=current_date, reviews=reviews, view_my_reviews=view_my_reviews)
+        return render_template('userhomepage.html', 
+                               username=session['username'], 
+                               user_id=session['id'], 
+                               current_date=current_date, 
+                               reviews=reviews, 
+                               view_my_reviews=view_my_reviews, 
+                               is_admin=is_admin)
     else:
         return redirect(url_for('login'))
     
@@ -812,7 +819,8 @@ def profile():
 
     # Check if the logged-in user is an admin or owner
     is_admin = account['isAdmin']
-    is_owner = account['LoginID'] == 1
+    # Check if the logged-in user is the owner
+    is_owner = session.get('isOwner')
 
     # Fetch order history for the user
     cursor.execute('''
@@ -837,16 +845,20 @@ def profile():
 
         # Handle user promotions and demotions
         if is_owner:
-            if 'promote_user' in request.form:
-                user_id = request.form['promote_user']
-                cursor.execute('UPDATE UserInfo SET isAdmin = 1 WHERE LoginID = %s', (user_id,))
+            # Handle user promotions and demotions where if they are a user, they become an admin and vice versa
+            if 'toggle_admin' in request.form:
+                user_id = request.form['toggle_admin']
+                cursor.execute('SELECT isAdmin FROM UserInfo WHERE LoginID = %s', (user_id,))
                 mysql.connection.commit()
-                msg = 'User promoted to admin!'
-            if 'demote_admin' in request.form:
-                user_id = request.form['demote_admin']
-                cursor.execute('UPDATE UserInfo SET isAdmin = 0 WHERE LoginID = %s', (user_id,))
-                mysql.connection.commit()
-                msg = 'Admin demoted to user!'
+                user = cursor.fetchone()
+                if user['isAdmin']:
+                    cursor.execute('UPDATE UserInfo SET isAdmin = 0 WHERE LoginID = %s', (user_id,))
+                    mysql.connection.commit()
+                    msg = 'User demoted to regular user!'
+                else:
+                    cursor.execute('UPDATE UserInfo SET isAdmin = 1 WHERE LoginID = %s', (user_id,))
+                    mysql.connection.commit()
+                    msg = 'User promoted to admin!'
 
         # Fetch all user accounts for admin view
         cursor.execute('SELECT * FROM UserInfo')
@@ -872,20 +884,6 @@ def delete_review(review_id):
     cursor.execute('DELETE FROM reviews WHERE review_id = %s', (review_id,))
     mysql.connection.commit()
     cursor.close()
-
-
-def is_admin():
-    if 'isAdmin' in session:
-        return True
-    else:
-        return False
-
-def is_owner():
-    if session['id'] == 1:
-        return True
-    else:
-        return False
-
 
 # Running the Flask app
 if __name__ == '__main__':
