@@ -98,6 +98,57 @@ h2, h3 {
     z-index: 2;
 }
 
+.timer-container{
+    background: linear-gradient(to right, #ff437b, #d4783a);
+    padding: 20px;
+    border: 2px solid blue;
+    width: 250px;
+    height: 200px;
+    margin-left: auto;
+    margin-right: auto;
+    animation: 10s infinite glow;
+}
+
+@keyframes glow {
+    0% {
+      border-color: rgb(254, 15, 15);
+    }
+    25% {
+      border-color: rgb(201, 8, 201);
+    }
+    75% {
+      border-color: rgb(0, 76, 255);
+    }
+    100% {
+      border-color: rgb(3, 200, 255);
+    }
+  }
+  @-webkit-keyframes glow {
+    0% {
+      border-color: rgb(255, 27, 27);
+    }
+    25% {
+      border-color:   rgb(201, 8, 201);
+    }
+    75% {
+      border-color: rgb(0, 76, 255);
+    }
+    100% {
+      border-color: rgb(3, 200, 255);
+    }
+  }
+
+.cancel-timer{
+    color: #ffffff;
+    margin-bottom: 10px;
+    text-align: center;
+    font-family: 'Mori';
+    font-weight: 850;
+    font-size: 5em;
+    font-weight: 500;
+}
+
+
 #order-details-container {
     width: 80%;
     margin: 20px auto;

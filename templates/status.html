@@ -47,7 +47,9 @@
             <h1 class="animation">Order Confirmed</h1>
             <h2>The party will arrive soon!</h2>
         </section>
-
+        <div class="timer-container">
+            <p id="timer" class="cancel-timer"></p>
+        </div>
         <section id="order-details-container">
             {% if orders %}
                 <h2>YOUR ITEMS</h2>
@@ -101,5 +103,6 @@
     <script src="{{ url_for('static', filename='cartani.js') }}"></script>
     <script src="{{ url_for('static', filename='status.js') }}"></script>
     <script src="{{ url_for('static', filename='cancel.js') }}"></script>
+    <script src="{{ url_for('static', filename='timer.js') }}"></script>
 </body>
 </html>
