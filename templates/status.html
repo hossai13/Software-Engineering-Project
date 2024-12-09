@@ -45,9 +45,12 @@
 
         <section class="order-status-header">
             <h1 class="animation">Order Confirmed</h1>
-            <h2>The party will arrive soon!</h2>
+            <h2>The party will arrive soon!</h2><br>
         </section>
         <div class="timer-container">
+            <div>
+                <h2>ORDER CANCELLATION TIME LEFT</h2>
+            </div>
             <p id="timer" class="cancel-timer"></p>
         </div>
         <section id="order-details-container">
@@ -79,9 +82,9 @@
                     <p class="order-date-header">Order Date: {{ orders[0].date_ordered.strftime('%Y-%m-%d %H:%M') }}</p>
                 </div>
                 <button class="cancel-order-button"
-                    {% if not can_cancel %} disabled {% endif %}
-                    onclick="openModal({{ orders[0].order_id }})">
-                    {% if not can_cancel %} Cancellation period has passed {% else %} Cancel Order {% endif %}
+                {% if 'loggedin' not in session or not can_cancel %} disabled {% endif %}
+                onclick="openModal({{ orders[0].order_id }})">
+                {% if 'loggedin' not in session or not can_cancel %} Cancellation not allowed {% else %} Cancel Order {% endif %}
                 </button>
             {% else %}
                 <p>No order details available.</p>

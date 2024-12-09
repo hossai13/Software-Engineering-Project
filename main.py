@@ -33,7 +33,7 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 # Initialize MySQL
 mysql = MySQL(app)
 
-# Route for the homepage
+# Route for the Homepage
 @app.route('/')
 def homepage():
     try:
@@ -75,7 +75,7 @@ def homepage():
         print(f"Error in homepage route: {e}")
         return "Error loading the homepage."
 
-# Route for the user homepage/restaurant reviews
+# Route for Userhomepage & Restaurant Reviews
 @app.route('/userhomepage', methods=['GET', 'POST'])
 def userhomepage():
     if 'loggedin' in session:
@@ -152,6 +152,7 @@ def userhomepage():
     else:
         return redirect(url_for('login'))
     
+#Route for Review Photos
 @app.route('/review/photo/<int:review_id>')
 def review_photo(review_id):
     cursor = mysql.connection.cursor()
@@ -164,6 +165,7 @@ def review_photo(review_id):
     else:
         return Response(open('static/placeholder.jpg', 'rb').read(), mimetype='image/jpeg')
 
+#Route for Item Sizes
 @app.route('/api/item_sizes/<int:item_id>', methods=['GET'])
 def get_item_sizes(item_id):
     try:
@@ -180,6 +182,7 @@ def get_item_sizes(item_id):
         print(f"Error fetching sizes: {e}")
         return jsonify({"error": "Failed to fetch sizes."}), 500
 
+#Route for Toppings
 @app.route('/api/item_toppings/<int:item_id>', methods=['GET'])
 def get_item_toppings(item_id):
     try:
@@ -208,6 +211,7 @@ def get_item_toppings(item_id):
         print(f"Error fetching toppings for item ID {item_id}: {e}")
         return jsonify({"error": "Failed to fetch toppings due to server error."}), 500
     
+#Route for Cart
 @app.route('/api/cart', methods=['GET', 'POST', 'PATCH', 'DELETE'])
 def cart_api():
     if 'cart' not in session:
@@ -292,7 +296,7 @@ def cart_api():
 
     return jsonify({'error': 'Method not allowed'}), 405
 
-# Route for the menu page
+# Route for Menu 
 @app.route('/menu', methods=['GET', 'POST'])
 def menu():
     try:
@@ -398,7 +402,7 @@ def menu():
         print(f"Error in /menu route: {e}")
         return "Error loading the menu." 
 
-# Route for pickup times
+# Route for Pickup Times
 @app.route('/set-pickup-time', methods=['POST'])
 def set_pickup_time():
     data = request.json
@@ -413,14 +417,19 @@ def set_pickup_time():
     session.modified = True
     return jsonify({"status": "success"}), 200
 
-# Route for checkout
+# Route for Checkout
 @app.route('/cart')
 def cart():
+    # Check for Guest or User ID in session
+    user_id = session.get('id')
+    if not user_id:
+        user_id = f"Guest_{int(time.time())}"  # Generate Guest ID if not logged in
+
     if 'cart' not in session or not isinstance(session['cart'], dict):
         session['cart'] = {'items': [], 'total': 0.0}
 
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute('SELECT Points FROM UserInfo WHERE LoginID = %s', (session['id'],))
+    cursor.execute('SELECT Points FROM UserInfo WHERE LoginID = %s', (user_id,))
     points = cursor.fetchone()
 
     if not points:
@@ -465,6 +474,7 @@ def cart():
         points = points
     )
 
+#Route for Tip
 @app.route('/set-tip', methods=['POST'])
 def set_tip():
     data = request.json
@@ -486,16 +496,19 @@ def place_order():
     tax_rate = 0.08
     tax = round(subtotal * tax_rate, 2)
     final_total = round(subtotal + tax + tip, 2)
-    user_id = session.get('id')
 
+    user_id = session.get('id', None) 
     if not user_id:
-        return jsonify({'error': 'User not authenticated'}), 401
+        user_id = None  
 
     try:
         cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 
-        # Generate unique order ID
-        order_id = user_id * 1000000 + int(time.time())
+        if user_id:
+            order_id = user_id * 1000000 + int(time.time())
+        else:
+            order_id = int(time.time())  
+
         order_datetime = datetime.now()
         order_details = []
 
@@ -522,19 +535,16 @@ def place_order():
                 'total_price': item['total_price']
             })
 
-        # Calculate points earned
-        points_earned = int(subtotal * 10)  # Example: 10 points per dollar spent
-        cur.execute("SELECT Points FROM UserInfo WHERE LoginID = %s", (user_id,))
-        current_points = cur.fetchone()['Points']
-        new_points_total = current_points + points_earned
-
-        # Update points in the database
-        cur.execute("UPDATE UserInfo SET Points = %s WHERE LoginID = %s", (new_points_total, user_id))
+        points_earned = int(subtotal * 10)
+        if user_id:
+            cur.execute("SELECT Points FROM UserInfo WHERE LoginID = %s", (user_id,))
+            current_points = cur.fetchone()['Points']
+            new_points_total = current_points + points_earned
+            cur.execute("UPDATE UserInfo SET Points = %s WHERE LoginID = %s", (new_points_total, user_id))
 
         mysql.connection.commit()
         cur.close()
 
-        # Store order details in the session for confirmation
         current_time = datetime.now()
         can_cancel = (current_time - order_datetime) <= timedelta(minutes=5)
         session['last_order'] = {
@@ -550,7 +560,6 @@ def place_order():
         return render_template('status.html', orders=order_details, subtotal=subtotal, tax=tax, tip=tip, total=final_total, points_earned=points_earned, can_cancel=can_cancel)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
     
 #Route for Order Cancellation
 @app.route('/cancel-order', methods=['POST'])
@@ -564,10 +573,16 @@ def cancel_order():
     try:
         cur = mysql.connection.cursor()
 
-        cur.execute("""
-            SELECT orderID, date_ordered FROM OrderHistory
-            WHERE orderID = %s AND LoginID = %s
-        """, (order_id, user_id))
+        if user_id:
+            cur.execute("""
+                SELECT orderID, date_ordered FROM OrderHistory
+                WHERE orderID = %s AND LoginID = %s
+            """, (order_id, user_id))
+        else:
+            cur.execute("""
+                SELECT orderID, date_ordered FROM OrderHistory
+                WHERE orderID = %s AND LoginID IS NULL
+            """, (order_id,))
 
         order = cur.fetchone()
 
@@ -590,21 +605,31 @@ def cancel_order():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Route
+# Route for Order History
 @app.route('/order-history', methods=['GET'])
 def order_history():
     if 'id' not in session:
-        return redirect(url_for('login')) 
+        return redirect(url_for('login'))
 
     user_id = session['id']
     cursor = mysql.connection.cursor()
-    cursor.execute('''
-        SELECT o.orderID, o.date_ordered, o.total_price, m.itemName, o.size, o.quantity
-        FROM OrderHistory o
-        LEFT JOIN Menu m ON o.itemID = m.itemID
-        WHERE o.LoginID = %s
-        ORDER BY o.date_ordered DESC
-    ''', (user_id,))
+
+    if user_id:
+        cursor.execute('''
+            SELECT o.orderID, o.date_ordered, o.total_price, m.itemName, o.size, o.quantity
+            FROM OrderHistory o
+            LEFT JOIN Menu m ON o.itemID = m.itemID
+            WHERE o.LoginID = %s
+            ORDER BY o.date_ordered DESC
+        ''', (user_id,))
+    else:
+        cursor.execute('''
+            SELECT o.orderID, o.date_ordered, o.total_price, m.itemName, o.size, o.quantity
+            FROM OrderHistory o
+            LEFT JOIN Menu m ON o.itemID = m.itemID
+            WHERE o.LoginID IS NULL
+            ORDER BY o.date_ordered DESC
+        ''')
 
     orders = cursor.fetchall()
     order_list = []
@@ -619,7 +644,9 @@ def order_history():
         })
 
     cursor.close()
+    return jsonify(order_list)
 
+#Route for Rewards
 @app.route('/rewards', methods=['GET'])
 def rewards():
     if 'loggedin' in session:
@@ -629,6 +656,7 @@ def rewards():
         cursor.close()
     return render_template('profile.html', points=points)
 
+#Route for Update Rewards Points
 @app.route('/update_points', methods=['POST'])
 def update_points():
     if 'loggedin' not in session:
@@ -671,6 +699,7 @@ def update_points():
         print(f"Error updating points: {e}")
         return jsonify({'status': 'failed', 'message': 'Server error occurred'}), 500
 
+#Route for Redeem Rewards Points
 @app.route('/redeem_rewards', methods=['POST'])
 def redeem_rewards():
     if 'loggedin' not in session:
@@ -747,7 +776,8 @@ def reduce_stock(itemID, quantity):
     cursor.execute('UPDATE inventory SET quantity=quantity - %s WHERE itemID = %s', (quantity, itemID))
     mysql.connection.commit()
     cursor.close()
-
+    
+#Route for Order Confirmation
 @app.route('/order-confirmation/<int:order_id>')
 def order_confirmation(order_id):
     if 'loggedin' not in session:
@@ -778,7 +808,7 @@ def order_confirmation(order_id):
         cursor.close()
 
 
-# Registration route
+#Route for Registration 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     msg = ''
@@ -821,7 +851,7 @@ def register():
 def validate_email(email):
     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
-# Route for the Login
+# Route for Login
 @app.route('/login', methods=['GET','POST'])
 def login():
     msg = ''
@@ -853,7 +883,7 @@ def login():
             msg = 'Please fill out the form'
     return render_template('login.html', msg=msg)
 
-# Route for logout
+# Route for Logout
 @app.route('/logout')
 def logout():
     # fill_inventory()
@@ -864,6 +894,7 @@ def logout():
     session.pop('isOwner', None)
     return redirect(url_for('login'))
 
+#Route for Profile Pic Update
 @app.route('/update-profile-pic', methods=['POST'])
 def update_profile_pic():
     if 'loggedin' in session:

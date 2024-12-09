@@ -101,12 +101,14 @@ h2, h3 {
 .timer-container{
     background: linear-gradient(to right, #ff437b, #d4783a);
     padding: 20px;
-    border: 2px solid blue;
-    width: 250px;
-    height: 200px;
+    text-align: center;
+    font-family: 'MoriB';
+    width: 350px;
+    height: 300px;
     margin-left: auto;
     margin-right: auto;
-    animation: 10s infinite glow;
+    box-shadow: 0 0 30px rgba(254, 15, 15, 0.8), 0 0 50px rgba(201, 8, 201, 0.8), 0 0 70px rgba(0, 76, 255, 0.8);
+    animation: 10px 10s infinite glow;
 }
 
 @keyframes glow {
