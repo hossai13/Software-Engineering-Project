@@ -406,6 +406,25 @@ body {
     margin-bottom: 1rem;
 }
 
+.username-review input, date-field-review input {
+    width: 80%;
+}
+
+#name, #DateMade, #rating, #header, #photo {
+    margin: 0 auto;
+    width: 98%;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.star-rating {
+    margin-bottom: 1rem;
+}
+
+.review-description {
+    width: 98%;
+}
+
 .close {
     float: right;
     font-size: 1.5rem;

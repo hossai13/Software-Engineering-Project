@@ -47,10 +47,14 @@
             <h1 class="animation">Order Confirmed</h1>
             <h2>The party will arrive soon!</h2><br>
         </section>
+        {% if 'loggedin' in session %}
         <div class="timer-container">
             <h2>Order Cancellation Time Left</h2>
             <p id="timer" class="cancel-timer"></p>
         </div>
+        {% endif %}  
+
+
         <section id="order-details-container">
             {% if orders %}
                 <h2>YOUR ITEMS</h2>
