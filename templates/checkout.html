@@ -12,12 +12,15 @@
             <nav>
                 <h2>CHECKOUT</h2>
                 <div class="user-container">
+                    {% if 'loggedin' in session %}
+                    <a href="{{ url_for('userhomepage') }}">
+                        <h1>Fiesta Pizza</h1>
+                    </a>
+                        <h1 class="user">{{ session.get('username') }}</h1>
+                    {% else %}
                     <a href="{{ url_for('homepage') }}">
                         <h1>Fiesta Pizza</h1>
                     </a>
-                    {% if 'loggedin' in session %}
-                        <h1 class="user">{{ session.get('username') }}</h1>
-                    {% else %}
                     <a href="{{ url_for('login') }}">
                         <h1 class="user">Log In</h1>
                     </a>
