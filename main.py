@@ -21,9 +21,9 @@ def allowed_file(filename):
 app.secret_key = 'your secret key'
 
 # MySQL database configuration
-app.config['MYSQL_HOST'] = 'localhost'  
+app.config['MYSQL_HOST'] = 'Jubayads-MacBook-Pro.local'  
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = '2113284'
+app.config['MYSQL_PASSWORD'] = 'Minecraft100'
 app.config['MYSQL_DB'] = 'PizzaInfo'
 
 # Initialize MySQL
@@ -452,6 +452,7 @@ def cart():
     cursor.execute('SELECT Points FROM UserInfo WHERE LoginID = %s', (user_id,))
     points = cursor.fetchone()
 
+    # Starting Accounts with 0 Points
     if not points:
         points = {'Points': 0}
 
@@ -463,6 +464,7 @@ def cart():
     pickup_time = session.get('pickup_time', 'ASAP (15-30 min)')
     delivery_address = session.get('delivery_address', None)
 
+
     for item in items:
         item['quantity'] = int(float(item['quantity']))
         item['price_per_unit'] = "{:.2f}".format(float(item['price_per_unit']))
@@ -473,6 +475,7 @@ def cart():
                 for topping in item['toppings']
             ]
 
+    # Empty Cart Logic
     if not items:
         return render_template(
             'checkout.html',
@@ -532,6 +535,7 @@ def place_order():
         order_datetime = datetime.now()
         order_details = []
 
+        # Saving Orders to Database  
         for item in items:
             item_id = item['id']
             item_name = item['name']
@@ -555,6 +559,7 @@ def place_order():
                 'total_price': item['total_price']
             })
 
+        # Rewards Points Added into Orders
         points_earned = int(subtotal * 10)
         if user_id:
             cur.execute("SELECT Points FROM UserInfo WHERE LoginID = %s", (user_id,))
@@ -565,6 +570,7 @@ def place_order():
         mysql.connection.commit()
         cur.close()
 
+        # Canceling Order Within Time Limit 
         current_time = datetime.now()
         can_cancel = (current_time - order_datetime) <= timedelta(minutes=5)
         session['last_order'] = {
@@ -679,6 +685,7 @@ def rewards():
 #Route for Update Rewards Points
 @app.route('/update_points', methods=['POST'])
 def update_points():
+    # If User's not Logged In
     if 'loggedin' not in session:
         return jsonify({'status': 'failed', 'message': 'User not logged in'}), 401
 
@@ -745,6 +752,7 @@ def redeem_rewards():
         if not user or user['Points'] < item_points:
             return jsonify({'status': 'failed', 'message': 'Not enough points to redeem this reward'}), 400
 
+        #Deducting Points from Balance
         new_points = user['Points'] - item_points
         cursor.execute("UPDATE UserInfo SET Points = %s WHERE LoginID = %s", (new_points, user_id))
 
@@ -843,6 +851,7 @@ def register():
 
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 
+            # Checks if User Exists
             cursor.execute('SELECT * FROM UserInfo WHERE Email = %s', (email,))
             account = cursor.fetchone()
             print("Account Check:", account)
@@ -882,6 +891,7 @@ def login():
             username = request.form['Username']
             password = request.form['Password']
 
+            # Checks Database for Matching Credentials
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute('SELECT * FROM UserInfo WHERE Username = %s AND Password = %s', (username, password))
             account = cursor.fetchone()
@@ -937,28 +947,30 @@ def update_profile_pic():
 # Route for Profile Management
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
+    # If User's not Logged In
     if 'loggedin' not in session:
         return redirect(url_for('login'))
 
     msg = ''
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 
-    # Fetch user details
+    # Fetch User Details
     cursor.execute('SELECT * FROM UserInfo WHERE LoginID = %s', (session['id'],))
     account = cursor.fetchone()
     current_profile_pic = account.get('profile_pic', 'Images_Videos/whitepizzausericon.png')
 
+    # Fetch User's Rewards Points
     cursor.execute('SELECT Points FROM UserInfo WHERE LoginID = %s', (session['id'],))
     points = cursor.fetchone()
 
-    # Update username
+    # Update Username
     if 'UsernameChange' in request.form and 'PasswordChange' not in request.form:
         username = request.form['UsernameChange']
         cursor.execute('UPDATE UserInfo SET Username = %s WHERE LoginID = %s', (username, session['id']))
         mysql.connection.commit()
         msg = 'Username updated successfully!'
 
-    # Update password
+    # Update Password
     if 'PasswordChange' in request.form and 'UsernameChange' not in request.form:
         password = request.form['PasswordChange']
         cursor.execute('UPDATE UserInfo SET Password = %s WHERE LoginID = %s', (password, session['id']))
