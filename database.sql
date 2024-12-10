@@ -16,16 +16,16 @@ CREATE TABLE IF NOT EXISTS UserInfo (
 );
 
 -- Create the reviews table
-CREATE TABLE IF NOT EXISTS reviews (
+CREATE TABLE IF NOT EXISTS Reviews (
     review_id INT AUTO_INCREMENT PRIMARY KEY,
-    LoginID int not null,
+    LoginID INT NOT NULL,
     username VARCHAR(100) NOT NULL,
     rating INT NOT NULL,
     review_text TEXT NOT NULL,
     header VARCHAR(255) NOT NULL,
     photo LONGBLOB,
     date_made DATE NOT NULL,
-    FOREIGN KEY (LoginID) references UserInfo(LoginID)
+    FOREIGN KEY (LoginID) REFERENCES UserInfo(LoginID) ON DELETE CASCADE
 );
 
 -- Create the Menu table
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS Toppings (
 
 -- Create the OrderHistory table to track orders
 CREATE TABLE IF NOT EXISTS OrderHistory (
-    orderID INT NOT NULL,  
+    orderID INT NOT NULL,
     LoginID INT DEFAULT NULL,
     itemID INT NOT NULL, 
     size VARCHAR(50) NOT NULL,
@@ -73,11 +73,10 @@ CREATE TABLE IF NOT EXISTS OrderHistory (
     toppings VARCHAR(255), 
     total_price DECIMAL(10, 2) NOT NULL, 
     final_total DECIMAL(10, 2) NOT NULL,
-    FOREIGN KEY (LoginID) REFERENCES UserInfo(LoginID) ON DELETE SET NULL,
+    FOREIGN KEY (LoginID) REFERENCES UserInfo(LoginID) ON DELETE CASCADE,
     FOREIGN KEY (itemID) REFERENCES Menu(itemID) ON DELETE CASCADE,
-    PRIMARY KEY (orderID, itemID)  
+    PRIMARY KEY (orderID, itemID)
 );
-
 
 -- Create the OrderToppings table to associate toppings with orders
 CREATE TABLE IF NOT EXISTS OrderToppings (
@@ -97,15 +96,15 @@ CREATE TABLE IF NOT EXISTS Categories (
 -- Create the inventory table
 -- Optional table which will subtract inventory quantity - order quantity
 -- Stock/quantity will be 99 and will reset each day
-create table if not exists inventory (
-    inventoryID int primary key AUTO_INCREMENT,
-    itemID int,
-    quantity int default 0,
-    FOREIGN KEY (itemID) references menu(itemID)
+CREATE TABLE IF NOT EXISTS Inventory (
+    inventoryID INT AUTO_INCREMENT PRIMARY KEY,
+    itemID INT,
+    quantity INT DEFAULT 0,
+    FOREIGN KEY (itemID) REFERENCES Menu(itemID) ON DELETE CASCADE
 );
 
 -- Insert menu list
-insert into menu(itemName, itemPrice, itemCategory) VALUES
+insert into Menu(itemName, itemPrice, itemCategory) VALUES
 ('Plain Cheese Pizza', 8.99, 'Pizza'), 
 ('White Pizza', 9.25,'Pizza'),
 ('Extra Cheese Pizza', 10.95, 'Pizza'),

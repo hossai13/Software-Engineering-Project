@@ -131,9 +131,9 @@
                                     <td>{{ item.itemCategory }}</td>
                                     <td>{{ item.itemPrice }}</td>
                                     <td>
-                                        <form method="post" action="{{ url_for('menu') }}" style="display:inline;">
+                                        <form method="POST" action="{{ url_for('menu') }}" style="display:inline;">
                                             <button type="submit" name="delete_menu" value="{{ item.itemID }}" class="delete-btn">Delete</button>
-                                        </form>
+                                        </form>      
                                     </td>
                                 </tr>
                                 {% endfor %}

@@ -23,7 +23,7 @@ app.secret_key = 'your secret key'
 # MySQL database configuration
 app.config['MYSQL_HOST'] = 'localhost'  
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'rootpassword'
+app.config['MYSQL_PASSWORD'] = '2113284'
 app.config['MYSQL_DB'] = 'PizzaInfo'
 
 # Initialize MySQL
@@ -299,37 +299,42 @@ def menu():
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         
         # Fetch all menu items
-        cursor.execute("SELECT DISTINCT itemName, itemCategory, itemPrice FROM Menu ORDER BY itemName")
+        cursor.execute("""
+            SELECT DISTINCT m.itemID, m.itemName, m.itemCategory,
+                COALESCE(MIN(ps.price), m.itemPrice) AS defaultPrice,
+                CASE
+                    WHEN MIN(ps.price) IS NOT NULL THEN TRUE
+                    ELSE FALSE
+                END AS hasSizes
+            FROM Menu m
+            LEFT JOIN PizzaSizes ps ON m.itemID = ps.itemID
+            GROUP BY m.itemID, m.itemName, m.itemCategory, m.itemPrice
+            ORDER BY m.itemName
+        """)
         all_menu_items = cursor.fetchall()
         
-        # Fetch categories from the Categories table
+        # Fetch categories
         cursor.execute("SELECT itemCategory FROM Categories ORDER BY categoryOrder")
         categories = cursor.fetchall()
-        
-        # Fetch all menu items grouped by category
+
+        # Fetch menu items by category
         menu_items_by_category = {}
         for category in categories:
             cursor.execute("""
-                SELECT DISTINCT
-                    m.itemID, m.itemName, m.itemCategory,
+                SELECT DISTINCT m.itemID, m.itemName, m.itemCategory,
                     COALESCE(MIN(ps.price), m.itemPrice) AS defaultPrice,
                     CASE
                         WHEN MIN(ps.price) IS NOT NULL THEN TRUE
                         ELSE FALSE
                     END AS hasSizes
-                FROM
-                    Menu m
-                LEFT JOIN
-                    PizzaSizes ps ON m.itemID = ps.itemID
-                WHERE
-                    m.itemCategory = %s
-                GROUP BY
-                    m.itemID, m.itemName, m.itemCategory, m.itemPrice
-                ORDER BY
-                    m.itemName;
+                FROM Menu m
+                LEFT JOIN PizzaSizes ps ON m.itemID = ps.itemID
+                WHERE m.itemCategory = %s
+                GROUP BY m.itemID, m.itemName, m.itemCategory, m.itemPrice
+                ORDER BY m.itemName
             """, (category['itemCategory'],))
             menu_items_by_category[category['itemCategory']] = cursor.fetchall()
-
+        
         cursor.close()
 
         # Admin-specific functionality
@@ -337,66 +342,85 @@ def menu():
             # Delete menu item
             if 'delete_menu' in request.form:
                 menu_id = request.form['delete_menu']
-                cursor = mysql.connection.cursor()
-                cursor.execute('DELETE FROM Menu WHERE itemID = %s', (menu_id,))
-                mysql.connection.commit()
-                cursor.close()
+                try:
+                    cursor = mysql.connection.cursor()
+                    cursor.execute('DELETE FROM Menu WHERE itemID = %s', (menu_id,))
+                    mysql.connection.commit()
+                    cursor.close()
+                    flash(f"Menu item with ID {menu_id} has been successfully deleted.", "success")
+                except Exception as e:
+                    mysql.connection.rollback()
+                    flash(f"Error deleting menu item: {e}", "danger")
                 return redirect(url_for('menu'))
 
-            # Add a new menu item
+            # Add menu item
             if 'addName' in request.form and 'addPrice' in request.form and 'addCategory' in request.form:
                 item_name = request.form['addName']
                 item_price = request.form['addPrice']
                 item_category = request.form['addCategory']
-                cursor = mysql.connection.cursor()
-                cursor.execute('INSERT INTO Menu (itemName, itemPrice, itemCategory) VALUES (%s, %s, %s)', 
-                               (item_name, item_price, item_category))
-                mysql.connection.commit()
-                cursor.close()
+                try:
+                    cursor = mysql.connection.cursor()
+                    cursor.execute("""
+                        INSERT INTO Menu (itemName, itemPrice, itemCategory)
+                        VALUES (%s, %s, %s)
+                    """, (item_name, item_price, item_category))
+                    mysql.connection.commit()
+                    cursor.close()
+                    flash("Menu item added successfully.", "success")
+                except Exception as e:
+                    mysql.connection.rollback()
+                    flash(f"Error adding menu item: {e}", "danger")
                 return redirect(url_for('menu'))
 
-            # Update an existing menu item
+            # Update menu item
             if 'editName' in request.form and 'updatePrice' in request.form:
                 item_name = request.form['editName']
                 item_price = request.form['updatePrice']
-                cursor = mysql.connection.cursor()
-                cursor.execute('UPDATE Menu SET itemPrice = %s WHERE itemName = %s', (item_price, item_name))
-                mysql.connection.commit()
-                cursor.close()
+                try:
+                    cursor = mysql.connection.cursor()
+                    cursor.execute("""
+                        UPDATE Menu SET itemPrice = %s WHERE itemName = %s
+                    """, (item_price, item_name))
+                    mysql.connection.commit()
+                    cursor.close()
+                    flash("Menu item updated successfully.", "success")
+                except Exception as e:
+                    mysql.connection.rollback()
+                    flash(f"Error updating menu item: {e}", "danger")
                 return redirect(url_for('menu'))
 
-            # Apply a special discount to a menu item
+            # Apply special discount
             if 'specialName' in request.form and 'specialPercent' in request.form:
                 special_name = request.form['specialName']
                 try:
                     special_percent = int(request.form['specialPercent'])
                     if special_percent < 0 or special_percent > 100:
-                        return "Special percent must be between 0 and 100"
-                    discount_factor = 1 - (special_percent / 100)
+                        flash("Special percent must be between 0 and 100.", "warning")
+                    else:
+                        discount_factor = 1 - (special_percent / 100)
+                        cursor = mysql.connection.cursor()
+                        cursor.execute("""
+                            UPDATE Menu SET itemPrice = itemPrice * %s WHERE itemName = %s
+                        """, (discount_factor, special_name))
+                        mysql.connection.commit()
+                        cursor.close()
+                        flash("Special discount applied successfully.", "success")
                 except ValueError:
-                    return "Special percent must be an integer"
-                
-                try:
-                    cursor = mysql.connection.cursor()
-                    cursor.execute('UPDATE Menu SET itemPrice = itemPrice * %s WHERE itemName = %s', 
-                                   (discount_factor, special_name))
-                    mysql.connection.commit()
-                    cursor.close()
+                    flash("Special percent must be an integer.", "warning")
                 except Exception as e:
                     mysql.connection.rollback()
-                    print(f"Database Error: {e}")
-                    return "Database Error"
+                    flash(f"Error applying discount: {e}", "danger")
                 return redirect(url_for('menu'))
 
         return render_template(
             'menu.html',
             all_menu_items=all_menu_items,
             menu_items_by_category=menu_items_by_category,
-            is_admin= session.get('isAdmin')
+            is_admin=session.get('isAdmin')
         )
     except Exception as e:
         print(f"Error in /menu route: {e}")
-        return "Error loading the menu." 
+        return "Error loading the menu.", 500
 
 # Route for Pickup Times
 @app.route('/set-pickup-time', methods=['POST'])
